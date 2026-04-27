@@ -1,11 +1,11 @@
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sb-logo" onclick="showSection('bienvenida')">🐾</div>
-  <button class="sb-btn active" onclick="showSection('bienvenida')" title="Inicio">
+  <button class="sb-btn active" onclick="if(document.getElementById('sec-bienvenida')){ showSection('bienvenida'); return false; } window.location.href='{{ route('home') }}';" title="Inicio">
     <i class="fa-solid fa-house"></i>
     <span class="sb-tip">Inicio</span>
   </button>
-  <button class="sb-btn" onclick="showSection('principal')" title="Publicaciones">
+  <button class="sb-btn" onclick="if(document.getElementById('sec-principal')){ showSection('principal'); return false; } window.location.href='{{ route('home') }}';" title="Publicaciones">
     <i class="fa-solid fa-paw"></i>
     <span class="sb-tip">Publicaciones</span>
   </button>
@@ -21,7 +21,7 @@
     <span class="sb-tip">Notificaciones</span>
   </button>
   <div class="sb-sep"></div>
-  <button class="sb-btn" onclick="showSection('faq')">
+  <button class="sb-btn" onclick="if(document.getElementById('sec-faq')){ showSection('faq'); return false; } window.location.href='{{ route('home') }}';">
     <i class="fa-solid fa-circle-info"></i>
     <span class="sb-tip">Información</span>
   </button>
@@ -34,6 +34,10 @@
   @endguest
 
   @auth
+    <button class="sb-btn" onclick="window.location.href='{{ route('profile.show') }}'">
+      <i class="fa-solid fa-user"></i>
+      <span class="sb-tip">Perfil</span>
+    </button>
     <form method="POST" action="{{ route('logout') }}" class="sb-session-btn">
       @csrf
       <button class="sb-btn sb-session-btn" type="submit">

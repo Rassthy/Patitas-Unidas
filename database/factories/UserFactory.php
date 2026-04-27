@@ -24,13 +24,35 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        static $dniCounter = 10000000;
+        static $phoneCounter = 600000000;
+
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'username' => $this->faker->unique()->userName(),
+            'nombre' => $this->faker->firstName(),
+            'apellidos' => $this->faker->lastName() . ' ' . $this->faker->lastName(),
+            'email' => $this->faker->unique()->safeEmail(),
+            'dni_nie' => (string)($dniCounter++) . 'A',
+            'telefono' => (string)($phoneCounter++),
+            'password_hash' => static::$password ??= Hash::make('TestPass123'),
+            'tipo' => 'usuario',
+            'activo' => true,
+            'email_verificado' => false,
+            'telefono_verificado' => false,
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
+    }
+
+    /**
+     * Indicate that the model's email address should be verified.
+     */
+    public function verified(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'email_verificado' => true,
+            'telefono_verificado' => true,
+        ]);
     }
 
     /**
@@ -39,7 +61,38 @@ class UserFactory extends Factory
     public function unverified(): static
     {
         return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
+            'email_verificado' => false,
+            'telefono_verificado' => false,
+        ]);
+    }
+
+    /**
+     * Indicate that the user is an admin.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'tipo' => 'admin',
+        ]);
+    }
+
+    /**
+     * Indicate that the user is a shelter.
+     */
+    public function shelter(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'tipo' => 'protectora',
+        ]);
+    }
+
+    /**
+     * Indicate that the user is an organization.
+     */
+    public function organization(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'tipo' => 'organizacion',
         ]);
     }
 }
