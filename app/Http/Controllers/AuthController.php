@@ -36,7 +36,7 @@ class AuthController extends Controller
             // Autenticar al usuario automáticamente
             Auth::login($user);
 
-            return redirect('/')->with('success', 'Cuenta creada correctamente. ¡Bienvenido a PatitasUnidas!');
+            return redirect()->route('dashboard')->with('success', 'Cuenta creada correctamente. ¡Bienvenido a PatitasUnidas!');
         } catch (\Exception $e) {
             return back()
                 ->withInput($request->except('password'))
@@ -54,7 +54,7 @@ class AuthController extends Controller
         // Intentar autenticación con email y contraseña
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            return redirect('/')->with('success', 'Sesión iniciada correctamente.');
+            return redirect()->route('dashboard')->with('success', 'Sesión iniciada correctamente.');
         }
 
         // Si falla, devolver error específico
