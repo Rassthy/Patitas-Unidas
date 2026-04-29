@@ -3,10 +3,10 @@
 @section('content')
 <div class="profile-container">
     <!-- Banner -->
-    <div class="profile-banner" style="background-image: url('{{ $user->banner ? asset('storage/' . $user->banner) : 'https://via.placeholder.com/1200x300/4CAF50/FFFFFF?text=Banner' }}');">
+    <div class="profile-banner" style="background-image: url('{{ $user->banner_url }}');">
         <div class="profile-banner-overlay">
             <div class="profile-avatar">
-                <img src="{{ $user->foto_perfil ? asset('storage/' . $user->foto_perfil) : 'https://via.placeholder.com/100x100/2196F3/FFFFFF?text=' . urlencode(substr($user->nombre, 0, 1) . substr($user->apellidos, 0, 1)) }}" alt="Foto de perfil">
+                <img src="{{ $user->foto_perfil_url }}" alt="Foto de perfil">
             </div>
         </div>
     </div>

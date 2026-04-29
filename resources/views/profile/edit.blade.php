@@ -29,7 +29,7 @@
             <div class="form-group">
                 <label for="foto_perfil">Foto de perfil</label>
                 <div class="current-image">
-                    <img src="{{ $user->foto_perfil ? asset('storage/' . $user->foto_perfil) : 'https://via.placeholder.com/100x100/2196F3/FFFFFF?text=' . urlencode(substr($user->nombre, 0, 1) . substr($user->apellidos, 0, 1)) }}" alt="Foto actual" id="current-avatar">
+                    <img src="{{ $user->foto_perfil_url }}" alt="Foto actual" id="current-avatar">
                 </div>
                 <input type="file" id="foto_perfil" name="foto_perfil" accept="image/*" onchange="previewImage(this, 'current-avatar')">
                 <small>Formatos permitidos: JPG, PNG, GIF. Máximo 2MB.</small>
@@ -39,7 +39,7 @@
             <div class="form-group">
                 <label for="banner">Banner</label>
                 <div class="current-banner">
-                    <div style="background-image: url('{{ $user->banner ? asset('storage/' . $user->banner) : 'https://via.placeholder.com/400x100/4CAF50/FFFFFF?text=Banner' }}');" id="current-banner"></div>
+                    <div style="background-image: url('{{ $user->banner_url }}');" id="current-banner"></div>
                 </div>
                 <input type="file" id="banner" name="banner" accept="image/*" onchange="previewBanner(this, 'current-banner')">
                 <small>Formatos permitidos: JPG, PNG, GIF. Máximo 4MB.</small>

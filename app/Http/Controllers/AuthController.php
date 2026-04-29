@@ -30,7 +30,7 @@ class AuthController extends Controller
                 'apellidos' => $data['apellidos'],
                 'tipo' => 'usuario',
                 'activo' => true,
-                'foto_perfil' => 'defaults/foto_perfil_generica.png',
+                'foto_perfil' => null,
             ]);
 
             // Autenticar al usuario automáticamente

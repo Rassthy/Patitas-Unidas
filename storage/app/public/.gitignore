@@ -1,2 +1,6 @@
 *
 !.gitignore
+!profiles/
+!profiles/.gitignore
+!banners/
+!banners/.gitignore

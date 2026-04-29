@@ -22,7 +22,7 @@
         <span class="hdr-badge">3</span>
       </button>
       <div class="user-chip" onclick="window.location.href='{{ route('profile.show') }}'">
-        <img src="{{ Auth::user()->foto_perfil ? asset('storage/' . Auth::user()->foto_perfil) : 'https://via.placeholder.com/40x40/2196F3/FFFFFF?text=' . urlencode(substr(Auth::user()->nombre, 0, 1)) }}" alt="Foto de perfil">
+        <img src="{{ Auth::user()->foto_perfil_url }}" alt="Foto de perfil">
         <span class="user-chip-name">Hola {{ Auth::user()->nombre }}!</span>
       </div>
     @else
