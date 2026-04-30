@@ -1,0 +1,185 @@
+@extends('layouts.app')
+
+@section('content')
+<div id="profile-container">
+
+  {{-- CABECERA --}}
+  <div class="profile-header" style="margin-bottom:0;">
+    <div style="display:flex;align-items:center;gap:14px;max-width:1100px;margin:0 auto 32px;">
+      <a href="{{ route('profile.show') }}" class="btn-s" style="padding:8px 16px;font-size:.82rem;">
+        <i class="fa-solid fa-arrow-left"></i> Volver al perfil
+      </a>
+      <h1 style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;color:var(--dark);">
+        Ajustes de la cuenta
+      </h1>
+    </div>
+  </div>
+
+  <div style="max-width:700px;margin:0 auto;">
+
+    @if(session('success'))
+      <div class="alert-banner" style="margin-bottom:24px;">
+        <i class="fa-solid fa-circle-check"></i> {{ session('success') }}
+      </div>
+    @endif
+
+    {{-- TABS DE AJUSTES --}}
+    <div class="profile-tabs" style="margin-bottom:32px;">
+      <button class="profile-tab active" onclick="switchSettings(this,'st-apariencia')">
+        <i class="fa-solid fa-palette"></i> Apariencia e idioma
+      </button>
+      <button class="profile-tab" onclick="switchSettings(this,'st-privacidad')">
+        <i class="fa-solid fa-lock"></i> Privacidad
+      </button>
+      <button class="profile-tab" onclick="switchSettings(this,'st-cuenta')">
+        <i class="fa-solid fa-shield-halved"></i> Cuenta
+      </button>
+    </div>
+
+    {{-- ===== APARIENCIA E IDIOMA ===== --}}
+    <div id="st-apariencia">
+      <form method="POST" action="{{ route('profile.settings.update') }}">
+        @csrf
+        @method('PUT')
+
+        <div class="profile-card" style="margin-bottom:24px;">
+          <div class="edit-section-title">
+            <i class="fa-solid fa-sun" style="color:var(--terra)"></i> Apariencia
+          </div>
+
+          {{-- TEMA --}}
+          <div class="edit-form-group">
+            <label class="edit-form-label">Tema de la plataforma</label>
+            <div class="settings-option-grid">
+              <label class="settings-option {{ ($user->user_settings['tema'] ?? 'claro') === 'claro' ? 'selected' : '' }}">
+                <input type="radio" name="settings[tema]" value="claro"
+                       {{ ($user->user_settings['tema'] ?? 'claro') === 'claro' ? 'checked' : '' }}>
+                <span class="settings-option-ico">☀️</span>
+                <span class="settings-option-lbl">Modo claro</span>
+              </label>
+              <label class="settings-option {{ ($user->user_settings['tema'] ?? '') === 'oscuro' ? 'selected' : '' }}">
+                <input type="radio" name="settings[tema]" value="oscuro"
+                       {{ ($user->user_settings['tema'] ?? '') === 'oscuro' ? 'checked' : '' }}>
+                <span class="settings-option-ico">🌙</span>
+                <span class="settings-option-lbl">Modo oscuro</span>
+              </label>
+            </div>
+          </div>
+
+          {{-- IDIOMA --}}
+          <div class="edit-form-group" style="margin-bottom:0;">
+            <label class="edit-form-label" for="idioma">Idioma de la interfaz</label>
+            <select id="idioma" name="settings[idioma]" class="settings-select">
+              <option value="es" {{ ($user->user_settings['idioma'] ?? 'es') === 'es' ? 'selected' : '' }}>
+                🇪🇸 Español
+              </option>
+              <option value="en" {{ ($user->user_settings['idioma'] ?? '') === 'en' ? 'selected' : '' }}>
+                🇬🇧 Inglés
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;margin-bottom:32px;">
+          <button type="submit" class="btn-p">
+            <i class="fa-solid fa-floppy-disk"></i> Guardar preferencias
+          </button>
+        </div>
+      </form>
+    </div>
+
+    {{-- ===== PRIVACIDAD ===== --}}
+    <div id="st-privacidad" style="display:none;">
+      <div class="profile-card" style="margin-bottom:24px;">
+        <div class="edit-section-title">
+          <i class="fa-solid fa-eye" style="color:var(--terra)"></i> Visibilidad de datos
+        </div>
+        <p style="color:var(--muted);font-size:.9rem;margin-bottom:20px;">
+          Controla qué información pueden ver otros usuarios en tu perfil público.
+        </p>
+
+        <div class="settings-toggle-row">
+          <div>
+            <div class="settings-toggle-lbl">Mostrar apellidos</div>
+            <div class="settings-toggle-hint">Otros usuarios verán tu nombre completo</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" checked>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+
+        <div class="settings-toggle-row">
+          <div>
+            <div class="settings-toggle-lbl">Mostrar fecha de nacimiento</div>
+            <div class="settings-toggle-hint">Solo el año o el día y mes según prefieras</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox">
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+
+        <div class="settings-toggle-row" style="border-bottom:none;">
+          <div>
+            <div class="settings-toggle-lbl">Perfil público</div>
+            <div class="settings-toggle-hint">Cualquier usuario puede ver tu perfil</div>
+          </div>
+          <label class="toggle-switch">
+            <input type="checkbox" checked>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+
+        <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border);">
+          <p style="font-size:.8rem;color:var(--muted);">
+            <i class="fa-solid fa-circle-info" style="color:var(--terra)"></i>
+            Estas opciones se guardarán cuando esté disponible la API de ajustes de privacidad.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {{-- ===== CUENTA ===== --}}
+    <div id="st-cuenta" style="display:none;">
+      <div class="profile-card" style="margin-bottom:44px;">
+        <div class="edit-section-title">
+          <i class="fa-solid fa-user-shield" style="color:var(--terra)"></i> Seguridad
+        </div>
+        <p style="color:var(--muted);font-size:.9rem;margin-bottom:20px;">
+          Gestiona tu contraseña y la seguridad de tu cuenta.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <button class="btn-s" style="width:fit-content;" disabled>
+            <i class="fa-solid fa-key"></i> Cambiar contraseña
+            <span style="font-size:.75rem;margin-left:6px;opacity:.6">(próximamente)</span>
+          </button>
+          <button class="btn-s" style="width:fit-content;color:#c0392b;border-color:#f5c6a8;" disabled>
+            <i class="fa-solid fa-trash"></i> Eliminar cuenta
+            <span style="font-size:.75rem;margin-left:6px;opacity:.6">(próximamente)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function switchSettings(btn, id) {
+  document.querySelectorAll('.profile-tab').forEach(b => b.classList.remove('active'));
+  ['st-apariencia', 'st-privacidad', 'st-cuenta'].forEach(s => {
+    document.getElementById(s).style.display = 'none';
+  });
+  btn.classList.add('active');
+  document.getElementById(id).style.display = '';
+}
+
+document.querySelectorAll('.settings-option input[type=radio]').forEach(r => {
+  r.addEventListener('change', () => {
+    document.querySelectorAll('.settings-option').forEach(o => o.classList.remove('selected'));
+    r.closest('.settings-option').classList.add('selected');
+  });
+});
+</script>
+@endsection

@@ -17,6 +17,7 @@
   <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
   <link rel="stylesheet" href="{{ asset('css/components.css') }}">
   <link rel="stylesheet" href="{{ asset('css/sections.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
 </head>
 
 <body>

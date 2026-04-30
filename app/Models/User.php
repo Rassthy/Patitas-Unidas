@@ -36,6 +36,7 @@ class User extends Authenticatable
         'telefono_verificado',
         'activo',
         'motivo_baja',
+        'user_settings',
     ];
 
     protected $hidden = [
@@ -47,6 +48,7 @@ class User extends Authenticatable
         'email_verificado' => 'boolean',
         'telefono_verificado' => 'boolean',
         'activo' => 'boolean',
+        'user_settings' => 'array',
     ];
 
     public function getAuthPassword()

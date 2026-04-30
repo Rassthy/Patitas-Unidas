@@ -16,6 +16,29 @@ class ProfileController extends Controller
         return view('profile.show', compact('user'));
     }
 
+    public function settings()
+    {
+        $user = Auth::user();
+        return view('profile.settings', compact('user'));
+    }
+
+    public function updateSettings(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'settings' => 'required|array',
+            'settings.tema' => 'nullable|string|in:claro,oscuro',
+            'settings.idioma' => 'nullable|string|in:es,en',
+        ]);
+
+        $user->update([
+            'user_settings' => $request->settings
+        ]);
+
+        return redirect()->route('profile.settings')->with('success', 'Preferencias actualizadas correctamente.');
+    }
+
     // Muestra el formulario de edición del perfil
     public function edit()
     {
@@ -29,6 +52,8 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         $request->validate([
+            'nombre' => 'required|string|max:255',
+            'apellidos' => 'required|string|max:255',
             'descripcion' => 'nullable|string|max:500',
             'fecha_nacimiento' => 'nullable|date|before:today',
             'provincia' => 'nullable|string|max:50',
@@ -37,11 +62,10 @@ class ProfileController extends Controller
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
         ]);
 
-        $data = $request->only(['descripcion', 'fecha_nacimiento', 'provincia', 'ciudad']);
+        $data = $request->only(['nombre', 'apellidos', 'descripcion', 'fecha_nacimiento', 'provincia', 'ciudad']);
 
         // Manejar foto de perfil
         if ($request->hasFile('foto_perfil')) {
-            // Eliminar foto anterior si existe
             if ($user->foto_perfil && Storage::disk('public')->exists($user->foto_perfil)) {
                 Storage::disk('public')->delete($user->foto_perfil);
             }
@@ -50,7 +74,6 @@ class ProfileController extends Controller
 
         // Manejar banner
         if ($request->hasFile('banner')) {
-            // Eliminar banner anterior si existe
             if ($user->banner && Storage::disk('public')->exists($user->banner)) {
                 Storage::disk('public')->delete($user->banner);
             }

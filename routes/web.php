@@ -28,10 +28,17 @@ Route::get('/check-auth', [AuthController::class, 'checkAuth'])->name('check-aut
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+    // Rutas de perfil
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
+    Route::get('/profile/settings', [ProfileController::class, 'settings'])->name('profile.settings');
+    Route::put('/profile/settings', [ProfileController::class, 'updateSettings'])->name('profile.settings.update');
+
+    Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
+
+    // Rutas de recursos
     Route::resource('users', UserController::class)->only(['index', 'show', 'update', 'destroy']);
     Route::resource('pets', PetController::class)->except(['create', 'edit']);
     Route::resource('posts', PostController::class)->except(['create', 'edit']);

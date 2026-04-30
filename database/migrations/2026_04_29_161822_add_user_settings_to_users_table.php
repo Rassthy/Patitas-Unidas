@@ -6,23 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->rememberToken();
+            // Añadimos una columna JSON con valores por defecto
+            $table->json('user_settings')->nullable()->after('ciudad');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropRememberToken();
+            $table->dropColumn('user_settings');
         });
     }
 };
