@@ -3,7 +3,7 @@
    Requiere: variables.css, layout.css, components.css
    ============================================= */
 
-/* ======= CONTENEDOR PRINCIPAL ======= */
+/*  CONTENEDOR PRINCIPAL  */
 #profile-container {
   margin-left: var(--sidebar);
   margin-top: var(--header);
@@ -12,7 +12,7 @@
   padding: 44px;
 }
 
-/* ======= HEADER DEL PERFIL ======= */
+/*  HEADER DEL PERFIL  */
 .profile-header {
   max-width: 1100px;
   margin: 0 auto 44px;
@@ -89,7 +89,7 @@
 .profile-actions .btn-p,
 .profile-actions .btn-s       { min-width: 120px; }
 
-/* ======= NAVEGACIÓN POR TABS ======= */
+/*  NAVEGACIÓN POR TABS  */
 .profile-sections { max-width: 1100px; margin: 0 auto; }
 
 .profile-tabs {
@@ -108,7 +108,7 @@
   bottom: -1.5px; left: 0; right: 0; height: 1.5px; background: var(--terra);
 }
 
-/* ======= GRIDS DE CONTENIDO ======= */
+/*  GRIDS DE CONTENIDO  */
 
 /* Mascotas */
 .pets-grid {
@@ -138,7 +138,7 @@
   gap: 22px; margin-bottom: 44px;
 }
 
-/* ======= ESTADO VACÍO ======= */
+/*  ESTADO VACÍO  */
 .empty-state {
   text-align: center; padding: 56px 44px;
   background: #fff; border: 1.5px dashed var(--border); border-radius: var(--r);
@@ -147,7 +147,7 @@
 .empty-state-title { font-family: 'Fraunces', serif; font-size: 1.3rem; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
 .empty-state-desc  { color: var(--muted); font-size: .95rem; margin-bottom: 24px; }
 
-/* ======= ESTADÍSTICAS DEL PERFIL ======= */
+/*  ESTADÍSTICAS DEL PERFIL  */
 /* (distinto de .stat-card del home — aquí sin icono grande, layout diferente) */
 .profile-stats {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -162,7 +162,7 @@
 .stat-item-num        { font-family: 'Fraunces', serif; font-size: 1.8rem; font-weight: 700; color: var(--terra); margin-bottom: 4px; }
 .stat-item-lbl        { font-size: .85rem; color: var(--muted); }
 
-/* ======= COMENTARIOS EN PERFIL ======= */
+/*  COMENTARIOS EN PERFIL  */
 /* (distinto de .comment-item del modal — aquí en tarjeta propia con rating) */
 .comments-section { max-width: 800px; }
 
@@ -191,7 +191,7 @@
 .comment-star   { color: var(--gold); font-size: .9rem; }
 .comment-text   { color: var(--muted); font-size: .9rem; line-height: 1.6; }
 
-/* ======= FAB — EDITAR PERFIL ======= */
+/*  FAB — EDITAR PERFIL  */
 .profile-edit-fab {
   position: fixed; bottom: 30px; right: 30px;
   width: 56px; height: 56px; background: var(--terra); border-radius: 50%; border: none;
@@ -202,7 +202,7 @@
 }
 .profile-edit-fab:hover { background: var(--terra-h); transform: scale(1.1); }
 
-/* ======= MODAL EDITAR PERFIL ======= */
+/*  MODAL EDITAR PERFIL  */
 .edit-profile-modal {
   position: fixed; inset: 0; background: rgba(24,12,4,.6);
   display: flex; align-items: center; justify-content: center;
@@ -228,7 +228,7 @@
 
 .edit-form-actions { display: flex; gap: 12px; margin-top: 32px; justify-content: flex-end; }
 
-/* ======= FORMULARIO DE EDICIÓN (edit.blade) ======= */
+/*  FORMULARIO DE EDICIÓN (edit.blade)  */
 
 /* Título de sección dentro de .profile-card */
 .edit-section-title {
@@ -274,7 +274,7 @@
 }
 .alert-banner--error { background: #FFF0E4; color: var(--terra); border-color: #f5c6a8; }
 
-/* ======= AJUSTES / SETTINGS (settings.blade) ======= */
+/*  AJUSTES / SETTINGS (settings.blade)  */
 
 /* Opciones de tema (tarjetas radio visuales) */
 .settings-option-grid { display: flex; gap: 14px; }
@@ -326,7 +326,88 @@
 .toggle-switch input:checked + .toggle-thumb            { background: var(--terra); }
 .toggle-switch input:checked + .toggle-thumb::before   { transform: translateX(20px); }
 
-/* ======= RESPONSIVE ======= */
+/* Botones Expandibles en el Banner */
+.banner-actions {
+  position: absolute; 
+  top: 24px; 
+  right: 24px;
+  display: flex; 
+  gap: 12px;
+}
+.banner-btn-p, .banner-btn-s {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  border-radius: 50px;
+  text-decoration: none;
+  overflow: hidden;
+  box-shadow: var(--sh-m);
+  transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease !important;
+  max-width: 44px; /* Estado colapsado (solo círculo) */
+  padding: 0;
+}
+.banner-btn-p {
+  background: var(--terra); /* Naranja/Primario */
+  color: #fff;
+}
+.banner-btn-s {
+  background: #fff; /* Blanco/Secundario */
+  color: var(--dark);
+  border: 1.5px solid var(--border);
+}
+.banner-btn-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.1rem;
+}
+.banner-btn-text {
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 0.9rem;
+  opacity: 0;
+  transition: opacity 0.2s ease !important;
+}
+
+/* Al pasar el ratón, se expanden mostrando el texto */
+.banner-btn-p:hover, .banner-btn-s:hover {
+  max-width: 180px; 
+  padding-right: 20px;
+}
+.banner-btn-p:hover .banner-btn-text, .banner-btn-s:hover .banner-btn-text {
+  opacity: 1;
+  transition-delay: 0.1s;
+}
+
+/* Forzar que el icono secundario mantenga el color al hacer hover */
+.banner-btn-s:hover { color: var(--terra); border-color: var(--terra); }
+
+/* Campos bloqueados (Seguridad) */
+.locked-input-group { 
+  position: relative; 
+}
+.locked-input-group input {
+  background-color: #f1f1f1 !important; 
+  color: #777; 
+  pointer-events: none;
+}
+.locked-overlay {
+  position: absolute; 
+  inset: 0; 
+  z-index: 10; 
+  cursor: help;
+}
+.input-lock-icon {
+  position: absolute; 
+  right: 15px; 
+  top: 38px; 
+  color: #aaa;
+}
+
+/*  RESPONSIVE  */
 @media (max-width: 900px) {
   #profile-container { padding: 22px; margin-left: 0; }
 }

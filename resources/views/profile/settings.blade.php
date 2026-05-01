@@ -3,7 +3,7 @@
 @section('content')
 <div id="profile-container">
 
-  {{-- CABECERA --}}
+  <!-- CABECERA -->
   <div class="profile-header" style="margin-bottom:0;">
     <div style="display:flex;align-items:center;gap:14px;max-width:1100px;margin:0 auto 32px;">
       <a href="{{ route('profile.show') }}" class="btn-s" style="padding:8px 16px;font-size:.82rem;">
@@ -23,7 +23,7 @@
       </div>
     @endif
 
-    {{-- TABS DE AJUSTES --}}
+    <!-- TABS DE AJUSTES -->
     <div class="profile-tabs" style="margin-bottom:32px;">
       <button class="profile-tab active" onclick="switchSettings(this,'st-apariencia')">
         <i class="fa-solid fa-palette"></i> Apariencia e idioma
@@ -36,7 +36,7 @@
       </button>
     </div>
 
-    {{-- ===== APARIENCIA E IDIOMA ===== --}}
+    <!-- APARIENCIA E IDIOMA  -->
     <div id="st-apariencia">
       <form method="POST" action="{{ route('profile.settings.update') }}">
         @csrf
@@ -47,7 +47,7 @@
             <i class="fa-solid fa-sun" style="color:var(--terra)"></i> Apariencia
           </div>
 
-          {{-- TEMA --}}
+          <!-- TEMA -->
           <div class="edit-form-group">
             <label class="edit-form-label">Tema de la plataforma</label>
             <div class="settings-option-grid">
@@ -66,7 +66,7 @@
             </div>
           </div>
 
-          {{-- IDIOMA --}}
+          <!-- IDIOMA -->
           <div class="edit-form-group" style="margin-bottom:0;">
             <label class="edit-form-label" for="idioma">Idioma de la interfaz</label>
             <select id="idioma" name="settings[idioma]" class="settings-select">
@@ -88,59 +88,51 @@
       </form>
     </div>
 
-    {{-- ===== PRIVACIDAD ===== --}}
+    <!--  PRIVACIDAD  -->
     <div id="st-privacidad" style="display:none;">
-      <div class="profile-card" style="margin-bottom:24px;">
-        <div class="edit-section-title">
-          <i class="fa-solid fa-eye" style="color:var(--terra)"></i> Visibilidad de datos
-        </div>
-        <p style="color:var(--muted);font-size:.9rem;margin-bottom:20px;">
-          Controla qué información pueden ver otros usuarios en tu perfil público.
-        </p>
-
-        <div class="settings-toggle-row">
-          <div>
-            <div class="settings-toggle-lbl">Mostrar apellidos</div>
-            <div class="settings-toggle-hint">Otros usuarios verán tu nombre completo</div>
+      <form method="POST" action="{{ route('profile.settings.update') }}">
+        @csrf
+        @method('PUT')
+        <div class="profile-card" style="margin-bottom:24px;">
+          <div class="edit-section-title">
+            <i class="fa-solid fa-eye" style="color:var(--terra)"></i> Visibilidad de datos
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" checked>
-            <span class="toggle-thumb"></span>
-          </label>
-        </div>
-
-        <div class="settings-toggle-row">
-          <div>
-            <div class="settings-toggle-lbl">Mostrar fecha de nacimiento</div>
-            <div class="settings-toggle-hint">Solo el año o el día y mes según prefieras</div>
+          
+          <div class="settings-toggle-row">
+            <div>
+              <div class="settings-toggle-lbl">Mostrar apellidos</div>
+              <div class="settings-toggle-hint">Otros usuarios verán tu nombre completo</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="hidden" name="settings[mostrar_apellidos]" value="0">
+              <input type="checkbox" name="settings[mostrar_apellidos]" value="1" 
+                     {{ ($user->user_settings['mostrar_apellidos'] ?? '1') == '1' ? 'checked' : '' }}>
+              <span class="toggle-thumb"></span>
+            </label>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox">
-            <span class="toggle-thumb"></span>
-          </label>
-        </div>
 
-        <div class="settings-toggle-row" style="border-bottom:none;">
-          <div>
-            <div class="settings-toggle-lbl">Perfil público</div>
-            <div class="settings-toggle-hint">Cualquier usuario puede ver tu perfil</div>
+          <div class="settings-toggle-row">
+            <div>
+              <div class="settings-toggle-lbl">Mostrar fecha de nacimiento</div>
+              <div class="settings-toggle-hint">Visible en tu perfil público</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="hidden" name="settings[mostrar_fecha]" value="0">
+              <input type="checkbox" name="settings[mostrar_fecha]" value="1"
+                     {{ ($user->user_settings['mostrar_fecha'] ?? '0') == '1' ? 'checked' : '' }}>
+              <span class="toggle-thumb"></span>
+            </label>
           </div>
-          <label class="toggle-switch">
-            <input type="checkbox" checked>
-            <span class="toggle-thumb"></span>
-          </label>
         </div>
-
-        <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border);">
-          <p style="font-size:.8rem;color:var(--muted);">
-            <i class="fa-solid fa-circle-info" style="color:var(--terra)"></i>
-            Estas opciones se guardarán cuando esté disponible la API de ajustes de privacidad.
-          </p>
-        </div>
-      </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:24px;">
+            <button type="submit" class="btn-p">
+              <i class="fa-solid fa-floppy-disk"></i> Guardar privacidad
+            </button>
+          </div>
+      </form>
     </div>
 
-    {{-- ===== CUENTA ===== --}}
+    <!--  CUENTA  -->
     <div id="st-cuenta" style="display:none;">
       <div class="profile-card" style="margin-bottom:44px;">
         <div class="edit-section-title">

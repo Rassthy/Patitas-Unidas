@@ -3,7 +3,7 @@
 @section('content')
 <div id="profile-container">
 
-  {{-- CABECERA --}}
+  <!-- CABECERA -->
   <div class="profile-header" style="margin-bottom:0;">
     <div style="display:flex;align-items:center;gap:14px;max-width:1100px;margin:0 auto 32px;">
       <a href="{{ route('profile.show') }}" class="btn-s" style="padding:8px 16px;font-size:.82rem;">
@@ -17,7 +17,7 @@
 
   <div style="max-width:700px;margin:0 auto;">
 
-    {{-- ALERTAS --}}
+    <!-- ALERTAS -->
     @if(session('success'))
       <div class="alert-banner" style="margin-bottom:24px;">
         <i class="fa-solid fa-circle-check"></i> {{ session('success') }}
@@ -38,13 +38,13 @@
       @csrf
       @method('PUT')
 
-      {{-- ===== IMÁGENES ===== --}}
+      <!-- IMÁGENES -->
       <div class="profile-card" style="margin-bottom:24px;">
         <div class="edit-section-title">
           <i class="fa-solid fa-image" style="color:var(--terra)"></i> Imágenes del perfil
         </div>
 
-        {{-- BANNER --}}
+        <!-- BANNER -->
         <div class="edit-form-group">
           <label class="edit-form-label">Banner</label>
           <div class="edit-media-preview" id="banner-preview"
@@ -64,7 +64,7 @@
           <small class="edit-hint">JPG, PNG o GIF · Máximo 4 MB · Recomendado: 1400 × 350 px</small>
         </div>
 
-        {{-- AVATAR --}}
+        <!-- AVATAR -->
         <div class="edit-form-group" style="margin-bottom:0;">
           <label class="edit-form-label">Foto de perfil</label>
           <div style="display:flex;align-items:center;gap:22px;">
@@ -90,28 +90,26 @@
         </div>
       </div>
 
-      {{-- ===== DATOS PERSONALES ===== --}}
+      <!-- DATOS PERSONALES -->
       <div class="profile-card" style="margin-bottom:24px;">
         <div class="edit-section-title">
           <i class="fa-solid fa-user" style="color:var(--terra)"></i> Datos personales
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
-          <div class="edit-form-group">
-            <label class="edit-form-label" for="nombre">
-              Nombre <span style="color:var(--terra)">*</span>
-            </label>
-            <input class="edit-form-input" type="text" id="nombre" name="nombre" required
-                   value="{{ old('nombre', $user->nombre) }}" placeholder="Tu nombre">
-            @error('nombre')<span class="edit-field-error">{{ $message }}</span>@enderror
+          <div class="edit-form-group locked-input-group">
+            <label class="edit-form-label" for="nombre">Nombre</label>
+            <div class="locked-overlay" title="Por motivos de seguridad, para cambiar tu nombre o apellidos debes contactar con el soporte de Patitas Unidas."></div>
+            <input class="edit-form-input" type="text" id="nombre" name="nombre" readonly
+                   value="{{ $user->nombre }}" placeholder="Tu nombre">
+            <i class="fa-solid fa-lock input-lock-icon"></i>
           </div>
-          <div class="edit-form-group">
-            <label class="edit-form-label" for="apellidos">
-              Apellidos <span style="color:var(--terra)">*</span>
-            </label>
-            <input class="edit-form-input" type="text" id="apellidos" name="apellidos" required
-                   value="{{ old('apellidos', $user->apellidos) }}" placeholder="Tus apellidos">
-            @error('apellidos')<span class="edit-field-error">{{ $message }}</span>@enderror
+          <div class="edit-form-group locked-input-group">
+            <label class="edit-form-label" for="apellidos">Apellidos</label>
+            <div class="locked-overlay" title="Por motivos de seguridad, para cambiar tu nombre o apellidos debes contactar con el soporte de Patitas Unidas."></div>
+            <input class="edit-form-input" type="text" id="apellidos" name="apellidos" readonly
+                   value="{{ $user->apellidos }}" placeholder="Tus apellidos">
+            <i class="fa-solid fa-lock input-lock-icon"></i>
           </div>
         </div>
 
@@ -133,7 +131,7 @@
         </div>
       </div>
 
-      {{-- ===== UBICACIÓN ===== --}}
+      <!-- UBICACIÓN -->
       <div class="profile-card" style="margin-bottom:32px;">
         <div class="edit-section-title">
           <i class="fa-solid fa-location-dot" style="color:var(--terra)"></i> Ubicación
@@ -155,7 +153,7 @@
         </div>
       </div>
 
-      {{-- ACCIONES --}}
+      <!-- ACCIONES -->
       <div style="display:flex;gap:14px;justify-content:flex-end;padding-bottom:44px;">
         <a href="{{ route('profile.show') }}" class="btn-s">Cancelar</a>
         <button type="submit" class="btn-p">
