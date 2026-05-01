@@ -6,10 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Str;
-use App\Models\Pet;
-use App\Models\Post;
-use App\Models\Notification;
-use App\Models\Report;
 
 class User extends Authenticatable
 {
@@ -56,20 +52,25 @@ class User extends Authenticatable
         return $this->password_hash;
     }
 
+    /* Foto de perfil: Maneja tres casos principales para devolver la URL correcta. */
     public function getFotoPerfilUrlAttribute()
     {
-        if (!$this->foto_perfil || $this->foto_perfil === 'defaults/foto_perfil_generica.png' || $this->foto_perfil === 'storage/defaults/foto_perfil_generica.png') {
+        // Si no hay foto, devolvemos la genérica de la carpeta public
+        if (!$this->foto_perfil) {
             return asset('img/defaults/foto_perfil_generica.png');
         }
 
+        // Si es una URL externa (por ejemplo Gravatar, Imgur...)
         if (Str::startsWith($this->foto_perfil, ['http://', 'https://'])) {
             return $this->foto_perfil;
         }
 
+        // Si por alguna razón la base de datos ya apunta a la carpeta img/
         if (Str::startsWith($this->foto_perfil, 'img/')) {
             return asset($this->foto_perfil);
         }
 
+        // Por defecto, buscamos en la carpeta storage (lo normal al subir fotos)
         return asset('storage/' . $this->foto_perfil);
     }
 
@@ -90,28 +91,10 @@ class User extends Authenticatable
         return asset('storage/' . $this->banner);
     }
 
-    public function pets()
-    {
-        return $this->hasMany(Pet::class);
-    }
-
-    public function posts()
-    {
-        return $this->hasMany(Post::class, 'author_id');
-    }
-
-    public function notifications()
-    {
-        return $this->hasMany(Notification::class);
-    }
-
-    public function reportsMade()
-    {
-        return $this->hasMany(Report::class, 'reporter_id');
-    }
-
-    public function reportsReceived()
-    {
-        return $this->hasMany(Report::class, 'reported_user_id');
-    }
+    // RELACIONES
+    public function pets() { return $this->hasMany(Pet::class); }
+    public function posts() { return $this->hasMany(Post::class, 'author_id'); }
+    public function notifications() { return $this->hasMany(Notification::class); }
+    public function reportsMade() { return $this->hasMany(Report::class, 'reporter_id'); }
+    public function reportsReceived() { return $this->hasMany(Report::class, 'reported_user_id'); }
 }

@@ -29,18 +29,16 @@
 
     <div class="profile-card">
       <div class="profile-top">
-        {{-- AVATAR Y ESTADO --}}
+        <!-- AVATAR Y SU ESTADO -->
         <div class="profile-avatar-wrap">
-          @if($user->foto_perfil)
-            <img class="profile-avatar" src="{{ $user->foto_perfil_url }}" alt="Foto de {{ $user->nombre }}">
-          @else
-            <div class="profile-avatar no-image">🐾</div>
-          @endif
-          {{-- Preparado para la lógica backend: online, away, offline --}}
+          <!-- El modelo User decidira si muestra la foto o la que dejemos default -->
+          <img class="profile-avatar" src="{{ $user->foto_perfil_url }}" alt="Foto de {{ $user->nombre }}">
+          
+          <!-- Preparado para la logica de online, away, offline -->
           <div class="profile-status status-online" title="Conectado"></div>
         </div>
 
-        {{-- INFO --}}
+        <!-- INFO -->
         <div>
           <h1 class="profile-name">
             {{ $user->nombre }}
@@ -66,7 +64,7 @@
               <p>Miembro desde {{ \Carbon\Carbon::parse($user->created_at)->locale('es')->translatedFormat('F Y') }}</p>
             </div>
             
-            {{-- Aplicamos la privacidad a la fecha de nacimiento --}}
+            <!-- Aplicamos la privacidad a la fecha de nacimiento -->
             @if($user->fecha_nacimiento && $mostrarFecha)
               <div class="meta-item">
                 <i class="fa-solid fa-cake-candles" style="color:var(--terra)"></i>
@@ -76,7 +74,7 @@
           </div>
         </div>
 
-        {{-- ETIQUETA DERECHA --}}
+        <!-- ETIQUETA DERECHA -->
         <div class="profile-right-area" style="text-align: right;">
           <div class="profile-type">
             <i class="fa-solid fa-user"></i> Usuario

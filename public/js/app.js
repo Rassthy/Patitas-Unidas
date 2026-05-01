@@ -113,6 +113,7 @@ function filterPosts(provincia) {
 
 function renderPosts(catId, filter='') {
   if (!DOM.paCount || !DOM.postsGrid) return;
+
   const posts = allPosts.filter(p => !filter || p.provincia === filter);
   DOM.paCount.textContent = posts.length + ' publicacion' + (posts.length !== 1 ? 'es' : '');
 
@@ -127,12 +128,12 @@ function renderPosts(catId, filter='') {
   DOM.postsGrid.innerHTML = posts.length ? posts.map(p => {
     const postBadge = getBadgeInfo(catId, p);
 
-    // ✅ Fix: construir la URL en JS en vez de usar asset() de PHP
+    // Construir la URL en JS en vez de usar asset() del PHP
     const imgSrc = (p.images && p.images.length)
       ? `/storage/${p.images[0].url}`
       : `https://picsum.photos/seed/${p.id}/400/300`;
 
-    // ✅ Fix: autor puede ser null si la relación no se cargó
+    // El autor puede ser null si la relación no se cargó
     const autorNombre = p.author?.username ?? 'Usuario';
     const autorFoto   = p.author?.foto_perfil ? `/storage/${p.author.foto_perfil}` : `https://i.pravatar.cc/40?img=1`;
     const autorLabel  = autorNombre.substring(0, 16) + (autorNombre.length > 16 ? '…' : '');
@@ -286,6 +287,7 @@ const faqData = [
 function renderFaq() {
   const list = document.getElementById('faqList');
   if (!list) return;
+
   list.innerHTML = faqData.map((f,i) => `
     <div class="faq-item" id="faq-${i}">
       <div class="faq-q" onclick="toggleFaq(${i})">

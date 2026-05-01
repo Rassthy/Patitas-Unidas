@@ -3,7 +3,7 @@
 @section('content')
 <div id="profile-container">
 
-  {{-- ===== CABECERA ===== --}}
+  <!--  CABECERA  -->
   <div class="profile-header">
 
     <div class="profile-banner {{ $user->banner ? '' : 'no-image' }}"
@@ -13,19 +13,16 @@
     <div class="profile-card">
       <div class="profile-top">
 
-        {{-- AVATAR --}}
+        <!-- AVATAR -->
         <div class="profile-avatar-wrap">
-          @if($user->foto_perfil)
             <img class="profile-avatar" src="{{ $user->foto_perfil_url }}" alt="Foto de {{ $user->nombre }}">
-          @else
-            <div class="profile-avatar no-image">🐾</div>
-          @endif
-          <div class="profile-badge" title="Usuario verificado">
-            <i class="fa-solid fa-check"></i>
-          </div>
+            
+            <div class="profile-badge" title="Usuario verificado">
+                <i class="fa-solid fa-check"></i>
+            </div>
         </div>
 
-        {{-- INFO --}}
+        <!-- INFO -->
         <div>
           <div class="profile-type">
             <i class="fa-solid fa-user"></i> Usuario registrado
@@ -51,7 +48,7 @@
           </div>
         </div>
 
-        {{-- ACCIONES (vista pública) --}}
+        <!-- ACCIONES (vista pública) -->
         @auth
           @if(Auth::id() !== $user->id)
             <div class="profile-actions">
@@ -75,7 +72,7 @@
     </div>
   </div>
 
-  {{-- ===== CONTENIDO PÚBLICO ===== --}}
+  <!--  CONTENIDO PÚBLICO  -->
   <div class="profile-sections">
 
     <div class="profile-tabs">
@@ -88,7 +85,7 @@
     </div>
 
     <div id="tab-pub" class="profile-tab-content">
-      {{-- TODO: renderizar $publications cuando esté disponible --}}
+      <!-- TODO: renderizar $publications cuando esté disponible -->
       <div class="empty-state">
         <div class="empty-state-ico">🐾</div>
         <div class="empty-state-title">{{ $user->nombre }} aún no tiene publicaciones</div>
