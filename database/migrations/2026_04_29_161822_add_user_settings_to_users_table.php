@@ -9,14 +9,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Añadimos una columna JSON con valores por defecto
+            // Mantenemos solo tu cambio de user_settings
             $table->json('user_settings')->nullable()->after('ciudad');
         });
-        if (!Schema::hasColumn('users', 'remember_token')) {
-            Schema::table('users', function (Blueprint $table) {
-                $table->rememberToken();
-            });
-        }
     }
 
     public function down(): void
@@ -24,10 +19,5 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('user_settings');
         });
-        if (Schema::hasColumn('users', 'remember_token')) {
-            Schema::table('users', function (Blueprint $table) {
-                $table->dropRememberToken();
-            });
-        }
     }
 };
