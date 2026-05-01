@@ -14,12 +14,8 @@
 
     <!-- TABS -->
     <div class="lm-tabs">
-      <button class="lm-tab active" onclick="setLoginTab(this,'login')">
-        Iniciar sesión
-      </button>
-      <button class="lm-tab" onclick="setLoginTab(this,'register')">
-        Registrarse
-      </button>
+      <button class="lm-tab active" onclick="setLoginTab(this,'login')">Iniciar sesión</button>
+      <button class="lm-tab" onclick="setLoginTab(this,'register')">Registrarse</button>
     </div>
 
     @php

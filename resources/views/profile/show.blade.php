@@ -1,170 +1,176 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="profile-container">
-    <!-- Banner -->
-    <div class="profile-banner" style="background-image: url('{{ $user->banner_url }}');">
-        <div class="profile-banner-overlay">
-            <div class="profile-avatar">
-                <img src="{{ $user->foto_perfil_url }}" alt="Foto de perfil">
-            </div>
-        </div>
+<div id="profile-container">
+
+  <!--  CABECERA  -->
+  <div class="profile-header">
+    <div class="profile-banner {{ $user->banner ? '' : 'no-image' }}"
+         style="{{ $user->banner ? 'background-image:url(' . $user->banner_url . ');' : '' }}">
+         
+         <!-- Botones integrados en el banner (Expandibles) -->
+         <div class="banner-actions">
+            <a href="{{ route('profile.edit') }}" class="banner-btn-p" title="Editar perfil">
+              <div class="banner-btn-icon"><i class="fa-solid fa-pen"></i></div>
+              <span class="banner-btn-text">Editar perfil</span>
+            </a>
+            <a href="{{ route('profile.settings') }}" class="banner-btn-s" title="Ajustes">
+              <div class="banner-btn-icon"><i class="fa-solid fa-gear"></i></div>
+              <span class="banner-btn-text">Ajustes</span>
+            </a>
+         </div>
     </div>
 
-    <!-- Información del perfil -->
-    <div class="profile-content">
-        <div class="profile-header">
-            <h1>{{ $user->nombre }} {{ $user->apellidos }}</h1>
-            <p class="profile-username">{{ '@' . $user->username }}</p>
-            <a href="{{ route('profile.edit') }}" class="btn btn-primary">Editar perfil</a>
+    @php
+        // Leemos la privacidad (por defecto mostramos apellidos y ocultamos fecha)
+        $mostrarApellidos = ($user->user_settings['mostrar_apellidos'] ?? '1') == '1';
+        $mostrarFecha = ($user->user_settings['mostrar_fecha'] ?? '0') == '1';
+    @endphp
+
+    <div class="profile-card">
+      <div class="profile-top">
+        {{-- AVATAR Y ESTADO --}}
+        <div class="profile-avatar-wrap">
+          @if($user->foto_perfil)
+            <img class="profile-avatar" src="{{ $user->foto_perfil_url }}" alt="Foto de {{ $user->nombre }}">
+          @else
+            <div class="profile-avatar no-image">🐾</div>
+          @endif
+          {{-- Preparado para la lógica backend: online, away, offline --}}
+          <div class="profile-status status-online" title="Conectado"></div>
         </div>
 
-        <div class="profile-info">
-            <div class="info-section">
-                <h3>Información básica</h3>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <label>Email:</label>
-                        <span>{{ $user->email }}</span>
-                    </div>
-                    <div class="info-item">
-                        <label>DNI/NIE:</label>
-                        <span>{{ $user->dni_nie }}</span>
-                    </div>
-                    <div class="info-item">
-                        <label>Teléfono:</label>
-                        <span>{{ $user->telefono }}</span>
-                    </div>
-                    @if($user->fecha_nacimiento)
-                    <div class="info-item">
-                        <label>Fecha de nacimiento:</label>
-                        <span>{{ $user->fecha_nacimiento->format('d/m/Y') }}</span>
-                    </div>
-                    @endif
-                    @if($user->provincia)
-                    <div class="info-item">
-                        <label>Provincia:</label>
-                        <span>{{ $user->provincia }}</span>
-                    </div>
-                    @endif
-                    @if($user->ciudad)
-                    <div class="info-item">
-                        <label>Ciudad:</label>
-                        <span>{{ $user->ciudad }}</span>
-                    </div>
-                    @endif
-                </div>
-            </div>
+        {{-- INFO --}}
+        <div>
+          <h1 class="profile-name">
+            {{ $user->nombre }}
+            @if($mostrarApellidos)
+                {{ $user->apellidos }}
+            @endif
+          </h1>
+          <p class="profile-username"><a>@</a>{{ $user->username }}</p>
 
-            @if($user->descripcion)
-            <div class="info-section">
-                <h3>Descripción</h3>
-                <p>{{ $user->descripcion }}</p>
+          @if($user->descripcion)
+            <p class="profile-bio">{{ $user->descripcion }}</p>
+          @endif
+
+          <div class="profile-meta">
+            @if($user->ciudad || $user->provincia)
+              <div class="meta-item">
+                <i class="fa-solid fa-location-dot" style="color:var(--terra)"></i>
+                <p>{{ implode(', ', array_filter([$user->ciudad, $user->provincia])) }}</p>
+              </div>
+            @endif
+            <div class="meta-item">
+              <i class="fa-solid fa-calendar" style="color:var(--terra)"></i>
+              <p>Miembro desde {{ \Carbon\Carbon::parse($user->created_at)->locale('es')->translatedFormat('F Y') }}</p>
+            </div>
+            
+            {{-- Aplicamos la privacidad a la fecha de nacimiento --}}
+            @if($user->fecha_nacimiento && $mostrarFecha)
+              <div class="meta-item">
+                <i class="fa-solid fa-cake-candles" style="color:var(--terra)"></i>
+                <p>{{ $user->fecha_nacimiento->format('d/m/Y') }}</p>
+              </div>
+            @endif
+          </div>
+        </div>
+
+        {{-- ETIQUETA DERECHA --}}
+        <div class="profile-right-area" style="text-align: right;">
+          <div class="profile-type">
+            <i class="fa-solid fa-user"></i> Usuario
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!--  ESTADÍSTICAS (3 Elementos)  -->
+  <div class="profile-sections">
+    <div class="profile-stats">
+      <div class="stat-item">
+        <div class="stat-item-num">0</div>
+        <div class="stat-item-lbl">Publicaciones</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-item-num">0</div>
+        <div class="stat-item-lbl">Donaciones</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-item-num">0</div>
+        <div class="stat-item-lbl">Valoraciones enviadas</div>
+      </div>
+    </div>
+
+    <!--  SECCIÓN MIXTA: VALORACIONES O ANIMALES  -->
+    <div class="profile-card" style="margin-bottom: 32px;">
+        <div class="profile-tabs" style="border-bottom:none; margin-bottom: 16px;">
+          <button class="profile-tab active" onclick="switchTab(this,'tab-valoraciones')">
+            <i class="fa-solid fa-star"></i> Valoraciones
+          </button>
+          <button class="profile-tab" onclick="switchTab(this,'tab-animales')">
+            <i class="fa-solid fa-heart"></i> Mis animales
+          </button>
+        </div>
+
+        <div id="tab-valoraciones" class="profile-tab-content">
+          <!-- Formulario para valorar (Solo visible si estás registrado y no es tu propio perfil) -->
+          @auth
+            @if(Auth::id() !== $user->id)
+            <div class="review-form-container">
+              <h4>Dejar una valoración</h4>
+              <form action="#" method="POST">
+                @csrf
+                <div class="star-rating-input">
+                  <i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i>
+                </div>
+                <textarea placeholder="Deja un comentario (opcional)..." class="edit-form-textarea" style="min-height: 60px; margin-bottom: 10px;"></textarea>
+                <button class="btn-p btn-s" type="submit">Publicar valoración</button>
+              </form>
             </div>
             @endif
+          @endauth
+
+          <div class="empty-state">
+            <div class="empty-state-ico">⭐</div>
+            <div class="empty-state-title">Sin valoraciones todavía</div>
+            <p class="empty-state-desc">Nadie ha valorado a este usuario.</p>
+          </div>
+        </div>
+
+        <div id="tab-animales" class="profile-tab-content" style="display:none;">
+          <div class="empty-state">
+            <div class="empty-state-ico">🐶</div>
+            <div class="empty-state-title">Todavía no tienes animales registrados</div>
+            <p class="empty-state-desc">ÁREA EN CONSTRUCCIÓN...</p>
+          </div>
         </div>
     </div>
+
+    <!--  SECCIÓN INFERIOR: PUBLICACIONES  -->
+    <div class="profile-card">
+        <div class="edit-section-title" style="margin-bottom: 16px;">
+            <i class="fa-solid fa-paw" style="color:var(--terra)"></i> Publicaciones
+        </div>
+        <div class="empty-state">
+            <div class="empty-state-ico">🐾</div>
+            <div class="empty-state-title">Aún no hay publicaciones</div>
+            <p class="empty-state-desc">Cuando publique algo, aparecerá aquí.</p>
+        </div>
+    </div>
+
+  </div>
 </div>
+
+<script>
+function switchTab(btn, tabId) {
+  document.querySelectorAll('.profile-tabs .profile-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-valoraciones').style.display = 'none';
+  document.getElementById('tab-animales').style.display = 'none';
+  btn.classList.add('active');
+  document.getElementById(tabId).style.display = '';
+}
+</script>
 @endsection
-
-<style>
-.profile-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.profile-banner {
-    height: 300px;
-    background-size: cover;
-    background-position: center;
-    background-color: #f0f0f0;
-    position: relative;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
-
-.profile-banner-overlay {
-    position: absolute;
-    bottom: -50px;
-    left: 50px;
-}
-
-.profile-avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 4px solid white;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.profile-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.profile-content {
-    margin-top: 60px;
-}
-
-.profile-header {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.profile-header h1 {
-    margin: 0;
-    color: var(--text-primary);
-}
-
-.profile-username {
-    color: var(--text-secondary);
-    margin: 5px 0 15px 0;
-}
-
-.profile-info {
-    background: white;
-    border-radius: 8px;
-    padding: 30px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.info-section {
-    margin-bottom: 30px;
-}
-
-.info-section h3 {
-    color: var(--primary);
-    margin-bottom: 15px;
-    border-bottom: 2px solid var(--primary);
-    padding-bottom: 5px;
-}
-
-.info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 15px;
-}
-
-.info-item {
-    display: flex;
-    flex-direction: column;
-}
-
-.info-item label {
-    font-weight: 600;
-    color: var(--text-secondary);
-    margin-bottom: 5px;
-}
-
-.info-item span {
-    color: var(--text-primary);
-}
-
-.info-section p {
-    line-height: 1.6;
-    color: var(--text-primary);
-}
-</style>

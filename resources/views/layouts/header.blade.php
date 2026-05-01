@@ -30,9 +30,7 @@
         <i class="fa-solid fa-bell"></i>
         <span class="hdr-badge">3</span>
       </button>
-      <button class="login-btn" onclick="openLoginModal()">
-        <i class="fa-solid fa-right-to-bracket"></i> Iniciar sesión
-      </button>
+      <button class="login-btn" onclick="openLoginModal()"> <i class="fa-solid fa-right-to-bracket"></i> ­­­­­ ­Acceder </button>
     @endauth
   </div>
 </header>
