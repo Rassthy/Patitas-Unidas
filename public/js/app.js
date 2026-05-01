@@ -1,7 +1,8 @@
 // LOGICA PRINCIPAL DE LA APP E INICIALIZACION
 
 // ========== STATE ==========
-let currentCat = 1;
+let currentCat = 0;
+let selectedFiles = new DataTransfer();
 let currentPost = null;
 let currentGalIdx = 0;
 let likedPosts = new Set();
@@ -86,48 +87,118 @@ const catTitles = {
 };
 
 // ========== CARGA DE PUBLICACIONES ==========
-const allPostsFlat = [...postsData[1],...postsData[2],...postsData[3]];
+let allPosts = [];
+let currentFilter = '';
+
+async function loadPosts() {
+  try {
+    const params = new URLSearchParams();
+    params.append('category_id', currentCat);
+    if (currentFilter) params.append('provincia', currentFilter);
+
+    const response = await fetch(`/posts?${params}`);
+    const data = await response.json();
+    allPosts = data.posts.data || [];
+    renderPosts(currentCat, currentFilter);
+  } catch (error) {
+    console.error('Error loading posts:', error);
+    showToast('Error al cargar publicaciones');
+  }
+}
 
 function filterPosts(provincia) {
-  renderPosts(currentCat, provincia);
+  currentFilter = provincia;
+  loadPosts();
 }
 
 function renderPosts(catId, filter='') {
-  let posts = postsData[catId] || [];
-  if (filter) posts = posts.filter(p => p.provincia === filter);
+  const posts = allPosts.filter(p => !filter || p.provincia === filter);
   DOM.paCount.textContent = posts.length + ' publicacion' + (posts.length !== 1 ? 'es' : '');
 
-  const badgeClass = catId === 1 ? 'pc-badge-adopt' : catId === 2 ? 'pc-badge-lost' : 'pc-badge-support';
-  const catIcon    = catId === 1 ? '🏠' : catId === 2 ? '🔍' : '❤️';
+  const getBadgeInfo = (catId, post) => {
+    const id = catId === 0 ? post.category_id : catId;
+    return {
+      class: id === 1 ? 'pc-badge-adopt' : id === 2 ? 'pc-badge-lost' : 'pc-badge-support',
+      icon:  id === 1 ? '🏠'             : id === 2 ? '🔍'            : '❤️'
+    };
+  };
 
-  DOM.postsGrid.innerHTML = posts.length ? posts.map(p => `
-    <div class="post-card" data-id="${p.id}">
-      <div class="pc-img-wrap">
-        <img class="pc-img" src="${p.images[0]}" alt="${p.title}" loading="lazy" onerror="this.src='https://picsum.photos/seed/${p.id}/400/300'">
-        <span class="pc-badge ${badgeClass}">${catIcon}${p.especie ? ' ' + p.especie : ''}</span>
-      </div>
-      <div class="pc-body">
-        <div class="pc-loc">📍 ${p.ciudad}, ${p.provincia}</div>
-        <h4>${p.title}</h4>
-        <p>${p.desc}</p>
-        <div class="pc-foot">
-          <div class="pc-author">
-            <img class="pc-author-av" src="${p.authorImg}" alt="${p.author}" loading="lazy" onerror="this.src='https://i.pravatar.cc/40?img=1'">
-            <span>${p.author.substring(0,16)}${p.author.length>16?'…':''}</span>
+  DOM.postsGrid.innerHTML = posts.length ? posts.map(p => {
+    const postBadge = getBadgeInfo(catId, p);
+
+    // ✅ Fix: construir la URL en JS en vez de usar asset() de PHP
+    const imgSrc = (p.images && p.images.length)
+      ? `/storage/${p.images[0].url}`
+      : `https://picsum.photos/seed/${p.id}/400/300`;
+
+    // ✅ Fix: autor puede ser null si la relación no se cargó
+    const autorNombre = p.author?.username ?? 'Usuario';
+    const autorFoto   = p.author?.foto_perfil ? `/storage/${p.author.foto_perfil}` : `https://i.pravatar.cc/40?img=1`;
+    const autorLabel  = autorNombre.substring(0, 16) + (autorNombre.length > 16 ? '…' : '');
+
+    return `
+      <div class="post-card" data-id="${p.id}">
+        <div class="pc-img-wrap">
+          <img class="pc-img"
+               src="${imgSrc}"
+               alt="${p.titulo}"
+               loading="lazy"
+               onerror="this.src='https://picsum.photos/seed/${p.id}/400/300'">
+          <span class="pc-badge ${postBadge.class}">
+            ${postBadge.icon}${p.animal_especie ? ' ' + p.animal_especie : ''}
+          </span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-loc">📍 ${p.ciudad}, ${p.provincia}</div>
+          <h4>${p.titulo}</h4>
+          <p>${p.descripcion}</p>
+          <div class="pc-foot">
+            <div class="pc-author">
+              <img class="pc-author-av"
+                   src="${autorFoto}"
+                   alt="${autorNombre}"
+                   loading="lazy"
+                   onerror="this.src='https://i.pravatar.cc/40?img=1'">
+              <span>${autorLabel}</span>
+            </div>
+            <button class="btn-sm" data-id="${p.id}">Saber más</button>
           </div>
-          <button class="btn-sm" data-id="${p.id}">Saber más</button>
         </div>
       </div>
-    </div>
-  `).join('') : '<div style="text-align:center;padding:60px 20px;color:var(--muted);"><div style="font-size:2.5rem;margin-bottom:12px">🐾</div><p>No hay publicaciones en esta zona todavía.</p></div>';
+    `;
+  }).join('') : `
+    <div style="text-align:center;padding:60px 20px;color:var(--muted);">
+      <div style="font-size:2.5rem;margin-bottom:12px">🐾</div>
+      <p>No hay publicaciones en esta zona todavía.</p>
+    </div>`;
 }
 
 // ========== ENVIAR MENSAJE ==========
-function sendMsg() {
+async function sendMsg() {
   const input = document.getElementById('msgInput');
-  if (!input.value.trim()) { showToast('Escribe un mensaje antes de enviar 💬'); return; }
-  input.value = '';
-  showToast('Mensaje enviado correctamente ✉️');
+  if (!input.value.trim()) { showToast('Escribe un comentario antes de enviar 💬'); return; }
+
+  try {
+    const response = await fetch(`/posts/${currentPost.id}/comments`, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ comentario: input.value.trim() }),
+    });
+
+    if (response.ok) {
+      input.value = '';
+      loadComments(currentPost.id);
+      showToast('Comentario enviado ✉️');
+    } else {
+      showToast('Error al enviar comentario');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    showToast('Error de conexión');
+  }
 }
 
 // ========== FUNCIONES COMPLETAS DEL CHAT ==========
@@ -224,9 +295,9 @@ function renderFaq() {
   `).join('');
 }
 
-// ========== INIT ==========
+// ========== INICIALIZACION ==========
 DOM.init();
-renderPosts(1);
+loadPosts();
 renderFaq();
 renderChatPanel();
 
@@ -235,6 +306,118 @@ document.addEventListener('click', e => {
   if (card) { openPostModal(+card.dataset.id); return; }
   const smBtn = e.target.closest('.btn-sm[data-id]');
   if (smBtn) { e.stopPropagation(); openPostModal(+smBtn.dataset.id); }
+});
+
+// Vista previa de imágenes
+// Almacén acumulativo de archivos
+function previewImages(input) {
+  const container = document.getElementById('imagePreviewContainer');
+  const list = document.getElementById('imagePreviewList');
+
+  // Añadir los nuevos archivos al acumulador (sin duplicados por nombre)
+  Array.from(input.files).forEach(file => {
+    const yaExiste = Array.from(selectedFiles.files).some(f => f.name === file.name);
+    if (!yaExiste) selectedFiles.items.add(file);
+  });
+
+  // Limitar a 10 las fotos
+  if (selectedFiles.files.length > 10) {
+    showToast('Máximo 10 imágenes permitidas');
+    const dt = new DataTransfer();
+    Array.from(selectedFiles.files).slice(0, 10).forEach(f => dt.items.add(f));
+    selectedFiles = dt;
+  }
+
+  // Sincronizar el input con el acumulador
+  input.files = selectedFiles.files;
+
+  // Render del preview
+  if (selectedFiles.files.length > 0) {
+    container.style.display = 'block';
+    list.innerHTML = Array.from(selectedFiles.files).map((file, idx) => `
+      <div id="prev-${idx}" style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--bg-secondary);border-radius:6px;font-size:0.8rem;color:var(--text);max-width:100%;">
+        <i class="fa-solid fa-image" style="color:var(--terra);"></i>
+        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${file.name}">${file.name}</span>
+        <span style="color:var(--muted);font-size:0.75rem;">(${(file.size/1024).toFixed(1)}KB)</span>
+        <button type="button" onclick="removeFile(${idx})" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;">✕</button>
+      </div>
+    `).join('');
+  } else {
+    container.style.display = 'none';
+    list.innerHTML = '';
+  }
+}
+
+function removeFile(idx) {
+  const dt = new DataTransfer();
+  Array.from(selectedFiles.files)
+    .filter((_, i) => i !== idx)
+    .forEach(f => dt.items.add(f));
+  selectedFiles = dt;
+
+  // Sincronizar el input
+  document.getElementById('postImages').files = selectedFiles.files;
+  previewImages({ files: new DataTransfer().files }); // re-render sin añadir nada nuevo
+
+  // Re-render manual (previewImages con files vacíos no re-renderiza bien)
+  const list = document.getElementById('imagePreviewList');
+  const container = document.getElementById('imagePreviewContainer');
+  if (selectedFiles.files.length === 0) {
+    container.style.display = 'none';
+    list.innerHTML = '';
+  } else {
+    container.style.display = 'block';
+    list.innerHTML = Array.from(selectedFiles.files).map((file, i) => `
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--bg-secondary);border-radius:6px;font-size:0.8rem;color:var(--text);max-width:100%;">
+        <i class="fa-solid fa-image" style="color:var(--terra);"></i>
+        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${file.name}">${file.name}</span>
+        <span style="color:var(--muted);font-size:0.75rem;">(${(file.size/1024).toFixed(1)}KB)</span>
+        <button type="button" onclick="removeFile(${i})" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;">✕</button>
+      </div>
+    `).join('');
+  }
+}
+
+// Formulario de nueva publicación
+document.getElementById('newPostForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+
+  try {
+    const response = await fetch('/posts', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      },
+      body: formData,
+    });
+
+    const data = await response.json();
+    
+    if (response.ok) {
+      showToast('Publicación creada correctamente! 🎉');
+      closeNewPostModal();
+      // Limpiar el formulario
+      document.getElementById('newPostForm').reset();
+      selectedFiles = new DataTransfer();
+      document.getElementById('imagePreviewContainer').style.display = 'none';
+      loadPosts(); // Recargar posts
+    } else {
+      // Si es un error de validación, mostrar primer error disponible
+      if (data.errors && typeof data.errors === 'object') {
+        const firstError = Object.values(data.errors)[0];
+        const errorMsg = Array.isArray(firstError) ? firstError[0] : firstError;
+        showToast('Error: ' + errorMsg);
+      } else if (data.message) {
+        showToast('Error: ' + data.message);
+      } else {
+        showToast('Error al crear publicación. Inténtalo de nuevo.');
+      }
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    showToast('Error de conexión. Verifica tu conexión a internet.');
+  }
 });
 
 // Arreglo para el codigo de ayer (REVISAR)

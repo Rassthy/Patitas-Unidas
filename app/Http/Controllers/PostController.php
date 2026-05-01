@@ -3,64 +3,82 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\PostImage;
+use App\Models\PostComment;
+use App\Models\PostLike;
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $posts = Post::orderBy('created_at', 'desc')->get();
+        $query = Post::with(['author', 'category', 'images'])->whereIn('estado', ['activa', 'activo']);
+
+        // Filtros
+        if ($request->has('category_id') && $request->category_id && $request->category_id != 0) {
+            $query->where('category_id', $request->category_id);
+        }
+        if ($request->has('provincia') && $request->provincia) {
+            $query->where('provincia', $request->provincia);
+        }
+        if ($request->has('ciudad') && $request->ciudad) {
+            $query->where('ciudad', $request->ciudad);
+        }
+        if ($request->has('animal_especie') && $request->animal_especie) {
+            $query->where('animal_especie', $request->animal_especie);
+        }
+        if ($request->has('estado') && $request->estado) {
+            $query->where('estado', $request->estado);
+        }
+        if ($request->has('search') && $request->search) {
+            $query->where(function($q) use ($request) {
+                $q->where('titulo', 'like', '%' . $request->search . '%')
+                  ->orWhere('descripcion', 'like', '%' . $request->search . '%')
+                  ->orWhere('animal_nombre', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $posts = $query->orderBy('created_at', 'desc')->paginate(12);
+
         return response()->json(['posts' => $posts], 200);
     }
 
-    public function store(Request $request)
+    public function store(StorePostRequest $request)
     {
-        $data = $request->validate([
-            'category_id' => 'required|integer|exists:forum_categories,id',
-            'titulo' => 'required|string|max:200',
-            'descripcion' => 'required|string',
-            'animal_nombre' => 'nullable|string|max:100',
-            'animal_especie' => 'nullable|string|max:50',
-            'animal_raza' => 'nullable|string|max:50',
-            'provincia' => 'required|string|max:50',
-            'ciudad' => 'required|string|max:100',
-            'latitud' => 'nullable|numeric',
-            'longitud' => 'nullable|numeric',
-            'estado' => ['required', Rule::in(['activa', 'en_revision', 'cerrada'])],
-        ]);
-
+        $data = $request->validated();
         $data['author_id'] = Auth::id();
         $post = Post::create($data);
 
-        return response()->json(['post' => $post], 201);
+        // Manejar imágenes
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $index => $image) {
+                $path = $image->store('posts', 'public');
+                PostImage::create([
+                    'post_id' => $post->id,
+                    'url' => $path,
+                    'orden' => $index,
+                ]);
+            }
+        }
+
+        return response()->json(['post' => $post->load(['author', 'category', 'images'])], 201);
     }
 
     public function show($id)
     {
-        $post = Post::findOrFail($id);
+        $post = Post::with(['author', 'category', 'images', 'comments.user'])->findOrFail($id);
+        $post->liked_by_user = Auth::check() ? $post->isLikedBy(Auth::user()) : false;
         return response()->json(['post' => $post], 200);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdatePostRequest $request, $id)
     {
         $post = Post::where('author_id', Auth::id())->findOrFail($id);
-
-        $data = $request->validate([
-            'category_id' => 'sometimes|required|integer|exists:forum_categories,id',
-            'titulo' => 'sometimes|required|string|max:200',
-            'descripcion' => 'sometimes|required|string',
-            'animal_nombre' => 'nullable|string|max:100',
-            'animal_especie' => 'nullable|string|max:50',
-            'animal_raza' => 'nullable|string|max:50',
-            'provincia' => 'sometimes|required|string|max:50',
-            'ciudad' => 'sometimes|required|string|max:100',
-            'latitud' => 'nullable|numeric',
-            'longitud' => 'nullable|numeric',
-            'estado' => ['sometimes', Rule::in(['activa', 'en_revision', 'cerrada'])],
-        ]);
-
+        $data = $request->validated();
         $post->update($data);
         return response()->json(['post' => $post], 200);
     }
@@ -68,7 +86,56 @@ class PostController extends Controller
     public function destroy($id)
     {
         $post = Post::where('author_id', Auth::id())->findOrFail($id);
+
+        // Eliminar imágenes
+        foreach ($post->images as $image) {
+            Storage::disk('public')->delete($image->url);
+            $image->delete();
+        }
+
         $post->delete();
         return response()->json(['message' => 'Post deleted successfully.'], 200);
+    }
+
+    public function toggleLike($id)
+    {
+        $post = Post::findOrFail($id);
+        $like = PostLike::where('post_id', $id)->where('user_id', Auth::id())->first();
+
+        if ($like) {
+            PostLike::where('post_id', $id)->where('user_id', Auth::id())->delete();
+            return response()->json(['liked' => false, 'likes_count' => $post->likes()->count()], 200);
+        } else {
+            PostLike::create(['post_id' => $id, 'user_id' => Auth::id()]);
+            return response()->json(['liked' => true, 'likes_count' => $post->likes()->count()], 200);
+        }
+    }
+
+    public function addComment(Request $request, $id)
+    {
+        $data = $request->validate([
+            'comentario' => 'required|string|max:500',
+            'parent_comment_id' => 'nullable|integer|exists:post_comments,id',
+        ]);
+
+        $comment = PostComment::create([
+            'post_id' => $id,
+            'author_id' => Auth::id(),
+            'parent_comment_id' => $data['parent_comment_id'] ?? null,
+            'comentario' => $data['comentario'],
+        ]);
+
+        return response()->json(['comment' => $comment->load('user')], 201);
+    }
+
+    public function getComments($id)
+    {
+        $comments = PostComment::where('post_id', $id)
+            ->whereNull('parent_comment_id')
+            ->with(['user', 'replies.user'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json(['comments' => $comments], 200);
     }
 }

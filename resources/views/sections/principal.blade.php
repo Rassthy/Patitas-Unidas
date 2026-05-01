@@ -5,7 +5,10 @@
     <p>Explora lo que usuarios, protectoras y organizaciones están compartiendo ahora mismo.</p>
   </div>
   <div class="cat-tabs">
-    <button class="cat-tab active c1" onclick="setCategory(this, 1)">
+    <button class="cat-tab active c0" onclick="setCategory(this, 0)">
+      📋 Todas las publicaciones
+    </button>
+    <button class="cat-tab c1" onclick="setCategory(this, 1)">
       🏠 Adoptar mascota
     </button>
     <button class="cat-tab c2" onclick="setCategory(this, 2)">
@@ -18,8 +21,8 @@
   <div class="posts-area">
     <div class="pa-header">
       <div class="pa-title">
-        <span id="paTitle">🏠 Adoptar mascota</span>
-        <span class="pa-count" id="paCount">6 publicaciones</span>
+        <span id="paTitle">📋 Todas las publicaciones</span>
+        <span class="pa-count" id="paCount">0 publicaciones</span>
       </div>
       <div class="pa-filters">
         <select class="pa-select" onchange="filterPosts(this.value)">
@@ -37,7 +40,7 @@
           <option>Más populares</option>
           <option>Más antiguas</option>
         </select>
-        <button class="new-post-btn" onclick="openLoginModal()">
+        <button class="new-post-btn" onclick="openNewPostModal()">
           <i class="fa-solid fa-plus"></i> Publicar
         </button>
       </div>
