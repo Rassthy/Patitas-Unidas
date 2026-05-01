@@ -1,11 +1,11 @@
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sb-logo" onclick="showSection('bienvenida')">🐾</div>
-  <button class="sb-btn active" onclick="if(document.getElementById('sec-bienvenida')){ showSection('bienvenida'); return false; } window.location.href='{{ route('home') }}';" title="Inicio">
+  <button class="sb-btn active" onclick="if(document.getElementById('sec-bienvenida')){ showSection('bienvenida'); return false; } window.location.href='{{ route('home', ['tab' => 'bienvenida']) }}';" title="Inicio">
     <i class="fa-solid fa-house"></i>
     <span class="sb-tip">Inicio</span>
   </button>
-  <button class="sb-btn" onclick="if(document.getElementById('sec-principal')){ showSection('principal'); return false; } window.location.href='{{ route('home') }}';" title="Publicaciones">
+  <button class="sb-btn" onclick="if(document.getElementById('sec-principal')){ showSection('principal'); return false; } window.location.href='{{ route('home', ['tab' => 'principal']) }}';" title="Publicaciones">
     <i class="fa-solid fa-paw"></i>
     <span class="sb-tip">Publicaciones</span>
   </button>
@@ -21,7 +21,7 @@
     <span class="sb-tip">Notificaciones</span>
   </button>
   <div class="sb-sep"></div>
-  <button class="sb-btn" onclick="if(document.getElementById('sec-faq')){ showSection('faq'); return false; } window.location.href='{{ route('home') }}';">
+  <button class="sb-btn" onclick="if(document.getElementById('sec-faq')){ showSection('faq'); return false; } window.location.href='{{ route('home', ['tab' => 'faq']) }}';">
     <i class="fa-solid fa-circle-info"></i>
     <span class="sb-tip">Información</span>
   </button>

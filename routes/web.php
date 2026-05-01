@@ -16,13 +16,18 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/dashboard', function () {
-    return redirect()->route('profile.show');
+    return redirect()->route('home', ['tab' => 'principal']);
 })->name('dashboard');
 
 // Rutas de autenticación (públicas)
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::get('/check-auth', [AuthController::class, 'checkAuth'])->name('check-auth');
+
+// Public post routes
+Route::get('posts/{id}/comments', [PostController::class, 'getComments'])->name('posts.comments.index');
+Route::get('posts', [PostController::class, 'index'])->name('posts.index');
+Route::get('posts/{post}', [PostController::class, 'show'])->name('posts.show');
 
 // Rutas protegidas por autenticación
 Route::middleware('auth')->group(function () {
@@ -41,7 +46,12 @@ Route::middleware('auth')->group(function () {
     // Rutas de recursos
     Route::resource('users', UserController::class)->only(['index', 'show', 'update', 'destroy']);
     Route::resource('pets', PetController::class)->except(['create', 'edit']);
-    Route::resource('posts', PostController::class)->except(['create', 'edit']);
+    Route::post('posts', [PostController::class, 'store'])->name('posts.store');
+    Route::put('posts/{post}', [PostController::class, 'update'])->name('posts.update');
+    Route::delete('posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+
+    Route::post('posts/{id}/like', [PostController::class, 'toggleLike'])->name('posts.like');
+    Route::post('posts/{id}/comments', [PostController::class, 'addComment'])->name('posts.comments.store');
     Route::resource('chats', ChatController::class)->except(['create', 'edit']);
     Route::resource('notifications', NotificationController::class)->only(['index', 'show', 'update']);
     Route::resource('reports', ReportController::class)->except(['create', 'edit']);

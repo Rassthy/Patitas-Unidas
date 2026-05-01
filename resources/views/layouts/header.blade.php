@@ -5,13 +5,13 @@
     <span class="hdr-logo-txt">PatitasUnidas</span>
   </a>
   <nav>
-    <button class="nav-btn active" onclick="if(document.getElementById('sec-bienvenida')){ setNav(this,'bienvenida'); return false; } window.location.href='{{ route('home') }}';">
+    <button class="nav-btn active" onclick="if(document.getElementById('sec-bienvenida')){ setNav(this,'bienvenida'); return false; } window.location.href='{{ route('home', ['tab' => 'bienvenida']) }}';">
       <span class="nav-paw">🐾</span>Bienvenida
     </button>
-    <button class="nav-btn" onclick="if(document.getElementById('sec-principal')){ setNav(this,'principal'); return false; } window.location.href='{{ route('home') }}';">
+    <button class="nav-btn" onclick="if(document.getElementById('sec-principal')){ setNav(this,'principal'); return false; } window.location.href='{{ route('home', ['tab' => 'principal']) }}';">
       <span class="nav-paw">🐾</span>Principal
     </button>
-    <button class="nav-btn" onclick="if(document.getElementById('sec-faq')){ setNav(this,'faq'); return false; } window.location.href='{{ route('home') }}';">
+    <button class="nav-btn" onclick="if(document.getElementById('sec-faq')){ setNav(this,'faq'); return false; } window.location.href='{{ route('home', ['tab' => 'faq']) }}';">
       <span class="nav-paw">🐾</span>Información / FAQ
     </button>
   </nav>

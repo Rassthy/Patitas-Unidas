@@ -50,6 +50,24 @@ function showSection(name) {
   window.scrollTo(0,0);
 }
 
+function clearNavSelection() {
+  _getNavBtns().forEach(b => b.classList.remove('active'));
+  _getSbBtns().forEach(b => b.classList.remove('active'));
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const requested = params.get('tab') || window.location.hash.replace('#', '');
+  if (requested && document.getElementById('sec-' + requested)) {
+    showSection(requested);
+    return;
+  }
+
+  if (document.querySelector('.profile-container') || !document.getElementById('sec-bienvenida')) {
+    clearNavSelection();
+  }
+});
+
 // Gestión de categorías
 let _catTabs;
 function _getCatTabs() { return _catTabs || (_catTabs = document.querySelectorAll('.cat-tab')); }
@@ -58,85 +76,94 @@ function setCategory(btn, id) {
   _getCatTabs().forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   currentCat = id;
-  renderPosts(id);
-  DOM.paTitle.textContent = catTitles[id];
+  loadPosts();
+  const titles = {
+    0: '📋 Todas las publicaciones',
+    1: '🏠 Adoptar mascota',
+    2: '🔍 Mascota perdida o robada',
+    3: '❤️ Apoyar animales'
+  };
+  DOM.paTitle.textContent = titles[id];
 }
 
 // Gestión de modal
-function openPostModal(id) {
-  const post = allPostsFlat.find(p => p.id === id);
-  if (!post) return;
-  currentPost = post;
-  currentGalIdx = 0;
+async function openPostModal(id) {
+  try {
+    const response = await fetch(`/posts/${id}`);
+    const data = await response.json();
+    const post = data.post;
+    if (!post) return;
 
-  updateGallery();
-  const dots = document.getElementById('galDots');
-  dots.innerHTML = post.images.map((_, i) => `<button class="gal-dot ${i===0?'act':''}" onclick="setGalIdx(${i})"></button>`).join('');
-  const showArr = post.images.length > 1;
-  document.querySelectorAll('.gal-arr').forEach(a => a.style.display = showArr ? '' : 'none');
+    currentPost = post;
+    currentGalIdx = 0;
 
-  const ct = catInfo[post.cat];
-  const catEl = document.getElementById('modalCatTag');
-  catEl.textContent = ct.label;
-  catEl.className = 'modal-cat-tag ' + ct.cls;
+    updateGallery();
+    document.getElementById('modalImg').onclick = () => {
+      const urls = currentPost.images.map(img => `/storage/${img.url}`);
+      openLightbox(urls, currentGalIdx);
+    };
+    document.getElementById('modalImg').style.cursor = 'zoom-in';
 
-  document.getElementById('modalTitle').textContent = post.title;
-  document.getElementById('modalDesc').textContent = post.desc;
+    const dots = document.getElementById('galDots');
+    dots.innerHTML = post.images.map((_, i) => `<button class="gal-dot ${i===0?'act':''}" onclick="setGalIdx(${i})"></button>`).join('');
+    const showArr = post.images.length > 1;
+    document.querySelectorAll('.gal-arr').forEach(a => a.style.display = showArr ? '' : 'none');
 
-  const meta = document.getElementById('modalMeta');
-  meta.innerHTML = `
-    <span class="modal-meta-i"><i class="fa-solid fa-location-dot"></i>${post.ciudad}, ${post.provincia}</span>
-    <span class="modal-meta-i"><i class="fa-solid fa-calendar"></i>${post.date}</span>
-    <span class="modal-meta-i"><i class="fa-regular fa-heart"></i>${post.likes} likes</span>
-    ${post.especie ? `<span class="modal-meta-i"><i class="fa-solid fa-paw"></i>${post.especie}</span>` : ''}
-  `;
+    const ct = catInfo[post.category_id];
+    const catEl = document.getElementById('modalCatTag');
+    catEl.textContent = ct.label;
+    catEl.className = 'modal-cat-tag ' + ct.cls;
 
-  const animalBox = document.getElementById('modalAnimalBox');
-  if (post.animal) {
-    animalBox.style.display = 'flex';
-    animalBox.innerHTML = `
-      ${post.animal  ? `<div class="ai-item"><div class="ai-lbl">Nombre</div><div class="ai-val">${post.animal}</div></div>` : ''}
-      ${post.especie ? `<div class="ai-item"><div class="ai-lbl">Especie</div><div class="ai-val">${post.especie}</div></div>` : ''}
-      ${post.raza    ? `<div class="ai-item"><div class="ai-lbl">Raza</div><div class="ai-val">${post.raza}</div></div>` : ''}
-      ${post.edad    ? `<div class="ai-item"><div class="ai-lbl">Edad</div><div class="ai-val">${post.edad}</div></div>` : ''}
+    document.getElementById('modalTitle').textContent = post.titulo;
+    document.getElementById('modalDesc').textContent = post.descripcion;
+
+    const meta = document.getElementById('modalMeta');
+    meta.innerHTML = `
+      <span class="modal-meta-i"><i class="fa-solid fa-location-dot"></i>${post.ciudad}, ${post.provincia}</span>
+      <span class="modal-meta-i"><i class="fa-solid fa-calendar"></i>${new Date(post.created_at).toLocaleDateString('es-ES')}</span>
+      <span class="modal-meta-i" id="modalLikeCount"><i class="fa-regular fa-heart"></i>${post.likes_count || 0} likes</span>
+      ${post.animal_especie ? `<span class="modal-meta-i"><i class="fa-solid fa-paw"></i>${post.animal_especie}</span>` : ''}
     `;
-  } else {
-    animalBox.style.display = 'none';
+
+    const animalBox = document.getElementById('modalAnimalBox');
+    if (post.animal_nombre || post.animal_especie || post.animal_raza) {
+      animalBox.style.display = 'flex';
+      animalBox.innerHTML = `
+        ${post.animal_nombre  ? `<div class="ai-item"><div class="ai-lbl">Nombre</div><div class="ai-val">${post.animal_nombre}</div></div>` : ''}
+        ${post.animal_especie ? `<div class="ai-item"><div class="ai-lbl">Especie</div><div class="ai-val">${post.animal_especie}</div></div>` : ''}
+        ${post.animal_raza    ? `<div class="ai-item"><div class="ai-lbl">Raza</div><div class="ai-val">${post.animal_raza}</div></div>` : ''}
+      `;
+    } else {
+      animalBox.style.display = 'none';
+    }
+
+    document.getElementById('modalAuthor').innerHTML = `
+      <img src="${post.author.foto_perfil ? `/storage/${post.author.foto_perfil}` : 'https://i.pravatar.cc/40?img=1'}" ...>
+      <div>
+        <div class="modal-author-name">${post.author.username}</div>
+        <div class="modal-author-role">${post.author.tipo === 'protectora' ? '🏥 Protectora verificada' : post.author.tipo === 'organizacion' ? '🌟 Organización' : '👤 Usuario'}</div>
+      </div>
+      <div class="modal-author-btns">
+        <button class="btn-outline" onclick="openFullChat();showToast('Chat iniciado con ${post.author.nombre} 💬')"><i class="fa-solid fa-comment"></i> Mensaje</button>
+        <button class="btn-outline" onclick="showToast('Perfil de ${post.author.nombre} — disponible próximamente')"><i class="fa-solid fa-user"></i> Perfil</button>
+      </div>
+    `;
+
+    // Cargar comentarios
+    loadComments(id);
+
+    // Actualizar botón de like
+    const likeBtn = document.getElementById('likeBtn');
+    likeBtn.classList.toggle('liked', post.liked_by_user);
+
+    // Mostrar modal
+    document.getElementById('postOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+  } catch (error) {
+    console.error('Error loading post:', error);
+    showToast('Error al cargar la publicación');
   }
-
-  document.getElementById('modalAuthor').innerHTML = `
-    <img src="${post.authorImg}" alt="${post.author}" onerror="this.src='https://i.pravatar.cc/40?img=1'">
-    <div>
-      <div class="modal-author-name">${post.author}</div>
-      <div class="modal-author-role">${post.authorType === 'protectora' ? '🏥 Protectora verificada' : post.authorType === 'organizacion' ? '🌟 Organización' : '👤 Usuario'}</div>
-    </div>
-    <div class="modal-author-btns">
-      <button class="btn-outline" onclick="openFullChat();showToast('Chat iniciado con ${post.author} 💬')"><i class="fa-solid fa-comment"></i> Mensaje</button>
-      <button class="btn-outline" onclick="showToast('Perfil de ${post.author} — disponible próximamente')"><i class="fa-solid fa-user"></i> Perfil</button>
-    </div>
-  `;
-
-  document.getElementById('modalComments').innerHTML = `
-    <div class="comment-item">
-      <img class="comment-av" src="https://i.pravatar.cc/40?img=14" alt="">
-      <div class="comment-bubble">
-        <div class="comment-name">@mariap</div>
-        <div class="comment-txt">¡Qué monada! Me encantaría adoptarle, ¿tienes más fotos?</div>
-        <div class="comment-time">hace 5 horas</div>
-      </div>
-    </div>
-    <div class="comment-item">
-      <img class="comment-av" src="https://i.pravatar.cc/40?img=28" alt="">
-      <div class="comment-bubble">
-        <div class="comment-name">@carlosa</div>
-        <div class="comment-txt">Pasé por la protectora el fin de semana, es un cielo. ¡Ojalá encuentre familia pronto!</div>
-        <div class="comment-time">hace 2 horas</div>
-      </div>
-    </div>
-  `;
-
-  document.getElementById('postOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
 }
 
 function closePostModal(e) {
@@ -146,9 +173,45 @@ function closePostModal(e) {
 }
 
 function updateGallery() {
-  if (!currentPost) return;
-  document.getElementById('modalImg').src = currentPost.images[currentGalIdx];
+  if (!currentPost || !currentPost.images || !currentPost.images.length) return;
+  const img = currentPost.images[currentGalIdx];
+
+  // Arreglo en esta línea igual que en renderPosts
+  document.getElementById('modalImg').src = `/storage/${img.url}`;
   document.querySelectorAll('.gal-dot').forEach((d,i) => d.classList.toggle('act', i === currentGalIdx));
+}
+
+let lightboxImages = [];
+let lightboxIdx = 0;
+
+function openLightbox(images, startIdx = 0) {
+  lightboxImages = images;
+  lightboxIdx = startIdx;
+  renderLightbox();
+  const overlay = document.getElementById('lightboxOverlay');
+  overlay.style.pointerEvents = 'all';
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  const overlay = document.getElementById('lightboxOverlay');
+  overlay.style.pointerEvents = 'none';
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function lightboxNav(dir) {
+  lightboxIdx = (lightboxIdx + dir + lightboxImages.length) % lightboxImages.length;
+  renderLightbox();
+}
+
+function renderLightbox() {
+  document.getElementById('lightboxImg').src = lightboxImages[lightboxIdx];
+  document.getElementById('lightboxCounter').textContent =
+    lightboxImages.length > 1 ? `${lightboxIdx + 1} / ${lightboxImages.length}` : '';
+  document.querySelectorAll('.lb-arr').forEach(a =>
+    a.style.display = lightboxImages.length > 1 ? '' : 'none');
 }
 
 function galNav(dir) {
@@ -274,4 +337,66 @@ function toggleFaq(i) {
   const opening = !item.classList.contains('open');
   item.classList.toggle('open', opening);
   _openFaqIdx = opening ? i : -1;
+}
+
+async function loadComments(postId) {
+  try {
+    const response = await fetch(`/posts/${postId}/comments`);
+    const data = await response.json();
+    const commentsEl = document.getElementById('modalComments');
+    commentsEl.innerHTML = data.comments.map(comment => `
+      <div class="comment-item">
+        <img class="comment-av" src="${comment.user.foto_perfil_url}" alt="" onerror="this.src='https://i.pravatar.cc/40?img=1'">
+        <div class="comment-bubble">
+          <div class="comment-name">${comment.user.nombre} ${comment.user.apellidos}</div>
+          <div class="comment-txt">${comment.comentario}</div>
+          <div class="comment-time">${new Date(comment.created_at).toLocaleDateString('es-ES')}</div>
+        </div>
+      </div>
+    `).join('');
+  } catch (error) {
+    console.error('Error loading comments:', error);
+  }
+}
+
+async function toggleLike(postId) {
+  try {
+    const response = await fetch(`/posts/${postId}/like`, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const likeBtn = document.getElementById('likeBtn');
+      const likeIcon = likeBtn.querySelector('i');
+      const likeCount = document.getElementById('modalLikeCount');
+      likeBtn.classList.toggle('liked', data.liked);
+      likeIcon.className = data.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+      likeCount.innerHTML = `<i class="fa-regular fa-heart"></i>${data.likes_count} likes`;
+      showToast(data.liked ? 'Like añadido ❤️' : 'Like quitado 💔');
+    } else {
+      showToast('Error al procesar like');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    showToast('Error de conexión');
+  }
+}
+
+function openNewPostModal() {
+  document.getElementById('newPostOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeNewPostModal(e) {
+  if (e && e.target !== document.getElementById('newPostOverlay')) return;
+  document.getElementById('newPostOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('newPostForm').reset();
+  document.getElementById('imagePreviewContainer').style.display = 'none';
+  document.getElementById('imagePreviewList').innerHTML = '';
 }

@@ -14,6 +14,11 @@
       <div class="modal-meta" id="modalMeta"></div>
       <p class="modal-desc" id="modalDesc"></p>
       <div class="animal-box" id="modalAnimalBox"></div>
+      <div class="modal-actions">
+        <button class="btn-outline" id="likeBtn" onclick="toggleLike(currentPost.id)">
+          <i class="fa-regular fa-heart"></i> Like
+        </button>
+      </div>
       <div class="modal-author" id="modalAuthor"></div>
       <div class="comments-section">
         <div class="modal-sec-title"><i class="fa-solid fa-comments" style="color:var(--terra)"></i> Comentarios</div>
@@ -29,6 +34,78 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- NUEVA PUBLICACIÓN MODAL -->
+<div class="overlay" id="newPostOverlay" onclick="closeNewPostModal(event)">
+  <div class="modal" id="newPostModal">
+    <div class="modal-header" style="text-align: center;">
+      <h2 style="margin: 0 auto; flex-grow: 1; text-align: center;">Crear nueva publicación</h2>
+      <button class="modal-close-btn" onclick="closeNewPostModal()" style="position: absolute; right: 16px; top: 16px;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="newPostForm" enctype="multipart/form-data">
+      <div class="modal-body npp-body">
+        <div class="form-group">
+          <label for="postCategory">Categoría *</label>
+          <select id="postCategory" name="category_id" required>
+            <option value="">Selecciona una categoría</option>
+            <option value="1">🏠 Adoptar mascota</option>
+            <option value="2">🔍 Mascota perdida o robada</option>
+            <option value="3">❤️ Apoyar animales</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="postTitle">Título *</label>
+          <input type="text" id="postTitle" name="titulo" placeholder="Ej: Se busca perro dorado" required maxlength="200">
+        </div>
+        <div class="form-group">
+          <label for="postDesc">Descripción *</label>
+          <textarea id="postDesc" name="descripcion" placeholder="Cuéntanos más detalles sobre el animal o la situación..." rows="4" required></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="provincia">Provincia *</label>
+            <input type="text" id="provincia" name="provincia" placeholder="Ej: Madrid" required maxlength="50">
+          </div>
+          <div class="form-group">
+            <label for="ciudad">Ciudad *</label>
+            <input type="text" id="ciudad" name="ciudad" placeholder="Ej: Madrid" required maxlength="100">
+          </div>
+        </div>
+        <div class="form-divider">Información del animal (opcional)</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="animalNombre">Nombre</label>
+            <input type="text" id="animalNombre" name="animal_nombre" placeholder="Ej: Firulais" maxlength="100">
+          </div>
+          <div class="form-group">
+            <label for="animalEspecie">Especie</label>
+            <input type="text" id="animalEspecie" name="animal_especie" placeholder="Ej: Perro" maxlength="50">
+          </div>
+          <div class="form-group">
+            <label for="animalRaza">Raza</label>
+            <input type="text" id="animalRaza" name="animal_raza" placeholder="Ej: Golden Retriever" maxlength="50">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="postImages">Imágenes</label>
+          <div class="file-input-wrapper">
+            <input type="file" id="postImages" name="images[]" multiple accept="image/*" onchange="previewImages(this)">
+            <span class="file-label">📁 Selecciona hasta 10 imágenes (máx. 2MB cada una)</span>
+          </div>
+          <div id="imagePreviewContainer" style="margin-top: 12px; display: none;">
+            <div style="font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: var(--text-secondary);">Archivos seleccionados:</div>
+            <div id="imagePreviewList" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+          </div>
+        </div>
+        <input type="hidden" name="estado" value="activa">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" onclick="closeNewPostModal()">Cancelar</button>
+        <button type="submit" class="btn-p">Publicar</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -89,4 +166,14 @@
       <button class="fc-send" onclick="sendFcMsg()"><i class="fa-solid fa-paper-plane"></i></button>
     </div>
   </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightboxOverlay" onclick="if(event.target===this)closeLightbox()"
+    style="display:flex;pointer-events:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;">
+  <button onclick="closeLightbox()" style="position:absolute;top:16px;right:20px;background:none;border:none;color:#fff;font-size:1.8rem;cursor:pointer;">✕</button>
+  <button class="lb-arr" onclick="lightboxNav(-1)" style="position:absolute;left:16px;background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:2rem;padding:10px 16px;border-radius:50%;cursor:pointer;">‹</button>
+  <img id="lightboxImg" src="" style="max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px;">
+  <button class="lb-arr" onclick="lightboxNav(1)" style="position:absolute;right:16px;background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:2rem;padding:10px 16px;border-radius:50%;cursor:pointer;">›</button>
+  <div id="lightboxCounter" style="position:absolute;bottom:20px;color:#fff;font-size:0.9rem;opacity:0.7;"></div>
 </div>
