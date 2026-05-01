@@ -17,20 +17,21 @@
   </nav>
   <div class="hdr-right">
     @auth
-      <button class="hdr-icon-btn" onclick="openLoginModal()">
+      <button class="hdr-icon-btn" onclick="openNotificationsPanel()">
         <i class="fa-solid fa-bell"></i>
-        <span class="hdr-badge">3</span>
+        <span class="hdr-badge" id="notifBadge">0</span>
       </button>
       <div class="user-chip" onclick="window.location.href='{{ route('profile.show') }}'">
         <img src="{{ Auth::user()->foto_perfil_url }}" alt="Foto de perfil">
-        <span class="user-chip-name">Hola {{ Auth::user()->nombre }}!</span>
+        <span class="user-chip-name">Hola {{ Auth::user()->username }}!</span>
       </div>
     @else
       <button class="hdr-icon-btn" onclick="openLoginModal()">
         <i class="fa-solid fa-bell"></i>
-        <span class="hdr-badge">3</span>
       </button>
-      <button class="login-btn" onclick="openLoginModal()"> <i class="fa-solid fa-right-to-bracket"></i> ­­­­­ ­Acceder </button>
+      <button class="login-btn" onclick="openLoginModal()">
+        <i class="fa-solid fa-right-to-bracket"></i> Acceder
+      </button>
     @endauth
   </div>
 </header>

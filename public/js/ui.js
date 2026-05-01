@@ -344,18 +344,170 @@ async function loadComments(postId) {
     const response = await fetch(`/posts/${postId}/comments`);
     const data = await response.json();
     const commentsEl = document.getElementById('modalComments');
-    commentsEl.innerHTML = data.comments.map(comment => `
-      <div class="comment-item">
-        <img class="comment-av" src="${comment.user.foto_perfil_url}" alt="" onerror="this.src='https://i.pravatar.cc/40?img=1'">
-        <div class="comment-bubble">
-          <div class="comment-name">${comment.user.nombre} ${comment.user.apellidos}</div>
-          <div class="comment-txt">${comment.comentario}</div>
-          <div class="comment-time">${new Date(comment.created_at).toLocaleDateString('es-ES')}</div>
+
+    if (!data.comments || !data.comments.length) {
+      commentsEl.innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:0.85rem;">Sé el primero en comentar 🐾</div>`;
+      return;
+    }
+
+    const currentUserId = window.AUTH_USER_ID ?? null;
+
+    const renderComment = (comment, isReply = false) => {
+      const foto = comment.user?.foto_perfil
+        ? `/storage/${comment.user.foto_perfil}`
+        : `https://i.pravatar.cc/40?img=1`;
+      const username = comment.user?.username ?? 'Usuario';
+      const fecha = new Date(comment.created_at);
+      const fechaStr = fecha.toLocaleDateString('es-ES');
+      const horaStr = fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+      const esPropio = currentUserId && comment.author_id === currentUserId;
+
+      return `
+        <div class="comment-item ${isReply ? 'comment-reply' : ''}" id="comment-${comment.id}"
+             style="${isReply ? 'margin-left:44px;margin-top:8px;' : ''}">
+          <img class="comment-av" src="${foto}" alt="${username}"
+               onerror="this.src='https://i.pravatar.cc/40?img=1'">
+          <div class="comment-bubble">
+            <div class="comment-name">${username}</div>
+            <div class="comment-txt">${comment.comentario}</div>
+            <div class="comment-foot" style="display:flex;align-items:center;gap:12px;margin-top:6px;flex-wrap:wrap;">
+              <span class="comment-time">${fechaStr} ${horaStr}</span>
+              <button onclick="toggleCommentLike(${comment.id}, this)"
+                style="background:none;border:none;cursor:pointer;font-size:0.8rem;color:${comment.liked_by_user ? 'var(--terra)' : 'var(--muted)'};"
+                data-liked="${comment.liked_by_user}">
+                ${comment.liked_by_user ? '❤️' : '🤍'} <span>${comment.likes_count ?? 0}</span>
+              </button>
+              ${!isReply ? `
+                <button onclick="toggleReplyInput(${comment.id}, '${username}', ${postId})"
+                  style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.75rem;padding:0;">
+                  💬 Responder
+                </button>` : ''}
+              ${esPropio ? `
+                <button onclick="deleteComment(${comment.id}, ${postId})"
+                  style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.75rem;padding:0;">
+                  🗑️ Eliminar
+                </button>` : ''}
+            </div>
+          </div>
         </div>
-      </div>
-    `).join('');
+        ${!isReply ? `<div id="reply-input-${comment.id}" style="display:none;"></div>` : ''}
+      `;
+    };
+
+    commentsEl.innerHTML = data.comments.map(comment => {
+      const repliesHtml = (comment.replies || []).map(r => renderComment(r, true)).join('');
+      return renderComment(comment, false) + repliesHtml;
+    }).join('');
+
   } catch (error) {
     console.error('Error loading comments:', error);
+  }
+}
+
+function toggleReplyInput(commentId, username, postId) {
+  if (!window.AUTH_USER_ID) { showToast('Inicia sesión para responder 🐾'); return; }
+
+  const container = document.getElementById(`reply-input-${commentId}`);
+  if (!container) return;
+
+  // Si ya está abierto, cerrarlo
+  if (container.style.display !== 'none') {
+    container.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+
+  container.style.display = 'block';
+  container.innerHTML = `
+    <div style="margin-left:44px;margin-top:6px;margin-bottom:10px;display:flex;gap:8px;align-items:flex-start;">
+      <div style="flex:1;background:var(--bg-secondary);border-radius:10px;padding:8px 12px;border:1px solid var(--border);">
+        <span style="font-size:0.75rem;color:var(--terra);font-weight:600;">@${username}</span>
+        <textarea id="reply-text-${commentId}"
+          placeholder="Escribe tu respuesta..."
+          rows="2"
+          style="width:100%;background:none;border:none;outline:none;resize:none;font-size:0.85rem;color:var(--text);margin-top:4px;font-family:inherit;"
+        ></textarea>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <button onclick="submitReply(${commentId}, ${postId})"
+          style="background:var(--terra);color:#fff;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:0.8rem;white-space:nowrap;">
+          Enviar
+        </button>
+        <button onclick="toggleReplyInput(${commentId}, '${username}', ${postId})"
+          style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:0.8rem;color:var(--muted);">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.getElementById(`reply-text-${commentId}`).focus();
+}
+
+async function submitReply(parentCommentId, postId) {
+  const textarea = document.getElementById(`reply-text-${parentCommentId}`);
+  const texto = textarea?.value.trim();
+  if (!texto) { showToast('Escribe algo antes de responder 💬'); return; }
+
+  try {
+    const response = await fetch(`/posts/${postId}/comments`, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        comentario: texto,
+        parent_comment_id: parentCommentId
+      })
+    });
+
+    if (response.ok) {
+      loadComments(postId);
+      showToast('Respuesta enviada 💬');
+    } else {
+      showToast('Error al enviar respuesta');
+    }
+  } catch (error) {
+    showToast('Error de conexión');
+  }
+}
+
+function deleteComment(commentId, postId) {
+  DOM.toastMsg.innerHTML = `
+    ¿Eliminar comentario?
+    <span style="display:flex;gap:8px;margin-top:8px;justify-content:center;">
+      <button onclick="confirmDeleteComment(${commentId}, ${postId})"
+        style="background:var(--terra);color:#fff;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:0.8rem;">
+        Eliminar
+      </button>
+      <button onclick="DOM.toast.classList.remove('show')"
+        style="background:var(--bg-secondary);color:var(--text);border:none;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:0.8rem;">
+        Cancelar
+      </button>
+    </span>
+  `;
+  DOM.toast.classList.add('show');
+  clearTimeout(toastTimer);
+}
+
+async function confirmDeleteComment(commentId, postId) {
+  DOM.toast.classList.remove('show');
+  try {
+    const response = await fetch(`/comments/${commentId}`, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      }
+    });
+    if (response.ok) {
+      loadComments(postId);
+      showToast('Comentario eliminado 🗑️');
+    } else {
+      showToast('Error al eliminar comentario');
+    }
+  } catch (error) {
+    showToast('Error de conexión');
   }
 }
 
@@ -387,6 +539,27 @@ async function toggleLike(postId) {
   }
 }
 
+async function toggleCommentLike(commentId, btn) {
+  if (!window.AUTH_USER_ID) { showToast('Inicia sesión para dar like 🐾'); return; }
+  try {
+    const response = await fetch(`/comments/${commentId}/like`, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Content-Type': 'application/json',
+      }
+    });
+    if (response.ok) {
+      const data = await response.json();
+      btn.dataset.liked = data.liked;
+      btn.style.color = data.liked ? 'var(--terra)' : 'var(--muted)';
+      btn.innerHTML = `${data.liked ? '❤️' : '🤍'} <span>${data.likes_count}</span>`;
+    }
+  } catch (error) {
+    showToast('Error de conexión');
+  }
+}
+
 function openNewPostModal() {
   document.getElementById('newPostOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -399,4 +572,127 @@ function closeNewPostModal(e) {
   document.getElementById('newPostForm').reset();
   document.getElementById('imagePreviewContainer').style.display = 'none';
   document.getElementById('imagePreviewList').innerHTML = '';
+}
+
+// ========== NOTIFICACIONES ==========
+let notifOpen = false;
+
+function openNotificationsPanel() {
+  if (!window.AUTH_USER_ID) { openLoginModal(); return; }
+  notifOpen = !notifOpen;
+  const dropdown = document.getElementById('notifDropdown');
+  dropdown.classList.toggle('open', notifOpen);
+  if (notifOpen) loadNotifications();
+}
+
+// Cerrar al hacer clic fuera
+document.addEventListener('click', e => {
+  if (!notifOpen) return;
+  const dropdown = document.getElementById('notifDropdown');
+  const btn = e.target.closest('.hdr-icon-btn');
+  if (!dropdown.contains(e.target) && !btn) {
+    notifOpen = false;
+    dropdown.classList.remove('open');
+  }
+});
+
+async function loadNotifications() {
+  try {
+    const response = await fetch('/notifications');
+    const data = await response.json();
+    const list = document.getElementById('notifList');
+    const badge = document.getElementById('notifBadge');
+
+    if (!data.notifications || !data.notifications.length) {
+      list.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:0.85rem;">Sin notificaciones por ahora 🐾</div>`;
+      badge.style.display = 'none';
+      return;
+    }
+
+    const unread = data.notifications.filter(n => !n.leida).length;
+    badge.textContent = unread;
+    badge.style.display = unread ? '' : 'none';
+
+    list.innerHTML = data.notifications.map(n => {
+      const icons = {
+        mensaje: '❤️',
+        comentario_post: '💬',
+        recordatorio_mascota: '🐾',
+        reporte: '🚨',
+        rating: '⭐',
+        sistema: '🔔'
+      };
+      const icon = icons[n.tipo] ?? '🔔';
+      const fecha = new Date(n.created_at);
+      const fechaStr = fecha.toLocaleDateString('es-ES');
+      const horaStr = fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+      return `
+        <div onclick="markNotificationRead(${n.id}, this)"
+             style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;cursor:pointer;
+                    border-bottom:1px solid var(--border);
+                    background:${n.leida ? 'transparent' : 'var(--soft)'}
+                    transition:background 0.2s;">
+          <span style="font-size:1.4rem;line-height:1;">${icon}</span>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:0.85rem;color:var(--text);line-height:1.4;">${n.mensaje ?? n.tipo}</div>
+            <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">${fechaStr} ${horaStr}</div>
+          </div>
+          ${!n.leida ? `<span style="width:8px;height:8px;border-radius:50%;background:var(--terra);flex-shrink:0;margin-top:4px;"></span>` : ''}
+        </div>
+      `;
+    }).join('');
+
+  } catch (error) {
+    console.error('Error cargando notificaciones:', error);
+  }
+}
+
+async function markNotificationRead(id, el) {
+  try {
+    await fetch(`/notifications/${id}`, {
+      method: 'PUT',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ leida: true })
+    });
+    el.style.background = 'transparent';
+    const dot = el.querySelector('span[style*="border-radius:50%"]');
+    if (dot) dot.remove();
+    // Actualizar badge
+    const badge = document.getElementById('notifBadge');
+    const current = parseInt(badge.textContent) || 0;
+    if (current > 0) {
+      badge.textContent = current - 1;
+      if (current - 1 === 0) badge.style.display = 'none';
+    }
+  } catch (error) {
+    console.error('Error marcando notificación:', error);
+  }
+}
+
+async function markAllNotificationsRead() {
+  const items = document.querySelectorAll('#notifList [style*="bg-secondary"]');
+  // Recargar tras marcar todas
+  try {
+    const response = await fetch('/notifications');
+    const data = await response.json();
+    const unread = data.notifications.filter(n => !n.leida);
+    await Promise.all(unread.map(n =>
+      fetch(`/notifications/${n.id}`, {
+        method: 'PUT',
+        headers: {
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ leida: true })
+      })
+    ));
+    loadNotifications();
+    showToast('Todas las notificaciones leídas ✅');
+  } catch (error) {
+    showToast('Error de conexión');
+  }
 }

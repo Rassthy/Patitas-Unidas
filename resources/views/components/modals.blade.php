@@ -168,6 +168,28 @@
   </div>
 </div>
 
+<!-- DROPDOWN NOTIFICACIONES -->
+<div id="notifDropdown"
+     style="display:none;position:fixed;top:60px;right:16px;width:360px;max-height:480px;
+            background:var(--cream);
+            border:1px solid var(--border);
+            border-radius:14px;
+            box-shadow:var(--sh-l);
+            z-index:1000;overflow:hidden;flex-direction:column;">
+  <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+    <span style="font-weight:700;font-size:0.95rem;">🔔 Notificaciones</span>
+    <button onclick="markAllNotificationsRead()"
+      style="background:none;border:none;cursor:pointer;color:var(--terra);font-size:0.75rem;">
+      Marcar todas como leídas
+    </button>
+  </div>
+  <div id="notifList" style="overflow-y:auto;max-height:400px;">
+    <div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:0.85rem;">
+      Cargando notificaciones...
+    </div>
+  </div>
+</div>
+
 <!-- LIGHTBOX -->
 <div id="lightboxOverlay" onclick="if(event.target===this)closeLightbox()"
     style="display:flex;pointer-events:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;">

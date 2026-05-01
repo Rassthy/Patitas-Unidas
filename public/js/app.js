@@ -112,6 +112,7 @@ function filterPosts(provincia) {
 }
 
 function renderPosts(catId, filter='') {
+  if (!DOM.paCount || !DOM.postsGrid) return;
   const posts = allPosts.filter(p => !filter || p.provincia === filter);
   DOM.paCount.textContent = posts.length + ' publicacion' + (posts.length !== 1 ? 'es' : '');
 
@@ -284,6 +285,7 @@ const faqData = [
 
 function renderFaq() {
   const list = document.getElementById('faqList');
+  if (!list) return;
   list.innerHTML = faqData.map((f,i) => `
     <div class="faq-item" id="faq-${i}">
       <div class="faq-q" onclick="toggleFaq(${i})">

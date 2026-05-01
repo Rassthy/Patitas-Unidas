@@ -63,8 +63,5 @@ class UserSeeder extends Seeder
                 'telefono_verificado' => false,
             ]
         );
-
-        // 10 usuarios aleatorios adicionales
-        User::factory(10)->create();
     }
 }

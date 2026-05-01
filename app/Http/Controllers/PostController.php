@@ -6,6 +6,7 @@ use App\Models\Post;
 use App\Models\PostImage;
 use App\Models\PostComment;
 use App\Models\PostLike;
+use App\Models\CommentLike;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use Illuminate\Http\Request;
@@ -107,6 +108,16 @@ class PostController extends Controller
             return response()->json(['liked' => false, 'likes_count' => $post->likes()->count()], 200);
         } else {
             PostLike::create(['post_id' => $id, 'user_id' => Auth::id()]);
+
+            // Notificar al autor del post
+            $this->createNotification(
+                $post->author_id,
+                'mensaje',
+                'Nuevo like',
+                Auth::user()->username . ' le dio like a tu publicación: ' . $post->titulo,
+                '/posts/' . $id
+            );
+
             return response()->json(['liked' => true, 'likes_count' => $post->likes()->count()], 200);
         }
     }
@@ -114,18 +125,74 @@ class PostController extends Controller
     public function addComment(Request $request, $id)
     {
         $data = $request->validate([
-            'comentario' => 'required|string|max:500',
+            'comentario'       => 'required|string|max:500',
             'parent_comment_id' => 'nullable|integer|exists:post_comments,id',
         ]);
 
         $comment = PostComment::create([
-            'post_id' => $id,
-            'author_id' => Auth::id(),
+            'post_id'           => $id,
+            'author_id'         => Auth::id(),
             'parent_comment_id' => $data['parent_comment_id'] ?? null,
-            'comentario' => $data['comentario'],
+            'comentario'        => $data['comentario'],
         ]);
 
+        $post = Post::findOrFail($id);
+
+        if ($data['parent_comment_id'] ?? null) {
+            // Es una respuesta — notificar al autor del comentario padre
+            $parentComment = PostComment::findOrFail($data['parent_comment_id']);
+            $this->createNotification(
+                $parentComment->author_id,
+                'comentario_post',
+                'Nueva respuesta',
+                Auth::user()->username . ' respondió a tu comentario: "' . substr($parentComment->comentario, 0, 50) . '"',
+                '/posts/' . $id
+            );
+        } else {
+            // Es un comentario — notificar al autor del post
+            $this->createNotification(
+                $post->author_id,
+                'comentario_post',
+                'Nuevo comentario',
+                Auth::user()->username . ' comentó en tu publicación: ' . $post->titulo,
+                '/posts/' . $id
+            );
+        }
+
         return response()->json(['comment' => $comment->load('user')], 201);
+    }
+
+    public function destroyComment($id)
+    {
+    $comment = PostComment::where('id', $id)
+        ->where('author_id', Auth::id())
+        ->firstOrFail();
+    $comment->delete();
+    return response()->json(['message' => 'Comentario eliminado'], 200);
+    }
+
+    public function toggleCommentLike($id)
+    {
+        $comment = PostComment::findOrFail($id);
+        $existing = CommentLike::where('comment_id', $id)->where('user_id', Auth::id())->first();
+
+        if ($existing) {
+            CommentLike::where('comment_id', $id)->where('user_id', Auth::id())->delete();
+            return response()->json(['liked' => false, 'likes_count' => $comment->likes()->count()], 200);
+        } else {
+            CommentLike::create(['comment_id' => $id, 'user_id' => Auth::id()]);
+
+            // Notificar al autor del comentario
+            $this->createNotification(
+                $comment->author_id,
+                'mensaje',
+                'Like en comentario',
+                Auth::user()->username . ' le dio like a tu comentario: "' . substr($comment->comentario, 0, 50) . '"',
+                '/posts/' . $comment->post_id
+            );
+
+            return response()->json(['liked' => true, 'likes_count' => $comment->likes()->count()], 200);
+        }
     }
 
     public function getComments($id)
@@ -136,6 +203,27 @@ class PostController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $userId = Auth::id();
+        $comments->each(function($comment) use ($userId) {
+            $comment->likes_count = $comment->likes()->count();
+            $comment->liked_by_user = $userId ? $comment->isLikedBy($userId) : false;
+        });
+
         return response()->json(['comments' => $comments], 200);
+    }
+
+    private function createNotification($userId, $tipo, $titulo, $mensaje, $enlaceUrl = null)
+    {
+        // No notificar a uno mismo
+        if ($userId === Auth::id()) return;
+
+        \App\Models\Notification::create([
+            'user_id'    => $userId,
+            'tipo'       => $tipo,
+            'titulo'     => $titulo,
+            'mensaje'    => $mensaje,
+            'enlace_url' => $enlaceUrl,
+            'leida'      => false,
+        ]);
     }
 }

@@ -46,6 +46,11 @@
 @include('components.login-modal')
 @include('components.toast')
 
+<!-- Auth user para JS -->
+<script>
+  window.AUTH_USER_ID = {{ Auth::check() ? Auth::id() : 'null' }};
+</script>
+
 <!-- JS -->
 <!-- <script src="{{ asset('js/api.js') }}"></script> -->
 <script src="{{ asset('js/ui.js') }}"></script>

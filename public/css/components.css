@@ -995,6 +995,8 @@
     margin-top: 22px;
 }
 
+#notifDropdown.open { display: flex !important; }
+
 #lightboxOverlay {
   opacity: 0;
   transition: opacity 0.25s ease;

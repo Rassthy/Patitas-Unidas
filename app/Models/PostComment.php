@@ -37,4 +37,14 @@ class PostComment extends Model
     {
         return $this->hasMany(PostComment::class, 'parent_comment_id');
     }
+
+    public function likes()
+    {
+    return $this->hasMany(CommentLike::class, 'comment_id');
+    }
+
+    public function isLikedBy($userId)
+    {
+    return $this->likes()->where('user_id', $userId)->exists();
+    }
 }
