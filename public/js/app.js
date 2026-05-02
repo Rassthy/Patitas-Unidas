@@ -8,70 +8,29 @@ let currentGalIdx = 0;
 let likedPosts = new Set();
 let chatPanelOpen = false;
 let activeFcChat = null;
+let CHATS = [];
+let activeChatId = null;
+let chatPollingInterval = null;
 
-// ========== DATOS: POSTS / PUBLICACIONES ==========
-const postsData = {
-  1: [
-    {
-      id:1, title:"Luna busca su hogar definitivo", cat:1,
-      desc:"Luna es una Golden Retriever de 3 años, rescatada de la calle. Es muy cariñosa, juguetona y se lleva bien con niños y otros perros. Está esterilizada, vacunada y desparasitada. Lleva 8 meses en la protectora y merece una segunda oportunidad.",
-      animal:"Luna", especie:"Perro", raza:"Golden Retriever", edad:"3 años",
-      provincia:"Madrid", ciudad:"Vallecas",
-      author:"Protectora Huellas", authorType:"protectora", authorImg:"https://i.pravatar.cc/40?img=12",
-      images:["https://images.unsplash.com/photo-1552053831-71594a27632d?w=800&q=80","https://picsum.photos/seed/luna2/800/600","https://picsum.photos/seed/luna3/800/600"],
-      likes:47, date:"hace 2 días"
-    },
-    {
-      id:2, title:"Mochi, gatito siamés afectuoso", cat:1,
-      desc:"Mochi tiene 1 año y es un gato siamés muy sociable. Le encanta estar con personas, ronronear y jugar. Fue encontrado abandonado y busca un hogar tranquilo. Vacunado y esterilizado.",
-      animal:"Mochi", especie:"Gato", raza:"Siamés", edad:"1 año",
-      provincia:"Barcelona", ciudad:"Gràcia",
-      author:"@gatosbarcelona", authorType:"usuario", authorImg:"https://i.pravatar.cc/40?img=23",
-      images:["https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e?w=800&q=80","https://picsum.photos/seed/mochi2/800/600"],
-      likes:62, date:"hace 3 días"
-    }
-  ],
-  2: [
-    {
-      id:7, title:"URGENTE: Max desaparecido en El Retiro", cat:2,
-      desc:"Max, pastor alemán de 5 años, desapareció el domingo por la tarde cerca del lago del Retiro en Madrid. Lleva collar azul con placa. Es muy asustadizo, no se acerquen bruscamente. Recompensa por cualquier información.",
-      animal:"Max", especie:"Perro", raza:"Pastor Alemán", edad:"5 años",
-      provincia:"Madrid", ciudad:"El Retiro",
-      author:"@maxfamilymadrid", authorType:"usuario", authorImg:"https://i.pravatar.cc/40?img=11",
-      images:["https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?w=800&q=80","https://picsum.photos/seed/max2/800/600"],
-      likes:203, date:"hace 1 día"
-    }
-  ],
-  3: [
-    {
-      id:10, title:"Colonia de gatos en Vallecas necesita ayuda", cat:3,
-      desc:"Llevamos años gestionando una colonia de 28 gatos en Vallecas (Madrid). Necesitamos ayuda para pienso, veterinario y mantenimiento del refugio temporal. Cualquier donación ayuda.",
-      animal:null, especie:null, raza:null, edad:null,
-      provincia:"Madrid", ciudad:"Vallecas",
-      author:"@coloniasvallecas", authorType:"organizacion", authorImg:"https://i.pravatar.cc/40?img=77",
-      images:["https://images.unsplash.com/photo-1548802673-380ab8ebc7b7?w=800&q=80","https://picsum.photos/seed/colony2/800/600"],
-      likes:312, date:"hace 5 días"
-    }
-  ]
-};
+// ========== CARGA DE CHATS ==========
+async function loadChats() {
+  if (!window.AUTH_USER_ID) return;
+  try {
+    const response = await fetch('/chats');
+    const data = await response.json();
+    CHATS = data.chats || [];
+    renderChatPanel();
 
-// ========== DATOS: CHATS ==========
-const CHATS = [
-  { id:1, name:'Protectora Huellas', av:'PH', preview:'¡Muchas gracias por tu interés en Luna! 🐕', time:'10:40', unread:2, online:true,
-    msgs:[
-      {mine:false, text:'¡Hola! Vi que te interesó Luna para adoptar.'},
-      {mine:true,  text:'Sí, me parece un amor. ¿Cuándo puedo visitarla?'},
-      {mine:false, text:'Este sábado a partir de las 11h. ¿Te viene bien?'},
-      {mine:true,  text:'Perfecto, apuntado. ¿Cómo llego?'},
-      {mine:false, text:'¡Muchas gracias por tu interés en Luna! 🐕 Te mando la dirección.'}
-    ]},
-  { id:2, name:'@gatosbarcelona', av:'GB', preview:'Sigue disponible para adopción 😸', time:'hace 1 h', unread:1, online:false,
-    msgs:[
-      {mine:false, text:'¡Hola! ¿Tienes alguna pregunta sobre Mochi?'},
-      {mine:true,  text:'Sí, ¿se lleva bien con perros?'},
-      {mine:false, text:'Sigue disponible para adopción 😸 Mochi es muy adaptable.'}
-    ]}
-];
+    // Actualizar dot de mensajes
+    const chatDot = document.getElementById('chatDot');
+    if (chatDot) {
+      const totalUnread = CHATS.reduce((acc, c) => acc + (c.unread || 0), 0);
+      chatDot.style.display = totalUnread > 0 ? '' : 'none';
+    }
+  } catch (error) {
+    console.error('Error cargando chats:', error);
+  }
+}
 
 // ========== CONSTANTES ==========
 const catInfo = {
@@ -203,48 +162,136 @@ async function sendMsg() {
 }
 
 // ========== FUNCIONES COMPLETAS DEL CHAT ==========
-function openFcChat(id) {
-  const chat = CHATS.find(c => c.id === id);
-  if (!chat) return;
-  activeFcChat = chat;
+async function openFcChat(id) {
+  activeChatId = id;
 
-  document.querySelectorAll('.fc-list .cp-item, #fcList .cp-item').forEach(i => i.classList.remove('selected'));
-  const el = document.getElementById('fci-'+id);
+  document.querySelectorAll('.fc-list .cp-item').forEach(i => i.classList.remove('selected'));
+  const el = document.getElementById('fci-' + id);
   if (el) el.classList.add('selected');
 
-  // Borrar el aviso (icono) de "no leído"
-  const badge = document.getElementById('fci-badge-'+id);
-  if (badge) badge.remove();
-  chat.unread = 0;
-  renderChatPanel();
+  await loadChats();
+  renderFcList(); 
 
-  document.getElementById('fcActiveAv').textContent = chat.av;
-  document.getElementById('fcActiveName').textContent = chat.name;
-  document.getElementById('fcActiveStatus').textContent = chat.online ? 'En línea' : 'Desconectado';
-  document.getElementById('fcOnlineDot').style.background = chat.online ? 'var(--green-l)' : 'var(--muted)';
-  document.getElementById('fcInputWrap').style.display = 'flex';
+  try {
+    const response = await fetch(`/chats/${id}`);
+    const data = await response.json();
+    const chat = data.chat;
+
+    const avEl = document.getElementById('fcActiveAv');
+      if (chat.foto) {
+        avEl.style.backgroundImage = `url(${chat.foto})`;
+        avEl.style.backgroundSize = 'cover';
+        avEl.textContent = '';
+      } else {
+        avEl.style.backgroundImage = '';
+        avEl.textContent = chat.nombre.substring(0,2).toUpperCase();
+      }
+    document.getElementById('fcActiveName').textContent = chat.nombre;
+    document.getElementById('fcActiveName').textContent = chat.nombre;
+    document.getElementById('fcActiveStatus').textContent = '';
+    document.getElementById('fcInputWrap').style.display = 'flex';
+
+    renderMessages(chat.messages);
+
+    clearInterval(chatPollingInterval);
+    chatPollingInterval = setInterval(() => pollMessages(id), 5000);
+    
+  } catch (error) {
+    console.error('Error cargando chat:', error);
+    showToast('Error al cargar el chat');
+  }
+}
+
+function renderMessages(messages) {
+    console.log('📨 Mensajes:', messages.map(m => ({tipo: m.tipo, texto: m.texto, mine: m.mine})));
 
   const msgs = document.getElementById('fcMessages');
+  if (!messages.length) {
+    msgs.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-size:0.85rem;">Sé el primero en escribir 🐾</div>`;
+    return;
+  }
+
   msgs.innerHTML = `<div class="sys-msg">🔒 Inicio de la conversación</div>` +
-    chat.msgs.map(m => `
-      <div class="bubble-wrap ${m.mine ? 'mine' : ''}">
-        <div class="bubble ${m.mine ? 'mine' : 'theirs'}">${escHtml(m.text)}</div>
-      </div>
-    `).join('');
+    messages.map(m => {
+      const bubble = renderBubbleContent(m);
+      return `
+        <div class="bubble-wrap ${m.mine ? 'mine' : ''}">
+          <div class="bubble ${m.mine ? 'mine' : 'theirs'}">${bubble}
+            <span style="font-size:0.65rem;opacity:0.6;display:block;text-align:right;margin-top:2px;">${m.time}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
   msgs.scrollTop = msgs.scrollHeight;
 }
 
-function sendFcMsg() {
-  if (!activeFcChat) return;
+function renderBubbleContent(m) {
+  const url = `/storage/${m.texto}`;
+  switch (m.tipo) {
+    case 'imagen':
+      return `<img src="${url}" style="max-width:100%;border-radius:8px;cursor:zoom-in;display:block;" onclick="openLightbox(['${url}'], 0)">`;
+    case 'video':
+      return `<video controls style="max-width:100%;border-radius:8px;display:block;"><source src="${url}"></video>`;
+    case 'pdf':
+      return `<a href="${url}" target="_blank" style="display:flex;align-items:center;gap:8px;color:inherit;text-decoration:none;">
+        <i class="fa-solid fa-file-pdf" style="font-size:1.5rem;color:var(--terra);"></i>
+        <span style="font-size:0.8rem;">Ver PDF</span>
+      </a>`;
+    case 'archivo':
+      const nombre = m.texto.split('/').pop();
+      return `<a href="${url}" target="_blank" style="display:flex;align-items:center;gap:8px;color:inherit;text-decoration:none;">
+        <i class="fa-solid fa-file-zipper" style="font-size:1.5rem;"></i>
+        <span style="font-size:0.8rem;">${nombre}</span>
+      </a>`;
+    default:
+      return escHtml(m.texto);
+  }
+}
+
+async function pollMessages(chatId) {
+  if (!activeChatId || activeChatId !== chatId) return;
+  try {
+    const response = await fetch(`/chats/${chatId}`);
+    const data = await response.json();
+    renderMessages(data.chat.messages);
+  } catch {}
+}
+
+async function sendFcMsg() {
+  if (!activeChatId) return;
   const inp = document.getElementById('fcMsgInput');
+  const fileInput = document.getElementById('fcFileInput');
   const txt = inp.value.trim();
-  if (!txt) return;
-  activeFcChat.msgs.push({ mine:true, text:txt });
-  const msgs = document.getElementById('fcMessages');
-  msgs.innerHTML += `<div class="bubble-wrap mine"><div class="bubble mine">${escHtml(txt)}</div></div>`;
-  inp.value = '';
-  inp.style.height = '';
-  msgs.scrollTop = msgs.scrollHeight;
+  const file = fileInput?.files?.[0];
+
+  if (!txt && !file) return;
+
+  const formData = new FormData();
+  if (txt) formData.append('contenido', txt);
+  if (file) formData.append('archivo', file);
+  formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+  try {
+    const response = await fetch(`/chats/${activeChatId}/messages`, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (response.ok) {
+      inp.value = '';
+      inp.style.height = '';
+      if (fileInput) { fileInput.value = ''; }
+      document.getElementById('fcFilePreview').style.display = 'none';
+      const data = await (await fetch(`/chats/${activeChatId}`)).json();
+      renderMessages(data.chat.messages);
+      loadChats();
+    } else {
+      showToast('Error al enviar mensaje');
+    }
+  } catch (error) {
+    showToast('Error de conexión');
+  }
 }
 
 function autoResize(el) {
@@ -254,6 +301,30 @@ function autoResize(el) {
 
 function escHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function startChatWith(userId) {
+  if (!window.AUTH_USER_ID) { openLoginModal(); return; }
+  if (userId === window.AUTH_USER_ID) { showToast('No puedes chatear contigo mismo 😄'); return; }
+
+  try {
+    const response = await fetch('/chats', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ user_id: userId, is_group: false })
+    });
+
+    const data = await response.json();
+    closePostModal();
+    await loadChats();
+    openFullChat();
+    setTimeout(() => openFcChat(data.chat.id), 100);
+  } catch (error) {
+    showToast('Error al iniciar chat');
+  }
 }
 
 // ========== FUNCIONES DE LOGIN ==========
@@ -302,6 +373,8 @@ DOM.init();
 loadPosts();
 renderFaq();
 renderChatPanel();
+loadChats();
+if (window.AUTH_USER_ID) loadNotifications();
 
 document.addEventListener('click', e => {
   const card = e.target.closest('.post-card[data-id]');
@@ -422,7 +495,6 @@ document.getElementById('newPostForm').addEventListener('submit', async (e) => {
   }
 });
 
-// Arreglo para el codigo de ayer (REVISAR)
 const _postOverlay = document.getElementById('postOverlay');
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {

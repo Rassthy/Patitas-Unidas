@@ -26,7 +26,7 @@ const DOM = {
   }
 };
 
-// Sección de navegacin
+// Sección de navegacion
 let _navBtns, _sections, _sbBtns;
 function _getNavBtns()  { return _navBtns  || (_navBtns  = document.querySelectorAll('.nav-btn')); }
 function _getSections() { return _sections || (_sections = document.querySelectorAll('.section')); }
@@ -144,10 +144,14 @@ async function openPostModal(id) {
         <div class="modal-author-role">${post.author.tipo === 'protectora' ? '🏥 Protectora verificada' : post.author.tipo === 'organizacion' ? '🌟 Organización' : '👤 Usuario'}</div>
       </div>
       <div class="modal-author-btns">
-        <button class="btn-outline" onclick="openFullChat();showToast('Chat iniciado con ${post.author.nombre} 💬')"><i class="fa-solid fa-comment"></i> Mensaje</button>
-        <button class="btn-outline" onclick="showToast('Perfil de ${post.author.nombre} — disponible próximamente')"><i class="fa-solid fa-user"></i> Perfil</button>
+        <button class="btn-outline" onclick="startChatWith(${post.author.id})">
+          <i class="fa-solid fa-comment"></i> Mensaje
+        </button>
+        <button class="btn-outline" onclick="showToast('Perfil de ${post.author.username} — disponible próximamente')">
+          <i class="fa-solid fa-user"></i> Perfil
+        </button>
       </div>
-    `;
+  `;
 
     // Cargar comentarios
     loadComments(id);
@@ -266,32 +270,51 @@ function toggleChatPanel() {
 }
 
 function renderChatPanel() {
-  document.getElementById('cpList').innerHTML = CHATS.map(c => `
+  const list = document.getElementById('cpList');
+  if (!list) return;
+
+  if (!CHATS.length) {
+    list.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:0.85rem;">No tienes conversaciones aún 🐾</div>`;
+    return;
+  }
+
+  list.innerHTML = CHATS.map(c => `
     <div class="cp-item" onclick="openFullChatWith(${c.id})">
-      <div class="cp-av-circle">${c.av}</div>
+      <div class="cp-av-circle" style="${c.foto ? `background-image:url(${c.foto});background-size:cover;` : ''}">
+        ${c.foto ? '' : c.nombre.substring(0,2).toUpperCase()}
+      </div>
       <div class="cp-info">
-        <div class="cp-name">${c.name}</div>
-        <div class="cp-prev">${c.preview}</div>
+        <div class="cp-name">${c.nombre}</div>
+        <div class="cp-prev">${c.last_msg || 'Sin mensajes aún'}</div>
       </div>
       <div class="cp-meta">
-        <span class="cp-time">${c.time}</span>
+        <span class="cp-time">${c.last_time || ''}</span>
         ${c.unread ? `<span class="cp-badge">${c.unread}</span>` : ''}
       </div>
     </div>
   `).join('');
 }
 
-// Modal del chat completo
 function renderFcList() {
-  document.getElementById('fcList').innerHTML = CHATS.map(c => `
+  const list = document.getElementById('fcList');
+  if (!list) return;
+
+  if (!CHATS.length) {
+    list.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:0.85rem;">No tienes conversaciones aún 🐾</div>`;
+    return;
+  }
+
+  list.innerHTML = CHATS.map(c => `
     <div class="cp-item" id="fci-${c.id}" onclick="openFcChat(${c.id})">
-      <div class="cp-av-circle">${c.av}</div>
+      <div class="cp-av-circle" style="${c.foto ? `background-image:url(${c.foto});background-size:cover;` : ''}">
+        ${c.foto ? '' : c.nombre.substring(0,2).toUpperCase()}
+      </div>
       <div class="cp-info">
-        <div class="cp-name">${c.name}</div>
-        <div class="cp-prev">${c.preview}</div>
+        <div class="cp-name">${c.nombre}</div>
+        <div class="cp-prev">${c.last_msg || 'Sin mensajes aún'}</div>
       </div>
       <div class="cp-meta">
-        <span class="cp-time">${c.time}</span>
+        <span class="cp-time">${c.last_time || ''}</span>
         ${c.unread ? `<span class="cp-badge" id="fci-badge-${c.id}">${c.unread}</span>` : ''}
       </div>
     </div>
@@ -313,9 +336,24 @@ function openFullChatWith(id) {
 
 function closeFullChat(e) {
   if (e && e.target !== document.getElementById('chatOverlayEl')) return;
+  clearInterval(chatPollingInterval);
+  activeChatId = null;
   document.getElementById('chatOverlayEl').classList.remove('open');
   document.getElementById('fullChatModal').classList.remove('open');
   document.body.style.overflow = '';
+}
+
+function previewFcFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const preview = document.getElementById('fcFilePreview');
+  document.getElementById('fcFilePreviewName').textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + 'KB)';
+  preview.style.display = 'flex';
+}
+
+function clearFcFile() {
+  document.getElementById('fcFileInput').value = '';
+  document.getElementById('fcFilePreview').style.display = 'none';
 }
 
 // Notificaciones del toast
@@ -581,17 +619,18 @@ function openNotificationsPanel() {
   if (!window.AUTH_USER_ID) { openLoginModal(); return; }
   notifOpen = !notifOpen;
   const dropdown = document.getElementById('notifDropdown');
+  dropdown.style.pointerEvents = notifOpen ? 'all' : 'none';
   dropdown.classList.toggle('open', notifOpen);
   if (notifOpen) loadNotifications();
 }
 
-// Cerrar al hacer clic fuera
 document.addEventListener('click', e => {
   if (!notifOpen) return;
   const dropdown = document.getElementById('notifDropdown');
-  const btn = e.target.closest('.hdr-icon-btn');
+  const btn = e.target.closest('.hdr-icon-btn, .sb-btn');
   if (!dropdown.contains(e.target) && !btn) {
     notifOpen = false;
+    dropdown.style.pointerEvents = 'none';
     dropdown.classList.remove('open');
   }
 });
@@ -642,7 +681,10 @@ async function loadNotifications() {
         </div>
       `;
     }).join('');
-
+    const notifDot = document.getElementById('notifDot');
+      if (notifDot) {
+        notifDot.style.display = unread > 0 ? '' : 'none';
+      }
   } catch (error) {
     console.error('Error cargando notificaciones:', error);
   }

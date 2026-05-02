@@ -904,6 +904,7 @@
 .bubble-wrap {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
 }
 
 .bubble-wrap.mine {
@@ -911,6 +912,7 @@
 }
 
 .bubble {
+    display: inline-block;
     max-width: 78%;
     padding: 9px 13px;
     font-family: 'DM Sans', sans-serif;
@@ -995,7 +997,14 @@
     margin-top: 22px;
 }
 
-#notifDropdown.open { display: flex !important; }
+#notifDropdown {
+  transition: opacity 0.2s ease;
+}
+
+#notifDropdown.open {
+  opacity: 1 !important;
+  pointer-events: all;
+}
 
 #lightboxOverlay {
   opacity: 0;
@@ -1005,3 +1014,4 @@
 #lightboxOverlay.open {
   opacity: 1;
 }
+

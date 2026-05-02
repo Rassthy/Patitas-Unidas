@@ -10,14 +10,16 @@
     <span class="sb-tip">Publicaciones</span>
   </button>
   <div class="sb-sep"></div>
-  <button class="sb-btn" id="sidebarChatBtn" onclick="toggleChatPanel()">
+  <button class="sb-btn" id="sidebarChatBtn" 
+    onclick="{{ Auth::check() ? 'toggleChatPanel()' : 'openLoginModal()' }}">
     <i class="fa-solid fa-comment-dots"></i>
-    <span class="sb-dot"></span>
+    <span class="sb-dot" id="chatDot" style="display:none;"></span>
     <span class="sb-tip">Mensajes</span>
   </button>
-  <button class="sb-btn" onclick="openLoginModal()">
+  <button class="sb-btn" 
+    onclick="{{ Auth::check() ? 'openNotificationsPanel()' : 'openLoginModal()' }}">
     <i class="fa-solid fa-bell"></i>
-    <span class="sb-dot" id="notifDot"></span>
+    <span class="sb-dot" id="notifDot" style="display:none;"></span>
     <span class="sb-tip">Notificaciones</span>
   </button>
   <div class="sb-sep"></div>

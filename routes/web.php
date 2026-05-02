@@ -54,7 +54,10 @@ Route::middleware('auth')->group(function () {
     Route::post('posts/{id}/comments', [PostController::class, 'addComment'])->name('posts.comments.store');
     Route::delete('comments/{id}', [PostController::class, 'destroyComment'])->name('comments.destroy');
     Route::post('comments/{id}/like', [PostController::class, 'toggleCommentLike'])->name('comments.like');
-    Route::resource('chats', ChatController::class)->except(['create', 'edit']);
+    Route::get('chats', [ChatController::class, 'index'])->name('chats.index');
+    Route::post('chats', [ChatController::class, 'store'])->name('chats.store');
+    Route::get('chats/{id}', [ChatController::class, 'show'])->name('chats.show');
+    Route::post('chats/{id}/messages', [ChatController::class, 'sendMessage'])->name('chats.messages.store');
     Route::resource('notifications', NotificationController::class)->only(['index', 'show', 'update']);
     Route::resource('reports', ReportController::class)->except(['create', 'edit']);
 });

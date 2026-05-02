@@ -19,4 +19,24 @@ class Chat extends Model
     protected $casts = [
         'is_group' => 'boolean',
     ];
+
+    public function participants()
+    {
+        return $this->hasMany(ChatParticipant::class);
+    }
+
+    public function messages()
+    {
+        return $this->hasMany(Message::class)->orderBy('created_at', 'asc');
+    }
+
+    public function lastMessage()
+    {
+        return $this->hasOne(Message::class)->latestOfMany();
+    }
+
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'chat_participants');
+    }
 }

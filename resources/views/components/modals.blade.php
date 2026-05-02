@@ -157,20 +157,34 @@
         <p style="font-size:.85rem;">Selecciona una conversación para empezar</p>
       </div>
     </div>
-    <div class="fc-input-wrap" id="fcInputWrap" style="display:none;">
-      <button class="hdr-icon-btn" style="border-color:var(--border);"
-        onclick="showToast('Adjuntar archivos: próximamente 🐾')"><i class="fa-solid fa-paperclip"></i></button>
-      <textarea class="fc-textarea" id="fcMsgInput" rows="1" placeholder="Escribe un mensaje..."
-        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendFcMsg()}"
-        oninput="autoResize(this)"></textarea>
-      <button class="fc-send" onclick="sendFcMsg()"><i class="fa-solid fa-paper-plane"></i></button>
+    <div class="fc-input-wrap" id="fcInputWrap" style="display:none;flex-direction:column;gap:6px;">
+    <!-- Preview del archivo seleccionado -->
+    <div id="fcFilePreview" style="display:none;padding:6px 12px;background:var(--soft);border-radius:8px;font-size:0.8rem;display:none;align-items:center;gap:8px;">
+        <i class="fa-solid fa-paperclip" style="color:var(--terra);"></i>
+        <span id="fcFilePreviewName" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+        <button onclick="clearFcFile()" style="background:none;border:none;cursor:pointer;color:var(--muted);">✕</button>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-end;width:100%;">
+        <!-- Input file oculto -->
+        <input type="file" id="fcFileInput" style="display:none;"
+              accept="image/*,video/*,.pdf,.doc,.docx,.zip,.rar"
+              onchange="previewFcFile(this)">
+        <button class="hdr-icon-btn" style="border-color:var(--border);flex-shrink:0;"
+                onclick="document.getElementById('fcFileInput').click()">
+          <i class="fa-solid fa-paperclip"></i>
+        </button>
+        <textarea class="fc-textarea" id="fcMsgInput" rows="1" placeholder="Escribe un mensaje..."
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendFcMsg()}"
+          oninput="autoResize(this)"></textarea>
+        <button class="fc-send" onclick="sendFcMsg()"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- DROPDOWN NOTIFICACIONES -->
 <div id="notifDropdown"
-     style="display:none;position:fixed;top:60px;right:16px;width:360px;max-height:480px;
+     style="display:flex;opacity:0;pointer-events:none;position:fixed;top:60px;right:16px;width:360px;max-height:480px;
             background:var(--cream);
             border:1px solid var(--border);
             border-radius:14px;
