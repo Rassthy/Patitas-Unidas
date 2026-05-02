@@ -6,13 +6,25 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use App\Models\User;
 
 class ProfileController extends Controller
 {
     // Muestra el perfil del usuario
-    public function show()
+    public function show($identifier = null)
     {
-        $user = Auth::user();
+        if (!$identifier) {
+            $user = Auth::user();
+        } else {
+            $cleanIdentifier = ltrim($identifier, '@');
+
+            if (is_numeric($cleanIdentifier)) {
+                $user = User::findOrFail($cleanIdentifier);
+            } else {
+                $user = User::where('username', $cleanIdentifier)->firstOrFail();
+            }
+        }
+
         return view('profile.show', compact('user'));
     }
 
