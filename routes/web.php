@@ -10,51 +10,74 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-// Ruta pública principal
+/*
+|--------------------------------------------------------------------------
+| RUTAS PÚBLICAS
+|--------------------------------------------------------------------------
+*/
+
+// Home | Landing
 Route::get('/', function () {
     return view('home');
 })->name('home');
 
-Route::get('/dashboard', function () {
-    return redirect()->route('home', ['tab' => 'principal']);
-})->name('dashboard');
-
-// Rutas de autenticación (públicas)
+// Autenticación
+Route::get('/login', function () { 
+    return redirect()->route('home')->with('error', 'Debes iniciar sesión primero.'); 
+})->name('login');
+Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register'])->name('register');
-Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::get('/check-auth', [AuthController::class, 'checkAuth'])->name('check-auth');
 
-// Public post routes
-Route::get('posts/{id}/comments', [PostController::class, 'getComments'])->name('posts.comments.index');
+// Contenido público (Lectura)
 Route::get('posts', [PostController::class, 'index'])->name('posts.index');
 Route::get('posts/{post}', [PostController::class, 'show'])->name('posts.show');
+Route::get('posts/{id}/comments', [PostController::class, 'getComments'])->name('posts.comments.index');
 
-// Rutas protegidas por autenticación
+
+/*
+|--------------------------------------------------------------------------
+| RUTAS PROTEGIDAS (Requieren inicio de sesión)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
+    
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    
+    Route::get('/dashboard', function () {
+        return redirect()->route('home', ['tab' => 'principal']);
+    })->name('dashboard');
 
-    // Rutas de perfil
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    // Gestión de Perfil (Rutas específicas)
+    // IMPORTANTE: Van antes que la ruta dinámica para evitar el Error 404
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
-
     Route::get('/profile/settings', [ProfileController::class, 'settings'])->name('profile.settings');
     Route::put('/profile/settings', [ProfileController::class, 'updateSettings'])->name('profile.settings.update');
 
-    Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
-
-    // Rutas de recursos
-    Route::resource('users', UserController::class)->only(['index', 'show', 'update', 'destroy']);
+    // Recursos de Usuario y Mascotas
+    Route::resource('users', UserController::class)->only(['index', 'update', 'destroy']);
     Route::resource('pets', PetController::class)->except(['create', 'edit']);
+
+    // Publicaciones e Interacciones
     Route::post('posts', [PostController::class, 'store'])->name('posts.store');
     Route::put('posts/{post}', [PostController::class, 'update'])->name('posts.update');
     Route::delete('posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
-
     Route::post('posts/{id}/like', [PostController::class, 'toggleLike'])->name('posts.like');
     Route::post('posts/{id}/comments', [PostController::class, 'addComment'])->name('posts.comments.store');
     Route::delete('comments/{id}', [PostController::class, 'destroyComment'])->name('comments.destroy');
     Route::post('comments/{id}/like', [PostController::class, 'toggleCommentLike'])->name('comments.like');
+
+    // Comunicación y Sistema
     Route::resource('chats', ChatController::class)->except(['create', 'edit']);
     Route::resource('notifications', NotificationController::class)->only(['index', 'show', 'update']);
     Route::resource('reports', ReportController::class)->except(['create', 'edit']);
 });
+
+/*
+|--------------------------------------------------------------------------
+| RUTAS DINÁMICAS (Al final para evitar colisiones)
+|--------------------------------------------------------------------------
+*/
+// Visualización de Perfiles (Pública para SEO, pero al final del archivo)
+Route::get('/profile/{identifier?}', [ProfileController::class, 'show'])->name('profile.show');

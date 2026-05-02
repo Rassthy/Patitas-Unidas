@@ -16,7 +16,6 @@ class AuthController extends Controller
      */
     public function register(RegisterRequest $request)
     {
-        // El FormRequest ya ha validado los datos
         $data = $request->validated();
 
         try {
@@ -47,22 +46,35 @@ class AuthController extends Controller
     /**
      * Iniciar sesión con un usuario existente.
      */
-    public function login(LoginRequest $request)
+    public function login(Request $request)
     {
-        $credentials = $request->validated();
+        $request->validate([
+            'login'    => 'required|string',
+            'password' => 'required|string',
+        ], [
+            'login.required' => 'El usuario o correo es obligatorio.',
+            'password.required' => 'La contraseña es obligatoria.',
+        ]);
 
-        // Intentar autenticación con email y contraseña
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        // Comprobacion de si el input es un email o un username
+        $fieldType = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        $credentials = [
+            $fieldType => $request->login,
+            'password' => $request->password,
+        ];
+
+        if (Auth::attempt($credentials, $request->filled('remember'))) {
             $request->session()->regenerate();
-            return redirect()->route('dashboard')->with('success', 'Sesión iniciada correctamente.');
+            
+            // Redirigimos a la ruta donde intentaba ir, o al home por defecto
+            return redirect()->intended(route('home'));
         }
 
-        // Si falla, devolver error específico
-        return back()
-            ->withInput($request->only('email'))
-            ->withErrors([
-                'login' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
-            ], 'login');
+        // Si falla, devolvemos a al login marcando el error del campo que falle
+        return back()->withErrors([
+            'login' => 'Las credenciales no coinciden con nuestros registros.',
+        ])->withInput($request->only('login', 'remember'));
     }
 
     /**
