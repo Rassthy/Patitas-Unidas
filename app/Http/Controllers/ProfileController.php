@@ -5,27 +5,61 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 use App\Models\User;
 
 class ProfileController extends Controller
 {
-    // Muestra el perfil del usuario
     public function show($identifier = null)
     {
         if (!$identifier) {
-            $user = Auth::user();
-        } else {
-            $cleanIdentifier = ltrim($identifier, '@');
-
-            if (is_numeric($cleanIdentifier)) {
-                $user = User::findOrFail($cleanIdentifier);
+            if (auth()->check()) {
+                $user = auth()->user();
             } else {
-                $user = User::where('username', $cleanIdentifier)->firstOrFail();
+                return redirect()->route('login');
             }
+        } else {
+            $user = User::where('username', $identifier)->firstOrFail();
         }
 
+        // Optimizamos la consulta para cargar solo lo necesario y evitar el N+1, aparte tambien ordenamos las valoracioes
+        $user->load([
+            'pets',
+            'ratings' => function($query) {
+                $query->latest();
+            },
+            'ratings.voter',
+            'posts.images',
+            'posts.category'
+        ]);
+
         return view('profile.show', compact('user'));
+    }
+
+    public function storeRating(Request $request, $id)
+    {
+        $request->validate([
+            'puntuacion' => 'required|numeric|min:0.5|max:5',
+            'comentario' => 'nullable|string|max:500',
+        ], [], [
+            'puntuacion' => 'puntuación',
+            'comentario' => 'comentario'
+        ]);
+
+        if (Auth::id() == $id) {
+            return back()->with('error', 'No puedes valorarte a ti mismo.');
+        }
+
+        $user = User::findOrFail($id);
+
+        $user->ratings()->where('voter_id', Auth::id())->delete();
+
+        $user->ratings()->create([
+            'voter_id'   => Auth::id(),
+            'puntuacion' => $request->puntuacion,
+            'comentario' => $request->comentario,
+        ]);
+
+        return back()->with('success', '¡Valoración publicada correctamente!');
     }
 
     public function settings()
@@ -51,14 +85,12 @@ class ProfileController extends Controller
         return redirect()->route('profile.settings')->with('success', 'Preferencias actualizadas correctamente.');
     }
 
-    // Muestra el formulario de edición del perfil
     public function edit()
     {
         $user = Auth::user();
         return view('profile.edit', compact('user'));
     }
 
-    // Actualiza el perfil del usuario
     public function update(Request $request)
     {
         $user = Auth::user();
@@ -72,11 +104,13 @@ class ProfileController extends Controller
             'ciudad' => 'nullable|string|max:100',
             'foto_perfil' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
+        ], [], [
+            'fecha_nacimiento' => 'fecha de nacimiento',
+            'descripcion' => 'descripción'
         ]);
 
         $data = $request->only(['nombre', 'apellidos', 'descripcion', 'fecha_nacimiento', 'provincia', 'ciudad']);
 
-        // Manejar foto de perfil
         if ($request->hasFile('foto_perfil')) {
             if ($user->foto_perfil && Storage::disk('public')->exists($user->foto_perfil)) {
                 Storage::disk('public')->delete($user->foto_perfil);
@@ -84,7 +118,6 @@ class ProfileController extends Controller
             $data['foto_perfil'] = $request->file('foto_perfil')->store('profiles', 'public');
         }
 
-        // Manejar banner
         if ($request->hasFile('banner')) {
             if ($user->banner && Storage::disk('public')->exists($user->banner)) {
                 Storage::disk('public')->delete($user->banner);
@@ -94,6 +127,6 @@ class ProfileController extends Controller
 
         $user->update($data);
 
-        return redirect()->route('profile.show')->with('success', 'Perfil actualizado correctamente.');
+        return redirect()->route('profile.show', $user->username)->with('success', 'Perfil actualizado correctamente.');
     }
 }

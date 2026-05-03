@@ -34,15 +34,15 @@ async function loadChats() {
 
 // ========== CONSTANTES ==========
 const catInfo = {
-  1:{ label:"🏠 Adoptar mascota", cls:"t1" },
-  2:{ label:"🔍 Perdida / Robada", cls:"t2" },
-  3:{ label:"❤️ Apoyar animales", cls:"t3" }
+  1: { label: "🏠 Adoptar mascota", cls: "t1" },
+  2: { label: "🔍 Perdida / Robada", cls: "t2" },
+  3: { label: "❤️ Apoyar animales", cls: "t3" }
 };
 
 const catTitles = {
-  1:"🏠 Adoptar mascota",
-  2:"🔍 Mascota perdida o robada",
-  3:"❤️ Apoyar animales"
+  1: "🏠 Adoptar mascota",
+  2: "🔍 Mascota perdida o robada",
+  3: "❤️ Apoyar animales"
 };
 
 // ========== CARGA DE PUBLICACIONES ==========
@@ -70,7 +70,7 @@ function filterPosts(provincia) {
   loadPosts();
 }
 
-function renderPosts(catId, filter='') {
+function renderPosts(catId, filter = '') {
   if (!DOM.paCount || !DOM.postsGrid) return;
 
   const posts = allPosts.filter(p => !filter || p.provincia === filter);
@@ -80,30 +80,32 @@ function renderPosts(catId, filter='') {
     const id = catId === 0 ? post.category_id : catId;
     return {
       class: id === 1 ? 'pc-badge-adopt' : id === 2 ? 'pc-badge-lost' : 'pc-badge-support',
-      icon:  id === 1 ? '🏠'             : id === 2 ? '🔍'            : '❤️'
+      icon: id === 1 ? '🏠' : id === 2 ? '🔍' : '❤️'
     };
   };
 
   DOM.postsGrid.innerHTML = posts.length ? posts.map(p => {
     const postBadge = getBadgeInfo(catId, p);
 
-    // Construir la URL en JS en vez de usar asset() del PHP
-    const imgSrc = (p.images && p.images.length)
-      ? `/storage/${p.images[0].url}`
-      : `/img/defaults/post_default.png`;
+    // Lógica de imágenes y autor (Tu versión preferida)
+    const imgSrc = (p.images && p.images.length > 0) 
+      ? `/storage/${p.images[0].url}` 
+      : '/img/defaults/foto_post_generica.png';
 
-    // El autor puede ser null si la relación no se cargó
-    const autorNombre = p.author?.username ?? 'Usuario';
-    const autorFoto   = p.author?.foto_perfil ? `/storage/${p.author.foto_perfil}` : `/img/defaults/foto_perfil_generica.png`;
-    const autorLabel  = autorNombre.substring(0, 16) + (autorNombre.length > 16 ? '…' : '');
+    const autorNombre = p.author ? p.author.nombre : 'Usuario';
+    const autorFoto = p.author && p.author.foto_perfil 
+      ? `/storage/${p.author.foto_perfil}` 
+      : '/img/defaults/foto_perfil_generica.png';
+      
+    const autorLabel = p.author ? `@${p.author.username}` : 'Anónimo';
 
     return `
       <div class="post-card" data-id="${p.id}">
         <div class="pc-img-wrap">
           <img class="pc-img"
-               src="${imgSrc}"
-               alt="${p.titulo}"
-               loading="lazy"
+            src="${imgSrc}"
+            alt="${p.titulo}"
+            loading="lazy">
           <span class="pc-badge ${postBadge.class}">
             ${postBadge.icon}${p.animal_especie ? ' ' + p.animal_especie : ''}
           </span>
@@ -117,7 +119,7 @@ function renderPosts(catId, filter='') {
               <img class="pc-author-av"
                    src="${autorFoto}"
                    alt="${autorNombre}"
-                   loading="lazy"
+                   loading="lazy">
               <span>${autorLabel}</span>
             </div>
             <button class="btn-sm" data-id="${p.id}">Saber más</button>
@@ -171,7 +173,7 @@ async function openFcChat(id) {
   if (el) el.classList.add('selected');
 
   await loadChats();
-  renderFcList(); 
+  renderFcList();
 
   try {
     const response = await fetch(`/chats/${id}`);
@@ -180,14 +182,14 @@ async function openFcChat(id) {
     activeChatUserId = data.chat.other_user_id ?? null;
 
     const avEl = document.getElementById('fcActiveAv');
-      if (chat.foto) {
-        avEl.style.backgroundImage = `url(${chat.foto})`;
-        avEl.style.backgroundSize = 'cover';
-        avEl.textContent = '';
-      } else {
-        avEl.style.backgroundImage = '';
-        avEl.textContent = chat.nombre.substring(0,2).toUpperCase();
-      }
+    if (chat.foto) {
+      avEl.style.backgroundImage = `url(${chat.foto})`;
+      avEl.style.backgroundSize = 'cover';
+      avEl.textContent = '';
+    } else {
+      avEl.style.backgroundImage = '';
+      avEl.textContent = chat.nombre.substring(0, 2).toUpperCase();
+    }
     document.getElementById('fcActiveName').textContent = chat.nombre;
     document.getElementById('fcActiveName').textContent = chat.nombre;
     document.getElementById('fcActiveStatus').textContent = '';
@@ -197,7 +199,7 @@ async function openFcChat(id) {
 
     clearInterval(chatPollingInterval);
     chatPollingInterval = setInterval(() => pollMessages(id), 5000);
-    
+
   } catch (error) {
     console.error('Error cargando chat:', error);
     showToast('Error al cargar el chat');
@@ -205,7 +207,7 @@ async function openFcChat(id) {
 }
 
 function renderMessages(messages) {
-    console.log('📨 Mensajes:', messages.map(m => ({tipo: m.tipo, texto: m.texto, mine: m.mine})));
+  console.log('📨 Mensajes:', messages.map(m => ({ tipo: m.tipo, texto: m.texto, mine: m.mine })));
 
   const msgs = document.getElementById('fcMessages');
   if (!messages.length) {
@@ -257,7 +259,7 @@ async function pollMessages(chatId) {
     const response = await fetch(`/chats/${chatId}`);
     const data = await response.json();
     renderMessages(data.chat.messages);
-  } catch {}
+  } catch { }
 }
 
 async function sendFcMsg() {
@@ -302,7 +304,7 @@ function autoResize(el) {
 }
 
 function escHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 async function startChatWith(userId) {
@@ -348,19 +350,19 @@ function doRegister() {
 
 // ========== DATOS FAQ / INFO ==========
 const faqData = [
-  { q:"¿Es gratuito registrarse en PatitasUnidas?", a:"Sí, el registro es completamente gratuito. Pedimos DNI/NIE y teléfono para garantizar la seguridad de todos los usuarios y evitar perfiles falsos o fraudes en adopciones." },
-  { q:"¿Cómo puedo publicar un animal en adopción?", a:"Una vez registrado y verificado tu perfil, puedes ir a la sección 'Principal', elegir 'Adoptar mascota' y pulsar el botón 'Publicar'. Podrás añadir fotos, descripción, ubicación y datos del animal." },
-  { q:"¿Qué hago si encuentro a mi mascota perdida?", a:"Actualiza tu publicación indicando que ha sido encontrada para que la comunidad sepa que ya está a salvo. También puedes contactar con los administradores para cerrar el caso." },
-  { q:"¿Cómo sé si una protectora está verificada?", a:"Los perfiles de protectoras y organizaciones pasan por un proceso de verificación adicional. Verás una insignia de verificación en su perfil. Siempre recomendamos visitar las instalaciones antes de una adopción." },
-  { q:"¿Puedo hacer donaciones a través de la plataforma?", a:"Actualmente estamos integrando un sistema de donaciones seguro mediante pasarela de pago. Muy pronto podrás donar directamente a protectoras y causas desde la plataforma." },
-  { q:"¿Es posible reportar contenido inapropiado?", a:"Sí. Cada publicación, comentario y perfil tiene un botón de reporte. Nuestro equipo revisa todos los reportes en menos de 24 horas. El sistema de insignias y valoraciones también ayuda a identificar usuarios de confianza." },
+  { q: "¿Es gratuito registrarse en PatitasUnidas?", a: "Sí, el registro es completamente gratuito. Pedimos DNI/NIE y teléfono para garantizar la seguridad de todos los usuarios y evitar perfiles falsos o fraudes en adopciones." },
+  { q: "¿Cómo puedo publicar un animal en adopción?", a: "Una vez registrado y verificado tu perfil, puedes ir a la sección 'Principal', elegir 'Adoptar mascota' y pulsar el botón 'Publicar'. Podrás añadir fotos, descripción, ubicación y datos del animal." },
+  { q: "¿Qué hago si encuentro a mi mascota perdida?", a: "Actualiza tu publicación indicando que ha sido encontrada para que la comunidad sepa que ya está a salvo. También puedes contactar con los administradores para cerrar el caso." },
+  { q: "¿Cómo sé si una protectora está verificada?", a: "Los perfiles de protectoras y organizaciones pasan por un proceso de verificación adicional. Verás una insignia de verificación en su perfil. Siempre recomendamos visitar las instalaciones antes de una adopción." },
+  { q: "¿Puedo hacer donaciones a través de la plataforma?", a: "Actualmente estamos integrando un sistema de donaciones seguro mediante pasarela de pago. Muy pronto podrás donar directamente a protectoras y causas desde la plataforma." },
+  { q: "¿Es posible reportar contenido inapropiado?", a: "Sí. Cada publicación, comentario y perfil tiene un botón de reporte. Nuestro equipo revisa todos los reportes en menos de 24 horas. El sistema de insignias y valoraciones también ayuda a identificar usuarios de confianza." },
 ];
 
 function renderFaq() {
   const list = document.getElementById('faqList');
   if (!list) return;
 
-  list.innerHTML = faqData.map((f,i) => `
+  list.innerHTML = faqData.map((f, i) => `
     <div class="faq-item" id="faq-${i}">
       <div class="faq-q" onclick="toggleFaq(${i})">
         <span>${f.q}</span>
@@ -416,7 +418,7 @@ function previewImages(input) {
       <div id="prev-${idx}" style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--bg-secondary);border-radius:6px;font-size:0.8rem;color:var(--text);max-width:100%;">
         <i class="fa-solid fa-image" style="color:var(--terra);"></i>
         <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${file.name}">${file.name}</span>
-        <span style="color:var(--muted);font-size:0.75rem;">(${(file.size/1024).toFixed(1)}KB)</span>
+        <span style="color:var(--muted);font-size:0.75rem;">(${(file.size / 1024).toFixed(1)}KB)</span>
         <button type="button" onclick="removeFile(${idx})" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;">✕</button>
       </div>
     `).join('');
@@ -435,9 +437,8 @@ function removeFile(idx) {
 
   // Sincronizar el input
   document.getElementById('postImages').files = selectedFiles.files;
-  previewImages({ files: new DataTransfer().files }); // re-render sin añadir nada nuevo
+  previewImages({ files: new DataTransfer().files });
 
-  // Re-render manual (previewImages con files vacíos no re-renderiza bien)
   const list = document.getElementById('imagePreviewList');
   const container = document.getElementById('imagePreviewContainer');
   if (selectedFiles.files.length === 0) {
@@ -449,7 +450,7 @@ function removeFile(idx) {
       <div style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--bg-secondary);border-radius:6px;font-size:0.8rem;color:var(--text);max-width:100%;">
         <i class="fa-solid fa-image" style="color:var(--terra);"></i>
         <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${file.name}">${file.name}</span>
-        <span style="color:var(--muted);font-size:0.75rem;">(${(file.size/1024).toFixed(1)}KB)</span>
+        <span style="color:var(--muted);font-size:0.75rem;">(${(file.size / 1024).toFixed(1)}KB)</span>
         <button type="button" onclick="removeFile(${i})" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;">✕</button>
       </div>
     `).join('');
@@ -471,7 +472,7 @@ document.getElementById('newPostForm').addEventListener('submit', async (e) => {
     });
 
     const data = await response.json();
-    
+
     if (response.ok) {
       showToast('Publicación creada correctamente! 🎉');
       closeNewPostModal();
@@ -507,13 +508,13 @@ document.addEventListener('keydown', e => {
     document.body.style.overflow = '';
   }
   if (_postOverlay.classList.contains('open')) {
-    if (e.key === 'ArrowLeft')  galNav(-1);
+    if (e.key === 'ArrowLeft') galNav(-1);
     if (e.key === 'ArrowRight') galNav(1);
   }
 });
 
 // Buscar en el panel del chat
-(function() {
+(function () {
   const searchEl = document.querySelector('.cp-search');
   if (!searchEl) return;
   let searchTimer;

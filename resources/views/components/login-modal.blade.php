@@ -21,8 +21,8 @@
 
     @php
       $isLoginAttempt = old('login') !== null;
-      $isRegisterAttempt = old('username') !== null || old('nombre') !== null;
-      $openModal = $errors->any() || $isLoginAttempt || $isRegisterAttempt; 
+      $isRegisterAttempt = (old('username') !== null || old('nombre') !== null) && !request()->routeIs('profile.*');
+      $openModal = ($errors->any() && !request()->routeIs('profile.*')) || $isLoginAttempt || $isRegisterAttempt; 
     @endphp
 
     <!-- LOGIN FORM -->
@@ -249,7 +249,7 @@
       if (tabs.length > 1) {
         if (isRegisterAttempt) {
           setLoginTab(tabs[1], 'register');
-        } else if (isLoginAttempt || {{ $errors->any() ? 'true' : 'false' }}) {
+        } else if (isLoginAttempt || {{ ($errors->any() && !request()->routeIs('profile.*')) ? 'true' : 'false' }}) {
           setLoginTab(tabs[0], 'login');
         }
       }

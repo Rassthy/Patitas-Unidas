@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\UserRating;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -65,12 +66,10 @@ class User extends Authenticatable
             return $this->foto_perfil;
         }
 
-        // Si por alguna razón la base de datos ya apunta a la carpeta img/
         if (Str::startsWith($this->foto_perfil, 'img/')) {
             return asset($this->foto_perfil);
         }
 
-        // Por defecto, buscamos en la carpeta storage (lo normal al subir fotos)
         return asset('storage/' . $this->foto_perfil);
     }
 
@@ -89,6 +88,11 @@ class User extends Authenticatable
         }
 
         return asset('storage/' . $this->banner);
+    }
+
+    public function ratings()
+    {
+        return $this->hasMany(UserRating::class, 'user_id');
     }
 
     // RELACIONES

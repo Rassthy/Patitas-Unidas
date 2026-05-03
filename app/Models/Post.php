@@ -77,4 +77,18 @@ class Post extends Model
     {
         return $this->comments()->count();
     }
+
+    // Accessor para la imagen en el perfil
+    public function getImagenUrlAttribute()
+    {
+        // Verificar si el post tiene almenos 1 imagencita
+        if ($this->images->count() > 0) {
+            // Pillamos la primera imagens y devolvemos su URL
+            $primeraImagen = $this->images->first()->url; 
+            return asset('storage/' . $primeraImagen);
+        }
+
+        // Imagen por defecto si no hay imagenes asociadas
+        return asset('img/defaults/foto_post_generica.png'); 
+    }
 }

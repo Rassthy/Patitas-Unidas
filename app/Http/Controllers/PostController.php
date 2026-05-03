@@ -71,9 +71,18 @@ class PostController extends Controller
 
     public function show($id)
     {
+        // Buscamos el post con todas sus relaciones para que no falte nada
         $post = Post::with(['author', 'category', 'images', 'comments.user'])->findOrFail($id);
-        $post->liked_by_user = Auth::check() ? $post->isLikedBy(Auth::user()) : false;
-        return response()->json(['post' => $post], 200);
+
+        // Si la petición es AJAX (viene del modal de ui.js)
+        if (request()->ajax()) {
+            return response()->json([
+                'post' => $post
+            ]);
+        }
+
+        // Si es una visita normal (desde el enlace del perfil), cargamos la página
+        return view('posts.show', compact('post'));
     }
 
     public function update(UpdatePostRequest $request, $id)

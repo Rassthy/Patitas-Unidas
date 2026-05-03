@@ -264,7 +264,15 @@
 
 /* Textos de ayuda y errores de campo */
 .edit-hint        { display: block; margin-top: 7px; font-size: .75rem; color: var(--muted); }
-.edit-field-error { display: block; margin-top: 5px; font-size: .78rem; color: #c0392b; }
+.edit-field-error {
+    color: var(--terra);
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
 
 /* Banner de alerta (éxito / error) — compartido entre edit y settings */
 .alert-banner {
@@ -405,6 +413,209 @@
   right: 15px; 
   top: 38px; 
   color: #aaa;
+}
+
+.edit-form-input.is-invalid, 
+.edit-form-textarea.is-invalid {
+    border: 2px solid var(--terra) !important;
+    background-color: rgba(230, 126, 34, 0.05);
+}
+
+/* =============================================
+   SISTEMA DE VALORACIONES (show.blade)
+   ============================================= */
+
+/* ---- Contenedor del formulario de nueva valoración ---- */
+.review-form-container {
+  background: var(--cream);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  padding: 22px 24px;
+  margin-bottom: 28px;
+}
+.review-form-container h4 {
+  font-family: 'Fraunces', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---- Estrellas interactivas ---- */
+#starRating {
+  display: inline-flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+#starRating i {
+  font-size: 2rem;
+  color: var(--border);
+  transition: color .12s, transform .12s;
+  display: inline-block;
+}
+/* Estado hover/preview — la clase la pone el JS */
+#starRating i.star-lit     { color: var(--terra); }
+#starRating i.star-preview { color: var(--terra-l); transform: scale(1.15); }
+
+/* ---- Lista de valoraciones publicadas ---- */
+.review-list { display: flex; flex-direction: column; gap: 14px; }
+
+.review-item {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-s);
+  padding: 16px 18px;
+  transition: box-shadow .22s;
+}
+.review-item:hover { box-shadow: var(--sh-s); }
+
+.review-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.review-header strong {
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--dark);
+}
+.review-stars {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+  font-size: .9rem;
+}
+.review-stars .fa-solid,
+.review-stars .fa-regular { color: var(--terra); }
+
+.review-item > p {
+  font-size: .85rem;
+  color: var(--txt);
+  line-height: 1.6;
+  margin-bottom: 6px;
+}
+.review-item > small {
+  font-size: .72rem;
+  color: var(--muted);
+}
+
+/* ---- Modal de confirmación de sobrescritura ---- */
+/*
+ * Backdrop mediante box-shadow gigante: no requiere ningún cambio en el blade.
+ * La sombra se extiende 100vmax en todas las direcciones actuando como overlay oscuro.
+ * El modal sigue el mismo lenguaje visual que .login-modal del proyecto.
+ *
+ * SCROLLBAR FIX:
+ * El selector :has() detecta cuándo el modal está visible (el JS le aplica
+ * display:block) y fuerza overflow:hidden en el body. Esto elimina la barra de
+ * desplazamiento mientras el aviso está abierto, cerrando el hueco de 1-2px entre
+ * el box-shadow y el borde derecho de la pantalla.
+ * padding-right compensa el ancho de la scrollbar para que el layout no salte.
+ * Soporte: Chrome 105+, Safari 15.4+, Firefox 121+.
+ */
+body:has(#overwriteWarning[style*="display: block"]) {
+  overflow: hidden;
+  padding-right: var(--scrollbar-compensation, 15px);
+}
+#overwriteWarning {
+  /* Posición (override de inline styles con !important) */
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  z-index: 9999 !important;
+
+  /* Dimensiones */
+  max-width: 420px;
+  width: calc(100vw - 40px) !important;
+  padding: 36px 36px 30px !important;
+
+  /* Superficie — idéntica a .login-modal */
+  background: var(--cream) !important;
+  border-radius: 20px !important;
+  border: 1.5px solid var(--border);
+
+  /* Backdrop con box-shadow extendida al viewport + sombra propia */
+  box-shadow:
+    0 0 0 100vmax rgba(16, 8, 2, .72),   /* overlay oscuro */
+    0 20px 80px rgba(16, 8, 2, .38) !important;  /* elevación del card */
+
+  /* Layout */
+  text-align: center;
+
+  /* Animación idéntica a .login-modal */
+  animation: overwritePop .32s cubic-bezier(.34, 1.2, .64, 1) both;
+}
+
+/* Icono de advertencia — overrideamos los inline styles del blade */
+#overwriteWarning > div:first-child {
+  width: 56px !important;
+  height: 56px !important;
+  background: #FFF0E4;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 auto 18px !important; /* centrado horizontal */
+  font-size: 1.4rem !important;
+  color: var(--terra) !important;
+}
+
+/* Título */
+#overwriteWarning h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin: 0 0 10px !important;
+  line-height: 1.2;
+}
+
+/* Texto descriptivo */
+#overwriteWarning p {
+  font-size: .875rem;
+  color: var(--muted);
+  line-height: 1.7;
+  margin: 0 0 24px !important;
+  max-width: 320px;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Separador antes de los botones */
+#overwriteWarning > div:last-child {
+  display: flex !important;
+  gap: 10px !important;
+  justify-content: center !important;
+  margin-top: 0 !important;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+/* Animación de entrada */
+@keyframes overwritePop {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(.93);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Hover de publicaciones en perfil */
+.post-card-link:hover .post-card {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    border-color: var(--terra) !important;
 }
 
 /*  RESPONSIVE  */

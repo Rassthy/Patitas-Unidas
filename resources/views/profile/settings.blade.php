@@ -4,23 +4,32 @@
 <div id="profile-container">
 
   <!-- CABECERA -->
-  <div class="profile-header" style="margin-bottom:0;">
-    <div style="display:flex;align-items:center;gap:14px;max-width:1100px;margin:0 auto 32px;">
-      <a href="{{ route('profile.show') }}" class="btn-s" style="padding:8px 16px;font-size:.82rem;">
-        <i class="fa-solid fa-arrow-left"></i> Volver al perfil
-      </a>
-      <h1 style="font-family:'Fraunces',serif;font-size:1.6rem;font-weight:700;color:var(--dark);">
-        Ajustes de la cuenta
-      </h1>
+  <div class="profile-header">
+    <div class="profile-banner {{ $user->banner ? '' : 'no-image' }}"
+      style="{{ $user->banner ? 'background-image:url(' . $user->banner_url . ');' : '' }}">
+
+      <!-- Botones integrados en el banner (Solo para el dueño) -->
+      @if(auth()->check() && auth()->id() === $user->id)
+      <div class="banner-actions">
+        <a href="{{ route('profile.edit') }}" class="banner-btn-p" title="Editar perfil">
+          <div class="banner-btn-icon"><i class="fa-solid fa-pen"></i></div>
+          <span class="banner-btn-text">Editar perfil</span>
+        </a>
+        <a href="{{ route('profile.settings') }}" class="banner-btn-s" title="Ajustes">
+          <div class="banner-btn-icon"><i class="fa-solid fa-gear"></i></div>
+          <span class="banner-btn-text">Ajustes</span>
+        </a>
+      </div>
+      @endif
     </div>
   </div>
 
   <div style="max-width:700px;margin:0 auto;">
 
     @if(session('success'))
-      <div class="alert-banner" style="margin-bottom:24px;">
-        <i class="fa-solid fa-circle-check"></i> {{ session('success') }}
-      </div>
+    <div class="alert-banner" style="margin-bottom:24px;">
+      <i class="fa-solid fa-circle-check"></i> {{ session('success') }}
+    </div>
     @endif
 
     <!-- TABS DE AJUSTES -->
@@ -53,13 +62,13 @@
             <div class="settings-option-grid">
               <label class="settings-option {{ ($user->user_settings['tema'] ?? 'claro') === 'claro' ? 'selected' : '' }}">
                 <input type="radio" name="settings[tema]" value="claro"
-                       {{ ($user->user_settings['tema'] ?? 'claro') === 'claro' ? 'checked' : '' }}>
+                  {{ ($user->user_settings['tema'] ?? 'claro') === 'claro' ? 'checked' : '' }}>
                 <span class="settings-option-ico">☀️</span>
                 <span class="settings-option-lbl">Modo claro</span>
               </label>
               <label class="settings-option {{ ($user->user_settings['tema'] ?? '') === 'oscuro' ? 'selected' : '' }}">
                 <input type="radio" name="settings[tema]" value="oscuro"
-                       {{ ($user->user_settings['tema'] ?? '') === 'oscuro' ? 'checked' : '' }}>
+                  {{ ($user->user_settings['tema'] ?? '') === 'oscuro' ? 'checked' : '' }}>
                 <span class="settings-option-ico">🌙</span>
                 <span class="settings-option-lbl">Modo oscuro</span>
               </label>
@@ -97,7 +106,7 @@
           <div class="edit-section-title">
             <i class="fa-solid fa-eye" style="color:var(--terra)"></i> Visibilidad de datos
           </div>
-          
+
           <div class="settings-toggle-row">
             <div>
               <div class="settings-toggle-lbl">Mostrar apellidos</div>
@@ -105,8 +114,8 @@
             </div>
             <label class="toggle-switch">
               <input type="hidden" name="settings[mostrar_apellidos]" value="0">
-              <input type="checkbox" name="settings[mostrar_apellidos]" value="1" 
-                     {{ ($user->user_settings['mostrar_apellidos'] ?? '1') == '1' ? 'checked' : '' }}>
+              <input type="checkbox" name="settings[mostrar_apellidos]" value="1"
+                {{ ($user->user_settings['mostrar_apellidos'] ?? '1') == '1' ? 'checked' : '' }}>
               <span class="toggle-thumb"></span>
             </label>
           </div>
@@ -119,16 +128,16 @@
             <label class="toggle-switch">
               <input type="hidden" name="settings[mostrar_fecha]" value="0">
               <input type="checkbox" name="settings[mostrar_fecha]" value="1"
-                     {{ ($user->user_settings['mostrar_fecha'] ?? '0') == '1' ? 'checked' : '' }}>
+                {{ ($user->user_settings['mostrar_fecha'] ?? '0') == '1' ? 'checked' : '' }}>
               <span class="toggle-thumb"></span>
             </label>
           </div>
         </div>
-          <div style="display:flex;justify-content:flex-end;margin-top:24px;">
-            <button type="submit" class="btn-p">
-              <i class="fa-solid fa-floppy-disk"></i> Guardar privacidad
-            </button>
-          </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:24px;">
+          <button type="submit" class="btn-p">
+            <i class="fa-solid fa-floppy-disk"></i> Guardar privacidad
+          </button>
+        </div>
       </form>
     </div>
 
@@ -158,20 +167,20 @@
 </div>
 
 <script>
-function switchSettings(btn, id) {
-  document.querySelectorAll('.profile-tab').forEach(b => b.classList.remove('active'));
-  ['st-apariencia', 'st-privacidad', 'st-cuenta'].forEach(s => {
-    document.getElementById(s).style.display = 'none';
-  });
-  btn.classList.add('active');
-  document.getElementById(id).style.display = '';
-}
+  function switchSettings(btn, id) {
+    document.querySelectorAll('.profile-tab').forEach(b => b.classList.remove('active'));
+    ['st-apariencia', 'st-privacidad', 'st-cuenta'].forEach(s => {
+      document.getElementById(s).style.display = 'none';
+    });
+    btn.classList.add('active');
+    document.getElementById(id).style.display = '';
+  }
 
-document.querySelectorAll('.settings-option input[type=radio]').forEach(r => {
-  r.addEventListener('change', () => {
-    document.querySelectorAll('.settings-option').forEach(o => o.classList.remove('selected'));
-    r.closest('.settings-option').classList.add('selected');
+  document.querySelectorAll('.settings-option input[type=radio]').forEach(r => {
+    r.addEventListener('change', () => {
+      document.querySelectorAll('.settings-option').forEach(o => o.classList.remove('selected'));
+      r.closest('.settings-option').classList.add('selected');
+    });
   });
-});
 </script>
 @endsection

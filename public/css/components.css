@@ -33,7 +33,7 @@
 
 .btn-s:hover {
     border-color: var(--terra);
-    color: var(--terra);
+    color: var(--white);
     transform: translateY(-2px);
 }
 

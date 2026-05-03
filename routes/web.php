@@ -65,6 +65,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
     Route::post('posts/{id}/like', [PostController::class, 'toggleLike'])->name('posts.like');
     Route::post('posts/{id}/comments', [PostController::class, 'addComment'])->name('posts.comments.store');
+    Route::post('/profile/{id}/rate', [ProfileController::class, 'storeRating'])->name('profile.rate');
     Route::delete('comments/{id}', [PostController::class, 'destroyComment'])->name('comments.destroy');
     Route::post('comments/{id}/like', [PostController::class, 'toggleCommentLike'])->name('comments.like');
     Route::get('chats', [ChatController::class, 'index'])->name('chats.index');
