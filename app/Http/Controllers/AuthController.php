@@ -16,29 +16,47 @@ class AuthController extends Controller
      */
     public function register(RegisterRequest $request)
     {
+        \Log::info('Register attempt', $request->all());
+    \Log::info('Validated', $request->validated());
         $data = $request->validated();
+        $isOrg = $data['tipo'] === 'organizacion';
 
         try {
-            $user = User::create([
-                'username' => $data['username'],
-                'dni_nie' => $data['dni_nie'],
-                'telefono' => $data['telefono'],
-                'email' => $data['email'],
-                'password_hash' => Hash::make($data['password']),
-                'nombre' => $data['nombre'],
-                'apellidos' => $data['apellidos'],
-                'tipo' => 'usuario',
-                'activo' => true,
-                'foto_perfil' => null,
-            ]);
+            $userData = [
+                'username'         => $data['username'],
+                'email'            => $data['email'],
+                'telefono'         => $data['telefono'],
+                'password_hash'    => Hash::make($data['password']),
+                'activo'           => true,
+                'foto_perfil'      => null,
+            ];
 
-            // Autenticar al usuario automáticamente
+            if ($isOrg) {
+                $userData['tipo']                = 'organizacion';
+                $userData['nombre']              = $data['nombre_organizacion'];
+                $userData['apellidos']           = '';
+                $userData['nombre_organizacion'] = $data['nombre_organizacion'];
+                $userData['tipo_organizacion']   = $data['tipo_organizacion'];
+                $userData['cif']                 = $data['cif'];
+                $userData['direccion']           = $data['direccion'] ?? null;
+                $userData['web']                 = $data['web'] ?? null;
+                $userData['provincia']           = $data['provincia'] ?? null;
+                $userData['ciudad']              = $data['ciudad'] ?? null;
+            } else {
+                $userData['tipo']      = 'usuario';
+                $userData['nombre']    = $data['nombre'];
+                $userData['apellidos'] = $data['apellidos'];
+                $userData['dni_nie']   = $data['dni_nie'];
+            }
+
+            $user = User::create($userData);
             Auth::login($user);
 
-            return redirect()->route('dashboard')->with('success', 'Cuenta creada correctamente. ¡Bienvenido a PatitasUnidas!');
+            return redirect()->route('dashboard')->with('success', '¡Bienvenido a PatitasUnidas! 🐾');
+
         } catch (\Exception $e) {
             return back()
-                ->withInput($request->except('password'))
+                ->withInput($request->except('password', 'password_confirmation'))
                 ->withErrors(['error' => 'Error al crear la cuenta. Por favor, intenta de nuevo.']);
         }
     }

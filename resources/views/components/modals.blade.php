@@ -14,9 +14,12 @@
       <div class="modal-meta" id="modalMeta"></div>
       <p class="modal-desc" id="modalDesc"></p>
       <div class="animal-box" id="modalAnimalBox"></div>
-      <div class="modal-actions">
+      <div class="modal-actions" style="display:flex;gap:12px;align-items:center;">
         <button class="btn-outline" id="likeBtn" onclick="toggleLike(currentPost.id)">
           <i class="fa-regular fa-heart"></i> Like
+        </button>
+        <button class="btn-outline" id="reportPostBtn" style="color:#e74c3c;border-color:#e74c3c;">
+          <i class="fa-solid fa-flag"></i> Reportar
         </button>
       </div>
       <div class="modal-author" id="modalAuthor"></div>
@@ -114,7 +117,6 @@
 
 <!-- CHAT COMPLETO MODAL -->
 <div class="full-chat" id="fullChatModal" style="position:fixed;">
-  <button class="fc-close-btn" onclick="closeFullChat()"><i class="fa-solid fa-xmark"></i></button>
 
   <!-- SIDEBAR: Lista de chats -->
   <div class="fc-sidebar">
@@ -143,11 +145,35 @@
           </div>
         </div>
       </div>
-      <div style="display:flex;gap:8px;">
-        <button class="hdr-icon-btn" style="border-color:var(--border);"
-          onclick="showToast('Videollamada: próximamente 🐾')"><i class="fa-solid fa-video"></i></button>
-        <button class="hdr-icon-btn" style="border-color:var(--border);"
-          onclick="showToast('Más opciones próximamente 🐾')"><i class="fa-solid fa-ellipsis"></i></button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <!-- Botón opciones con dropdown -->
+        <div style="position:relative;">
+          <button class="hdr-icon-btn" style="border-color:var(--border);"
+                  onclick="toggleChatOptions(event)">
+            <i class="fa-solid fa-ellipsis"></i>
+          </button>
+          <div id="chatOptionsDropdown"
+              style="display:flex;flex-direction:column;position:absolute;top:calc(100% + 8px);right:0;
+                      background:var(--cream);border:1px solid var(--border);border-radius:10px;
+                      box-shadow:var(--sh-m);z-index:100;min-width:180px;overflow:hidden;
+                      opacity:0;pointer-events:none;transition:opacity 0.2s ease;">
+            <button onclick="viewChatUserProfile()"
+                    style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:none;border:none;
+                          cursor:pointer;font-size:0.85rem;color:var(--txt);text-align:left;width:100%;">
+              <i class="fa-solid fa-user" style="color:var(--terra);width:16px;"></i> Ver perfil
+            </button>
+            <div style="height:1px;background:var(--border);margin:0 10px;"></div>
+            <button onclick="openReportModal('mensaje_chat', activeChatId, activeChatUserId)"
+              style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:none;border:none;
+                    cursor:pointer;font-size:0.85rem;color:#e74c3c;text-align:left;width:100%;">
+              <i class="fa-solid fa-flag" style="width:16px;"></i> Reportar usuario
+            </button>
+          </div>
+        </div>
+        <!-- Botón cerrar -->
+        <button class="hdr-icon-btn" style="border-color:var(--border);" onclick="closeFullChat()">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
     </div>
     <div class="fc-messages" id="fcMessages">
@@ -212,4 +238,41 @@
   <img id="lightboxImg" src="" style="max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px;">
   <button class="lb-arr" onclick="lightboxNav(1)" style="position:absolute;right:16px;background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:2rem;padding:10px 16px;border-radius:50%;cursor:pointer;">›</button>
   <div id="lightboxCounter" style="position:absolute;bottom:20px;color:#fff;font-size:0.9rem;opacity:0.7;"></div>
+</div>
+
+<!-- MODAL REPORTE -->
+<div id="reportOverlay" onclick="if(event.target===this)closeReportModal()"
+     style="display:flex;opacity:0;pointer-events:none;position:fixed;inset:0;z-index:10000;
+            background:rgba(0,0,0,0.5);align-items:center;justify-content:center;transition:opacity 0.2s;">
+  <div onclick="event.stopPropagation()"
+       style="background:var(--cream);border-radius:14px;padding:24px;width:min(90vw,420px);
+              box-shadow:var(--sh-l);position:relative;z-index:10001;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h3 style="margin:0;font-size:1rem;">🚨 Reportar contenido</h3>
+      <button onclick="closeReportModal()" style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--muted);">✕</button>
+    </div>
+    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:16px;">
+      Describe el motivo del reporte. Nuestro equipo lo revisará en menos de 24h.
+    </p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+      <label style="font-size:0.85rem;font-weight:600;">Motivo *</label>
+      <textarea id="reportMotivo" rows="4" placeholder="Explica por qué estás reportando este contenido..."
+        style="padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--cream);
+               font-size:0.85rem;color:var(--txt);resize:none;font-family:inherit;outline:none;"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button onclick="closeReportModal()"
+        style="padding:8px 16px;border:1px solid var(--border);border-radius:8px;
+               background:none;cursor:pointer;font-size:0.85rem;color:var(--muted);">
+        Cancelar
+      </button>
+      <button onclick="submitReport()"
+        style="padding:8px 16px;border:none;border-radius:8px;
+              background:var(--terra);color:#fff;cursor:pointer;
+              font-size:0.85rem;font-weight:600;
+              transition:background 0.2s;">
+        Enviar reporte
+      </button>
+    </div>
+  </div>
 </div>

@@ -76,8 +76,24 @@
     <div id="registerForm" class="hidden">
       <h2 class="lm-h2">Crea tu cuenta 🐾</h2>
 
-      <form method="POST" action="{{ route('register') }}" id="registerFormEl">
+      <!-- Selector tipo de cuenta -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button type="button" id="tipoUsuarioBtn"
+          onclick="setRegisterTipo('usuario')"
+          style="flex:1;padding:10px;border:2px solid var(--terra);border-radius:var(--r-s);background:var(--terra);color:#fff;cursor:pointer;font-weight:600;font-size:0.85rem;">
+          👤 Usuario
+        </button>
+        <button type="button" id="tipoOrgBtn"
+          onclick="setRegisterTipo('organizacion')"
+          style="flex:1;padding:10px;border:2px solid var(--terra);border-radius:var(--r-s);background:transparent;color:var(--terra);cursor:pointer;font-weight:600;font-size:0.85rem;">
+          🏥 Organización
+        </button>
+      </div>
+
+      <!-- FORM USUARIO -->
+      <form method="POST" action="{{ route('register') }}" id="registerFormUsuario">
         @csrf
+        <input type="hidden" name="tipo" value="usuario">
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div class="fg">
@@ -85,7 +101,6 @@
             <input class="fi @error('nombre') input-error @enderror" type="text" name="nombre" value="{{ old('nombre') }}" placeholder="Tu nombre" required>
             @error('nombre') <span class="error-msg">{{ $message }}</span> @enderror
           </div>
-
           <div class="fg">
             <label class="fl">Apellidos</label>
             <input class="fi @error('apellidos') input-error @enderror" type="text" name="apellidos" value="{{ old('apellidos') }}" placeholder="Tus apellidos" required>
@@ -121,25 +136,94 @@
           <label class="fl">Contraseña</label>
           <input class="fi @error('password') input-error @enderror" type="password" name="password" placeholder="Mín. 8 caracteres, mayús., números" required>
           @error('password') <span class="error-msg">{{ $message }}</span> @enderror
-          <small style="display: block; margin-top: 4px; color: var(--gray); font-size: 0.85em;">
-            Debe contener: mayúscula, minúscula y número
-          </small>
+          <small style="display:block;margin-top:4px;color:var(--muted);font-size:0.85em;">Debe contener: mayúscula, minúscula y número</small>
         </div>
 
         <div class="fg">
           <label class="fl">Confirmar contraseña</label>
-          <input class="fi @error('password_confirmation') input-error @enderror" type="password" name="password_confirmation" placeholder="Repite tu contraseña" required>
-          @error('password_confirmation') <span class="error-msg">{{ $message }}</span> @enderror
+          <input class="fi" type="password" name="password_confirmation" placeholder="Repite tu contraseña" required>
         </div>
 
-        <button class="lm-submit" type="submit">
-          Crear cuenta
-        </button>
+        <button class="lm-submit" type="submit">Crear cuenta</button>
       </form>
 
-      <p class="lm-footer">
-        Al registrarte aceptas nuestros <a href="#">términos de uso</a>
-      </p>
+      <!-- FORM ORGANIZACIÓN -->
+      <form method="POST" action="{{ route('register') }}" id="registerFormOrg" style="display:none;">
+        @csrf
+        <input type="hidden" name="tipo" value="organizacion">
+
+        <div class="fg">
+          <label class="fl">Nombre de la organización *</label>
+          <input class="fi" type="text" name="nombre_organizacion" placeholder="Ej: Protectora Huellas Felices" required>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Tipo de organización *</label>
+          <select class="fi" name="tipo_organizacion" required>
+            <option value="">Selecciona un tipo</option>
+            <option value="protectora">🏠 Protectora de animales</option>
+            <option value="veterinaria">🏥 Clínica veterinaria</option>
+            <option value="refugio">🌿 Refugio</option>
+            <option value="asociacion">🤝 Asociación</option>
+          </select>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Nombre de usuario *</label>
+          <input class="fi" type="text" name="username" placeholder="@tuorganizacion" required>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Correo electrónico *</label>
+          <input class="fi" type="email" name="email" placeholder="contacto@organizacion.com" required>
+        </div>
+
+        <div class="fg">
+          <label class="fl">CIF *</label>
+          <input class="fi" type="text" name="cif" placeholder="A12345678" required>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Teléfono *</label>
+          <input class="fi" type="tel" name="telefono" placeholder="+34 600 000 000" required>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="fg">
+            <label class="fl">Provincia</label>
+            <input class="fi" type="text" name="provincia" placeholder="Madrid">
+          </div>
+          <div class="fg">
+            <label class="fl">Ciudad</label>
+            <input class="fi" type="text" name="ciudad" placeholder="Madrid">
+          </div>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Dirección</label>
+          <input class="fi" type="text" name="direccion" placeholder="Calle Mayor 1">
+        </div>
+
+        <div class="fg">
+          <label class="fl">Web <span style="color:var(--muted);font-size:0.8rem;">(opcional)</span></label>
+          <input class="fi" type="url" name="web" placeholder="https://tuorganizacion.com">
+        </div>
+
+        <div class="fg">
+          <label class="fl">Contraseña *</label>
+          <input class="fi" type="password" name="password" placeholder="Mín. 8 caracteres, mayús., números" required>
+          <small style="display:block;margin-top:4px;color:var(--muted);font-size:0.85em;">Debe contener: mayúscula, minúscula y número</small>
+        </div>
+
+        <div class="fg">
+          <label class="fl">Confirmar contraseña *</label>
+          <input class="fi" type="password" name="password_confirmation" placeholder="Repite tu contraseña" required>
+        </div>
+
+        <button class="lm-submit" type="submit">Registrar organización</button>
+      </form>
+
+      <p class="lm-footer">Al registrarte aceptas nuestros <a href="#">términos de uso</a></p>
     </div>
 
   </div>

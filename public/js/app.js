@@ -90,11 +90,11 @@ function renderPosts(catId, filter='') {
     // Construir la URL en JS en vez de usar asset() del PHP
     const imgSrc = (p.images && p.images.length)
       ? `/storage/${p.images[0].url}`
-      : `https://picsum.photos/seed/${p.id}/400/300`;
+      : `/img/defaults/post_default.png`;
 
     // El autor puede ser null si la relación no se cargó
     const autorNombre = p.author?.username ?? 'Usuario';
-    const autorFoto   = p.author?.foto_perfil ? `/storage/${p.author.foto_perfil}` : `https://i.pravatar.cc/40?img=1`;
+    const autorFoto   = p.author?.foto_perfil ? `/storage/${p.author.foto_perfil}` : `/img/defaults/foto_perfil_generica.png`;
     const autorLabel  = autorNombre.substring(0, 16) + (autorNombre.length > 16 ? '…' : '');
 
     return `
@@ -104,7 +104,6 @@ function renderPosts(catId, filter='') {
                src="${imgSrc}"
                alt="${p.titulo}"
                loading="lazy"
-               onerror="this.src='https://picsum.photos/seed/${p.id}/400/300'">
           <span class="pc-badge ${postBadge.class}">
             ${postBadge.icon}${p.animal_especie ? ' ' + p.animal_especie : ''}
           </span>
@@ -119,7 +118,6 @@ function renderPosts(catId, filter='') {
                    src="${autorFoto}"
                    alt="${autorNombre}"
                    loading="lazy"
-                   onerror="this.src='https://i.pravatar.cc/40?img=1'">
               <span>${autorLabel}</span>
             </div>
             <button class="btn-sm" data-id="${p.id}">Saber más</button>
@@ -163,6 +161,8 @@ async function sendMsg() {
 }
 
 // ========== FUNCIONES COMPLETAS DEL CHAT ==========
+let activeChatUserId = null;
+
 async function openFcChat(id) {
   activeChatId = id;
 
@@ -177,6 +177,7 @@ async function openFcChat(id) {
     const response = await fetch(`/chats/${id}`);
     const data = await response.json();
     const chat = data.chat;
+    activeChatUserId = data.chat.other_user_id ?? null;
 
     const avEl = document.getElementById('fcActiveAv');
       if (chat.foto) {

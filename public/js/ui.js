@@ -99,14 +99,15 @@ async function openPostModal(id) {
 
     updateGallery();
     document.getElementById('modalImg').onclick = () => {
+      if (!currentPost.images || !currentPost.images.length) return;
       const urls = currentPost.images.map(img => `/storage/${img.url}`);
       openLightbox(urls, currentGalIdx);
     };
     document.getElementById('modalImg').style.cursor = 'zoom-in';
 
     const dots = document.getElementById('galDots');
-    dots.innerHTML = post.images.map((_, i) => `<button class="gal-dot ${i===0?'act':''}" onclick="setGalIdx(${i})"></button>`).join('');
-    const showArr = post.images.length > 1;
+    dots.innerHTML = (post.images || []).map((_, i) => `<button class="gal-dot ${i===0?'act':''}" onclick="setGalIdx(${i})"></button>`).join('');
+    const showArr = post.images && post.images.length > 1;
     document.querySelectorAll('.gal-arr').forEach(a => a.style.display = showArr ? '' : 'none');
 
     const ct = catInfo[post.category_id];
@@ -138,7 +139,7 @@ async function openPostModal(id) {
     }
 
     document.getElementById('modalAuthor').innerHTML = `
-      <img src="${post.author.foto_perfil ? `/storage/${post.author.foto_perfil}` : 'https://i.pravatar.cc/40?img=1'}" ...>
+      <img src="${post.author.foto_perfil ? `/storage/${post.author.foto_perfil}` : `/img/defaults/foto_perfil_generica.png`}" ...>
       <div>
         <div class="modal-author-name">${post.author.username}</div>
         <div class="modal-author-role">${post.author.tipo === 'protectora' ? '🏥 Protectora verificada' : post.author.tipo === 'organizacion' ? '🌟 Organización' : '👤 Usuario'}</div>
@@ -160,6 +161,18 @@ async function openPostModal(id) {
     const likeBtn = document.getElementById('likeBtn');
     likeBtn.classList.toggle('liked', post.liked_by_user);
 
+    const reportBtn = document.getElementById('reportPostBtn');
+    if (reportBtn) {
+      if (post.author.id === window.AUTH_USER_ID) {
+        reportBtn.style.display = 'none';
+      } else {
+        reportBtn.style.display = '';
+        reportBtn.onclick = () => openReportModal('post', post.id, post.author.id);
+      }
+    }
+    if (reportBtn) reportBtn.onclick = () =>
+      openReportModal('post', post.id, post.author.id);
+
     // Mostrar modal
     document.getElementById('postOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -177,11 +190,19 @@ function closePostModal(e) {
 }
 
 function updateGallery() {
-  if (!currentPost || !currentPost.images || !currentPost.images.length) return;
-  const img = currentPost.images[currentGalIdx];
+  const modalImg = document.getElementById('modalImg');
+  
+  if (!currentPost || !currentPost.images || !currentPost.images.length) {
 
-  // Arreglo en esta línea igual que en renderPosts
-  document.getElementById('modalImg').src = `/storage/${img.url}`;
+    // Sin fotos muestra foto predeterminada
+    modalImg.src = '/img/defaults/post_default.png';
+    document.querySelectorAll('.gal-arr').forEach(a => a.style.display = 'none');
+    document.getElementById('galDots').innerHTML = '';
+    return;
+  }
+
+  const img = currentPost.images[currentGalIdx];
+  modalImg.src = `/storage/${img.url}`;
   document.querySelectorAll('.gal-dot').forEach((d,i) => d.classList.toggle('act', i === currentGalIdx));
 }
 
@@ -258,6 +279,30 @@ function setLoginTab(btn, tab) {
   btn.classList.add('active');
   _loginForm.classList.toggle('hidden', tab !== 'login');
   _registerForm.classList.toggle('hidden', tab !== 'register');
+}
+
+// Para los diferentes tipos de registro (usuario u organización)
+function setRegisterTipo(tipo) {
+  const usuarioBtn = document.getElementById('tipoUsuarioBtn');
+  const orgBtn = document.getElementById('tipoOrgBtn');
+  const formUsuario = document.getElementById('registerFormUsuario');
+  const formOrg = document.getElementById('registerFormOrg');
+
+  if (tipo === 'usuario') {
+    usuarioBtn.style.background = 'var(--terra)';
+    usuarioBtn.style.color = '#fff';
+    orgBtn.style.background = 'transparent';
+    orgBtn.style.color = 'var(--terra)';
+    formUsuario.style.display = '';
+    formOrg.style.display = 'none';
+  } else {
+    orgBtn.style.background = 'var(--terra)';
+    orgBtn.style.color = '#fff';
+    usuarioBtn.style.background = 'transparent';
+    usuarioBtn.style.color = 'var(--terra)';
+    formUsuario.style.display = 'none';
+    formOrg.style.display = '';
+  }
 }
 
 // Panel de chat
@@ -356,6 +401,28 @@ function clearFcFile() {
   document.getElementById('fcFilePreview').style.display = 'none';
 }
 
+function toggleChatOptions(e) {
+  e.stopPropagation();
+  const dropdown = document.getElementById('chatOptionsDropdown');
+  const isOpen = dropdown.style.opacity === '1';
+  dropdown.style.opacity = isOpen ? '0' : '1';
+  dropdown.style.pointerEvents = isOpen ? 'none' : 'all';
+}
+
+function viewChatUserProfile() {
+  showToast('Vista de perfil — próximamente 🐾');
+  toggleChatOptions({ stopPropagation: () => {} });
+}
+
+// Cerrar dropdown al hacer clic fuera
+document.addEventListener('click', e => {
+  const dropdown = document.getElementById('chatOptionsDropdown');
+  if (dropdown && !dropdown.contains(e.target)) {
+    dropdown.style.opacity = '0';
+    dropdown.style.pointerEvents = 'none';
+  }
+});
+
 // Notificaciones del toast
 let toastTimer;
 function showToast(msg) {
@@ -393,7 +460,7 @@ async function loadComments(postId) {
     const renderComment = (comment, isReply = false) => {
       const foto = comment.user?.foto_perfil
         ? `/storage/${comment.user.foto_perfil}`
-        : `https://i.pravatar.cc/40?img=1`;
+        : `/img/defaults/foto_perfil_generica.png`;
       const username = comment.user?.username ?? 'Usuario';
       const fecha = new Date(comment.created_at);
       const fechaStr = fecha.toLocaleDateString('es-ES');
@@ -404,7 +471,7 @@ async function loadComments(postId) {
         <div class="comment-item ${isReply ? 'comment-reply' : ''}" id="comment-${comment.id}"
              style="${isReply ? 'margin-left:44px;margin-top:8px;' : ''}">
           <img class="comment-av" src="${foto}" alt="${username}"
-               onerror="this.src='https://i.pravatar.cc/40?img=1'">
+               onerror="this.src='/img/defaults/foto_perfil_generica.png'">
           <div class="comment-bubble">
             <div class="comment-name">${username}</div>
             <div class="comment-txt">${comment.comentario}</div>
@@ -424,6 +491,11 @@ async function loadComments(postId) {
                 <button onclick="deleteComment(${comment.id}, ${postId})"
                   style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.75rem;padding:0;">
                   🗑️ Eliminar
+                </button>` : ''}
+              ${!esPropio ? `
+                <button onclick="openReportModal('post_comentario', ${comment.id}, ${comment.author_id})"
+                  style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.75rem;padding:0;">
+                  🚨 Reportar
                 </button>` : ''}
             </div>
           </div>
@@ -734,6 +806,69 @@ async function markAllNotificationsRead() {
     ));
     loadNotifications();
     showToast('Todas las notificaciones leídas ✅');
+  } catch (error) {
+    showToast('Error de conexión');
+  }
+}
+
+// ========== REPORTES ==========
+let reportData = { tipo: null, entidadId: null, reportedUserId: null };
+
+function openReportModal(tipo, entidadId, reportedUserId = null) {
+  if (!window.AUTH_USER_ID) { openLoginModal(); return; }
+  reportData = { tipo, entidadId, reportedUserId };
+  document.getElementById('reportMotivo').value = '';
+  
+  const overlay = document.getElementById('reportOverlay');
+  overlay.classList.add('open');
+  overlay.style.pointerEvents = 'all';
+  overlay.style.opacity = '1';
+
+  const chatModal = document.getElementById('fullChatModal');
+  const postModal = document.getElementById('postOverlay');
+  if (chatModal) chatModal.style.pointerEvents = 'none';
+  if (postModal) postModal.style.pointerEvents = 'none';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeReportModal() {
+  const overlay = document.getElementById('reportOverlay');
+  overlay.classList.remove('open');
+  overlay.style.pointerEvents = 'none';
+  overlay.style.opacity = '0';
+
+  const chatModal = document.getElementById('fullChatModal');
+  const postModal = document.getElementById('postOverlay');
+  if (chatModal) chatModal.style.pointerEvents = '';
+  if (postModal) postModal.style.pointerEvents = '';
+  document.body.style.overflow = '';
+}
+
+async function submitReport() {
+  const motivo = document.getElementById('reportMotivo').value;
+  if (!motivo) { showToast('Selecciona un motivo para el reporte'); return; }
+
+  try {
+    const response = await fetch('/reports', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        tipo_entidad:      reportData.tipo,
+        entidad_id:        reportData.entidadId,
+        reported_user_id:  reportData.reportedUserId,
+        motivo:            motivo,
+      })
+    });
+
+    if (response.ok) {
+      closeReportModal();
+      showToast('Reporte enviado correctamente ✅');
+    } else {
+      showToast('Error al enviar el reporte');
+    }
   } catch (error) {
     showToast('Error de conexión');
   }
