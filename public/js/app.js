@@ -513,20 +513,32 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// Buscar en el panel del chat
 (function () {
-  const searchEl = document.querySelector('.cp-search');
-  if (!searchEl) return;
-  let searchTimer;
-  searchEl.addEventListener('input', () => {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => {
-      const q = searchEl.value.toLowerCase().trim();
-      document.querySelectorAll('#cpList .cp-item').forEach(item => {
-        const name = item.querySelector('.cp-name').textContent.toLowerCase();
-        item.style.display = (!q || name.includes(q)) ? '' : 'none';
-      });
-    }, 150);
+  function initSearch(searchEl, listId) {
+    if (!searchEl) return;
+    let searchTimer;
+    searchEl.addEventListener('input', () => {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        const q = searchEl.value.toLowerCase().trim();
+        document.querySelectorAll(`#${listId} .cp-item`).forEach(item => {
+          const name = item.querySelector('.cp-name')?.textContent.toLowerCase() ?? '';
+          item.style.display = (!q || name.includes(q)) ? '' : 'none';
+        });
+      }, 150);
+    });
+  }
+
+  // Panel lateral
+  initSearch(document.querySelector('#chatPanel .cp-search'), 'cpList');
+
+  // Chat completo — esperar a que se abra
+  document.addEventListener('click', e => {
+    if (e.target.closest('.btn-open-full, #sidebarChatBtn')) {
+      setTimeout(() => {
+        initSearch(document.querySelector('#fullChatModal .cp-search'), 'fcList');
+      }, 100);
+    }
   });
 })();
 
