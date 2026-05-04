@@ -862,3 +862,417 @@
 .mt22 {
     margin-top: 22px;
 }
+
+/* ===== ÁREA PRIVADA — MASCOTAS ===== */
+.private-area {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 36px 24px 60px;
+}
+
+.private-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.private-header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Grid de tarjetas */
+.pets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.pet-card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r);
+    overflow: hidden;
+    box-shadow: var(--sh-s);
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow .2s, transform .2s;
+}
+
+.pet-card:hover {
+    box-shadow: var(--sh-m);
+    transform: translateY(-3px);
+}
+
+.pet-card__photo {
+    width: 100%;
+    height: 160px;
+    overflow: hidden;
+    background: var(--cream-d);
+}
+
+.pet-card__photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pet-card__no-photo {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: var(--border);
+}
+
+.pet-card__no-photo--lg {
+    height: 200px;
+    font-size: 4rem;
+    border-radius: var(--r);
+    border: 1.5px solid var(--border);
+    background: var(--cream-d);
+}
+
+.pet-card__body {
+    padding: 14px 16px 8px;
+    flex: 1;
+}
+
+.pet-card__name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 4px;
+}
+
+.pet-card__meta {
+    font-size: .78rem;
+    color: var(--muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+
+.pet-card__desc {
+    font-size: .82rem;
+    color: var(--muted);
+    line-height: 1.5;
+}
+
+.pet-card__actions {
+    display: flex;
+    gap: 8px;
+    padding: 10px 16px 14px;
+    flex-wrap: wrap;
+}
+
+/* Perfil detalle */
+.pet-profile {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r);
+    padding: 24px;
+    margin-bottom: 32px;
+    box-shadow: var(--sh-s);
+}
+
+.pet-profile__photo {
+    width: 200px;
+    flex-shrink: 0;
+    border-radius: var(--r-s);
+    overflow: hidden;
+}
+
+.pet-profile__photo img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.pet-profile__info h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 8px;
+}
+
+.pet-profile__desc {
+    font-size: .9rem;
+    line-height: 1.65;
+    color: var(--muted);
+    margin-top: 10px;
+}
+
+/* Secciones vacunas / recordatorios */
+.pet-sections {
+    display: grid;
+    gap: 24px;
+}
+
+.pet-section {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r);
+    padding: 22px 24px;
+    box-shadow: var(--sh-s);
+}
+
+.pet-section__head {
+    margin-bottom: 16px;
+}
+
+.pet-section__head h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Inline forms */
+.inline-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: flex-end;
+    margin-bottom: 16px;
+}
+
+.inline-form--col {
+    flex-direction: column;
+}
+
+/* Tabla */
+.pet-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .85rem;
+}
+
+.pet-table th,
+.pet-table td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.pet-table th {
+    color: var(--muted);
+    font-weight: 600;
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+/* Recordatorios */
+.reminders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.reminder-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--cream);
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-s);
+}
+
+.reminder-item--past {
+    opacity: .6;
+    background: var(--cream-d);
+}
+
+.reminder-item__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.reminder-item__info strong {
+    font-size: .9rem;
+    color: var(--dark);
+}
+
+.reminder-item__info p {
+    font-size: .82rem;
+    color: var(--muted);
+}
+
+/* Badges estado */
+.badge-ok {
+    background: #d4edda;
+    color: #155724;
+    padding: 2px 8px;
+    border-radius: 50px;
+    font-size: .75rem;
+    font-weight: 600;
+}
+
+.badge-danger {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 2px 8px;
+    border-radius: 50px;
+    font-size: .75rem;
+    font-weight: 600;
+}
+
+/* Formularios */
+.pet-form {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r);
+    padding: 28px 32px;
+    box-shadow: var(--sh-s);
+    max-width: 620px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    font-size: .84rem;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.form-row .form-group {
+    flex: 1;
+    min-width: 120px;
+}
+
+.form-group--sm {
+    max-width: 100px;
+}
+
+.form-input {
+    padding: 9px 13px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--r-s);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .875rem;
+    color: var(--dark);
+    background: var(--cream);
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color .2s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--terra);
+}
+
+.form-input.is-error {
+    border-color: #e74c3c;
+}
+
+.form-error {
+    font-size: .78rem;
+    color: #e74c3c;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+.req {
+    color: var(--terra);
+}
+
+.btn-outline--danger {
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+
+.btn-outline--danger:hover {
+    border-color: #c0392b;
+    color: #c0392b;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: var(--border);
+}
+
+.empty-inline {
+    font-size: .85rem;
+    color: var(--muted);
+    padding: 8px 0;
+}
+
+.pet-current-photo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.pet-current-photo img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: var(--r-s);
+    border: 1.5px solid var(--border);
+}
+
+.muted {
+    font-size: .8rem;
+    color: var(--muted);
+}
+
+@media (max-width: 600px) {
+    .pet-profile {
+        flex-direction: column;
+    }
+    .pet-profile__photo {
+        width: 100%;
+    }
+    .inline-form {
+        flex-direction: column;
+    }
+}

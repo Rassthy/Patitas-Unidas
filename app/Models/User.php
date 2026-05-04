@@ -47,4 +47,10 @@ class User extends Authenticatable
     {
         return $this->password_hash;
     }
+
+    // "Un usuario TIENE MUCHAS mascotas" — permite hacer Auth::user()->pets para ver las suyas
+    public function pets()
+    {
+        return $this->hasMany(Pet::class);
+    }
 }

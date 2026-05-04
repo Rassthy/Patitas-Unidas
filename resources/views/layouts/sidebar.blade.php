@@ -34,6 +34,10 @@
   @endguest
 
   @auth
+    <a href="{{ route('mis-mascotas.index') }}" class="sb-btn" title="Mis mascotas">
+      <i class="fa-solid fa-dog"></i>
+      <span class="sb-tip">Mis mascotas</span>
+    </a>
     <form method="POST" action="{{ route('logout') }}" class="sb-session-btn">
       @csrf
       <button class="sb-btn sb-session-btn" type="submit">
