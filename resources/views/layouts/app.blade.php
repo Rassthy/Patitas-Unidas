@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PatitasUnidas</title>
@@ -17,6 +18,7 @@
   <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
   <link rel="stylesheet" href="{{ asset('css/components.css') }}">
   <link rel="stylesheet" href="{{ asset('css/sections.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
 </head>
 
 <body>
@@ -43,6 +45,11 @@
 @include('components.modals')
 @include('components.login-modal')
 @include('components.toast')
+
+<!-- Auth user para JS -->
+<script>
+  window.AUTH_USER_ID = {{ Auth::check() ? Auth::id() : 'null' }};
+</script>
 
 <!-- JS -->
 <!-- <script src="{{ asset('js/api.js') }}"></script> -->

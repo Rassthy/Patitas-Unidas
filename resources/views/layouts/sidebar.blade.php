@@ -1,27 +1,29 @@
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sb-logo" onclick="showSection('bienvenida')">🐾</div>
-  <button class="sb-btn active" onclick="showSection('bienvenida')" title="Inicio">
+  <button class="sb-btn active" onclick="if(document.getElementById('sec-bienvenida')){ showSection('bienvenida'); return false; } window.location.href='{{ route('home', ['tab' => 'bienvenida']) }}';" title="Inicio">
     <i class="fa-solid fa-house"></i>
     <span class="sb-tip">Inicio</span>
   </button>
-  <button class="sb-btn" onclick="showSection('principal')" title="Publicaciones">
+  <button class="sb-btn" onclick="if(document.getElementById('sec-principal')){ showSection('principal'); return false; } window.location.href='{{ route('home', ['tab' => 'principal']) }}';" title="Publicaciones">
     <i class="fa-solid fa-paw"></i>
     <span class="sb-tip">Publicaciones</span>
   </button>
   <div class="sb-sep"></div>
-  <button class="sb-btn" id="sidebarChatBtn" onclick="toggleChatPanel()">
+  <button class="sb-btn" id="sidebarChatBtn" 
+    onclick="{{ Auth::check() ? 'toggleChatPanel()' : 'openLoginModal()' }}">
     <i class="fa-solid fa-comment-dots"></i>
-    <span class="sb-dot"></span>
+    <span class="sb-dot" id="chatDot" style="display:none;"></span>
     <span class="sb-tip">Mensajes</span>
   </button>
-  <button class="sb-btn" onclick="openLoginModal()">
+  <button class="sb-btn" 
+    onclick="{{ Auth::check() ? 'openNotificationsPanel()' : 'openLoginModal()' }}">
     <i class="fa-solid fa-bell"></i>
-    <span class="sb-dot" id="notifDot"></span>
+    <span class="sb-dot" id="notifDot" style="display:none;"></span>
     <span class="sb-tip">Notificaciones</span>
   </button>
   <div class="sb-sep"></div>
-  <button class="sb-btn" onclick="showSection('faq')">
+  <button class="sb-btn" onclick="if(document.getElementById('sec-faq')){ showSection('faq'); return false; } window.location.href='{{ route('home', ['tab' => 'faq']) }}';">
     <i class="fa-solid fa-circle-info"></i>
     <span class="sb-tip">Información</span>
   </button>
@@ -34,6 +36,10 @@
   @endguest
 
   @auth
+    <button class="sb-btn" onclick="window.location.href='{{ route('profile.show') }}'">
+      <i class="fa-solid fa-user"></i>
+      <span class="sb-tip">Perfil</span>
+    </button>
     <a href="{{ route('mis-mascotas.index') }}" class="sb-btn" title="Mis mascotas">
       <i class="fa-solid fa-dog"></i>
       <span class="sb-tip">Mis mascotas</span>

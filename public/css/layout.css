@@ -664,29 +664,6 @@ main.chat-open {
     flex-shrink: 0;
 }
 
-.fc-close-btn {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(24, 12, 4, .09);
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    color: var(--txt);
-    transition: background .2s;
-    z-index: 10;
-}
-
-.fc-close-btn:hover {
-    background: rgba(24, 12, 4, .18);
-}
-
 /* RESPONSIVE */
 @media(max-width:900px) {
     header {

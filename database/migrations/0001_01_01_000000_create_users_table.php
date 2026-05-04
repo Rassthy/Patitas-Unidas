@@ -13,10 +13,29 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('username', 50)->unique();
+            $table->string('dni_nie', 15)->nullable()->unique();
+            $table->string('telefono', 20)->unique();
+            $table->string('email', 150)->unique();
+            $table->string('password_hash');
+            $table->string('nombre', 100);
+            $table->string('apellidos', 100);
+            $table->string('nombre_organizacion', 150)->nullable();
+            $table->enum('tipo_organizacion', ['protectora', 'veterinaria', 'refugio', 'asociacion'])->nullable();
+            $table->string('cif', 15)->nullable()->unique();
+            $table->string('direccion', 200)->nullable();
+            $table->string('web', 200)->nullable();
+            $table->enum('tipo', ['usuario', 'protectora', 'organizacion', 'admin'])->default('usuario');
+            $table->text('descripcion')->nullable();
+            $table->date('fecha_nacimiento')->nullable();
+            $table->string('foto_perfil')->nullable();
+            $table->string('banner')->nullable();
+            $table->string('provincia', 50)->nullable();
+            $table->string('ciudad', 100)->nullable();
+            $table->boolean('email_verificado')->default(false);
+            $table->boolean('telefono_verificado')->default(false);
+            $table->boolean('activo')->default(true);
+            $table->string('motivo_baja')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

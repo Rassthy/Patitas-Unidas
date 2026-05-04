@@ -1,10 +1,13 @@
 CREATE DATABASE IF NOT EXISTS patitas_unidas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE patitas_unidas;
 
+SET FOREIGN_KEY_CHECKS=0;
+
 -- ==============================================================================
 -- 1. USUARIOS Y CONFIGURACIÓN (Registro Estricto y Seguro)
 -- ==============================================================================
 
+DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL, -- El famoso @usuario
@@ -25,10 +28,12 @@ CREATE TABLE users (
     telefono_verificado BOOLEAN DEFAULT FALSE,
     activo BOOLEAN DEFAULT TRUE, 
     motivo_baja VARCHAR(255) NULL, -- MEJORA: Para saber por qué un admin baneó a alguien
+    remember_token VARCHAR(100) NULL, -- Para funcionalidad "Recuérdame" de Laravel
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+DROP TABLE IF EXISTS user_settings;
 CREATE TABLE user_settings (
     user_id INT PRIMARY KEY,
     idioma ENUM('es', 'en') DEFAULT 'es',
@@ -42,6 +47,7 @@ CREATE TABLE user_settings (
 -- 2. PERFILES: COMENTARIOS, LIKES E INSIGNIAS
 -- ==============================================================================
 
+DROP TABLE IF EXISTS profile_comments;
 CREATE TABLE profile_comments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     target_user_id INT NOT NULL, 
@@ -55,6 +61,7 @@ CREATE TABLE profile_comments (
     FOREIGN KEY (parent_comment_id) REFERENCES profile_comments(id) ON DELETE CASCADE
 );
 
+DROP TABLE IF EXISTS profile_comment_likes;
 CREATE TABLE profile_comment_likes (
     comment_id INT NOT NULL,
     user_id INT NOT NULL,
@@ -63,6 +70,7 @@ CREATE TABLE profile_comment_likes (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+DROP TABLE IF EXISTS badges;
 CREATE TABLE badges (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(50) NOT NULL,
@@ -70,6 +78,7 @@ CREATE TABLE badges (
     icono_url VARCHAR(255)
 );
 
+DROP TABLE IF EXISTS user_badges;
 CREATE TABLE user_badges (
     user_id INT NOT NULL,
     badge_id INT NOT NULL,
@@ -83,6 +92,7 @@ CREATE TABLE user_badges (
 -- 3. ÁREA PRIVADA: MASCOTAS, VACUNAS Y RECORDATORIOS
 -- ==============================================================================
 
+DROP TABLE IF EXISTS pets;
 CREATE TABLE pets (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -96,6 +106,7 @@ CREATE TABLE pets (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+DROP TABLE IF EXISTS pet_vaccines;
 CREATE TABLE pet_vaccines (
     id INT AUTO_INCREMENT PRIMARY KEY,
     pet_id INT NOT NULL,
@@ -105,6 +116,7 @@ CREATE TABLE pet_vaccines (
     FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE
 );
 
+DROP TABLE IF EXISTS pet_reminders;
 CREATE TABLE pet_reminders (
     id INT AUTO_INCREMENT PRIMARY KEY,
     pet_id INT NOT NULL,
@@ -119,6 +131,7 @@ CREATE TABLE pet_reminders (
 -- 4. FORO Y PUBLICACIONES (Desvinculado del área privada)
 -- ==============================================================================
 
+DROP TABLE IF EXISTS forum_categories;
 CREATE TABLE forum_categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL 
@@ -126,6 +139,7 @@ CREATE TABLE forum_categories (
 
 INSERT INTO forum_categories (nombre) VALUES ('Adoptar mascota'), ('Mascota perdida o robada'), ('Apoyar animales');
 
+DROP TABLE IF EXISTS posts;
 CREATE TABLE posts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     category_id INT NOT NULL,
@@ -146,13 +160,18 @@ CREATE TABLE posts (
     FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+DROP TABLE IF EXISTS post_images;
 CREATE TABLE post_images (
     id INT AUTO_INCREMENT PRIMARY KEY,
     post_id INT NOT NULL,
     url VARCHAR(255) NOT NULL,
+    orden INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
 );
 
+DROP TABLE IF EXISTS post_likes;
 CREATE TABLE post_likes (
     post_id INT NOT NULL,
     user_id INT NOT NULL,
@@ -161,6 +180,7 @@ CREATE TABLE post_likes (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+DROP TABLE IF EXISTS post_comments;
 CREATE TABLE post_comments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     post_id INT NOT NULL,
@@ -173,6 +193,7 @@ CREATE TABLE post_comments (
     FOREIGN KEY (parent_comment_id) REFERENCES post_comments(id) ON DELETE CASCADE
 );
 
+DROP TABLE IF EXISTS post_comment_likes;
 CREATE TABLE post_comment_likes (
     comment_id INT NOT NULL,
     user_id INT NOT NULL,
@@ -185,6 +206,7 @@ CREATE TABLE post_comment_likes (
 -- 5. MENSAJERÍA PRIVADA Y GRUPAL
 -- ==============================================================================
 
+DROP TABLE IF EXISTS chats;
 CREATE TABLE chats (
     id INT AUTO_INCREMENT PRIMARY KEY,
     is_group BOOLEAN DEFAULT FALSE,
@@ -192,6 +214,7 @@ CREATE TABLE chats (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+DROP TABLE IF EXISTS chat_participants;
 CREATE TABLE chat_participants (
     chat_id INT NOT NULL,
     user_id INT NOT NULL,
@@ -202,6 +225,7 @@ CREATE TABLE chat_participants (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+DROP TABLE IF EXISTS messages;
 CREATE TABLE messages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     chat_id INT NOT NULL,
@@ -219,6 +243,7 @@ CREATE TABLE messages (
 -- 6. SISTEMA GLOBAL DE DENUNCIAS Y NOTIFICACIONES
 -- ==============================================================================
 
+DROP TABLE IF EXISTS reports;
 CREATE TABLE reports (
     id INT AUTO_INCREMENT PRIMARY KEY,
     reporter_id INT NOT NULL, -- Quién denuncia
@@ -232,6 +257,7 @@ CREATE TABLE reports (
     FOREIGN KEY (reported_user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+DROP TABLE IF EXISTS notifications;
 CREATE TABLE notifications (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -250,3 +276,23 @@ CREATE TABLE notifications (
 CREATE INDEX idx_users_username ON users(username);
 CREATE INDEX idx_posts_ubicacion ON posts(provincia, ciudad);
 CREATE INDEX idx_posts_estado ON posts(estado);
+
+-- ==============================================================================
+-- 8. TABLA DE SESIONES (Laravel - driver: database)
+-- ==============================================================================
+
+DROP TABLE IF EXISTS sessions;
+CREATE TABLE sessions (
+    id VARCHAR(255) NOT NULL PRIMARY KEY,
+    user_id BIGINT UNSIGNED NULL,
+    ip_address VARCHAR(45) NULL,
+    user_agent TEXT NULL,
+    payload LONGTEXT NOT NULL,
+    last_activity INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_sessions_user_id (user_id),
+    INDEX idx_sessions_last_activity (last_activity)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+SET FOREIGN_KEY_CHECKS=1;

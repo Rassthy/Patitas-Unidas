@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-// Modelo para la tabla 'pet_reminders'
 class PetReminder extends Model
 {
-    // Sin timestamps en esta tabla
+    use HasFactory;
+
+    protected $table = 'pet_reminders';
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -19,11 +22,10 @@ class PetReminder extends Model
     ];
 
     protected $casts = [
-        'fecha_alarma' => 'datetime', // Convierte a Carbon con fecha + hora (no solo fecha)
-        'notificado'   => 'boolean',  // Lo trata como true/false en PHP (en BD es 0 o 1)
+        'fecha_alarma' => 'datetime',
+        'notificado' => 'boolean',
     ];
 
-    // "Un recordatorio PERTENECE A una mascota"
     public function pet()
     {
         return $this->belongsTo(Pet::class);

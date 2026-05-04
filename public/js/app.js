@@ -1,76 +1,36 @@
 // LOGICA PRINCIPAL DE LA APP E INICIALIZACION
 
 // ========== STATE ==========
-let currentCat = 1;
+let currentCat = 0;
+let selectedFiles = new DataTransfer();
 let currentPost = null;
 let currentGalIdx = 0;
 let likedPosts = new Set();
 let chatPanelOpen = false;
 let activeFcChat = null;
+let CHATS = [];
+let activeChatId = null;
+let chatPollingInterval = null;
 
-// ========== DATOS: POSTS / PUBLICACIONES ==========
-const postsData = {
-  1: [
-    {
-      id:1, title:"Luna busca su hogar definitivo", cat:1,
-      desc:"Luna es una Golden Retriever de 3 años, rescatada de la calle. Es muy cariñosa, juguetona y se lleva bien con niños y otros perros. Está esterilizada, vacunada y desparasitada. Lleva 8 meses en la protectora y merece una segunda oportunidad.",
-      animal:"Luna", especie:"Perro", raza:"Golden Retriever", edad:"3 años",
-      provincia:"Madrid", ciudad:"Vallecas",
-      author:"Protectora Huellas", authorType:"protectora", authorImg:"https://i.pravatar.cc/40?img=12",
-      images:["https://images.unsplash.com/photo-1552053831-71594a27632d?w=800&q=80","https://picsum.photos/seed/luna2/800/600","https://picsum.photos/seed/luna3/800/600"],
-      likes:47, date:"hace 2 días"
-    },
-    {
-      id:2, title:"Mochi, gatito siamés afectuoso", cat:1,
-      desc:"Mochi tiene 1 año y es un gato siamés muy sociable. Le encanta estar con personas, ronronear y jugar. Fue encontrado abandonado y busca un hogar tranquilo. Vacunado y esterilizado.",
-      animal:"Mochi", especie:"Gato", raza:"Siamés", edad:"1 año",
-      provincia:"Barcelona", ciudad:"Gràcia",
-      author:"@gatosbarcelona", authorType:"usuario", authorImg:"https://i.pravatar.cc/40?img=23",
-      images:["https://images.unsplash.com/photo-1596854407944-bf87f6fdd49e?w=800&q=80","https://picsum.photos/seed/mochi2/800/600"],
-      likes:62, date:"hace 3 días"
-    }
-  ],
-  2: [
-    {
-      id:7, title:"URGENTE: Max desaparecido en El Retiro", cat:2,
-      desc:"Max, pastor alemán de 5 años, desapareció el domingo por la tarde cerca del lago del Retiro en Madrid. Lleva collar azul con placa. Es muy asustadizo, no se acerquen bruscamente. Recompensa por cualquier información.",
-      animal:"Max", especie:"Perro", raza:"Pastor Alemán", edad:"5 años",
-      provincia:"Madrid", ciudad:"El Retiro",
-      author:"@maxfamilymadrid", authorType:"usuario", authorImg:"https://i.pravatar.cc/40?img=11",
-      images:["https://images.unsplash.com/photo-1589941013453-ec89f33b5e95?w=800&q=80","https://picsum.photos/seed/max2/800/600"],
-      likes:203, date:"hace 1 día"
-    }
-  ],
-  3: [
-    {
-      id:10, title:"Colonia de gatos en Vallecas necesita ayuda", cat:3,
-      desc:"Llevamos años gestionando una colonia de 28 gatos en Vallecas (Madrid). Necesitamos ayuda para pienso, veterinario y mantenimiento del refugio temporal. Cualquier donación ayuda.",
-      animal:null, especie:null, raza:null, edad:null,
-      provincia:"Madrid", ciudad:"Vallecas",
-      author:"@coloniasvallecas", authorType:"organizacion", authorImg:"https://i.pravatar.cc/40?img=77",
-      images:["https://images.unsplash.com/photo-1548802673-380ab8ebc7b7?w=800&q=80","https://picsum.photos/seed/colony2/800/600"],
-      likes:312, date:"hace 5 días"
-    }
-  ]
-};
+// ========== CARGA DE CHATS ==========
+async function loadChats() {
+  if (!window.AUTH_USER_ID) return;
+  try {
+    const response = await fetch('/chats');
+    const data = await response.json();
+    CHATS = data.chats || [];
+    renderChatPanel();
 
-// ========== DATOS: CHATS ==========
-const CHATS = [
-  { id:1, name:'Protectora Huellas', av:'PH', preview:'¡Muchas gracias por tu interés en Luna! 🐕', time:'10:40', unread:2, online:true,
-    msgs:[
-      {mine:false, text:'¡Hola! Vi que te interesó Luna para adoptar.'},
-      {mine:true,  text:'Sí, me parece un amor. ¿Cuándo puedo visitarla?'},
-      {mine:false, text:'Este sábado a partir de las 11h. ¿Te viene bien?'},
-      {mine:true,  text:'Perfecto, apuntado. ¿Cómo llego?'},
-      {mine:false, text:'¡Muchas gracias por tu interés en Luna! 🐕 Te mando la dirección.'}
-    ]},
-  { id:2, name:'@gatosbarcelona', av:'GB', preview:'Sigue disponible para adopción 😸', time:'hace 1 h', unread:1, online:false,
-    msgs:[
-      {mine:false, text:'¡Hola! ¿Tienes alguna pregunta sobre Mochi?'},
-      {mine:true,  text:'Sí, ¿se lleva bien con perros?'},
-      {mine:false, text:'Sigue disponible para adopción 😸 Mochi es muy adaptable.'}
-    ]}
-];
+    // Actualizar dot de mensajes
+    const chatDot = document.getElementById('chatDot');
+    if (chatDot) {
+      const totalUnread = CHATS.reduce((acc, c) => acc + (c.unread || 0), 0);
+      chatDot.style.display = totalUnread > 0 ? '' : 'none';
+    }
+  } catch (error) {
+    console.error('Error cargando chats:', error);
+  }
+}
 
 // ========== CONSTANTES ==========
 const catInfo = {
@@ -86,93 +46,254 @@ const catTitles = {
 };
 
 // ========== CARGA DE PUBLICACIONES ==========
-const allPostsFlat = [...postsData[1],...postsData[2],...postsData[3]];
+let allPosts = [];
+let currentFilter = '';
+
+async function loadPosts() {
+  try {
+    const params = new URLSearchParams();
+    params.append('category_id', currentCat);
+    if (currentFilter) params.append('provincia', currentFilter);
+
+    const response = await fetch(`/posts?${params}`);
+    const data = await response.json();
+    allPosts = data.posts.data || [];
+    renderPosts(currentCat, currentFilter);
+  } catch (error) {
+    console.error('Error loading posts:', error);
+    showToast('Error al cargar publicaciones');
+  }
+}
 
 function filterPosts(provincia) {
-  renderPosts(currentCat, provincia);
+  currentFilter = provincia;
+  loadPosts();
 }
 
 function renderPosts(catId, filter='') {
-  let posts = postsData[catId] || [];
-  if (filter) posts = posts.filter(p => p.provincia === filter);
+  if (!DOM.paCount || !DOM.postsGrid) return;
+
+  const posts = allPosts.filter(p => !filter || p.provincia === filter);
   DOM.paCount.textContent = posts.length + ' publicacion' + (posts.length !== 1 ? 'es' : '');
 
-  const badgeClass = catId === 1 ? 'pc-badge-adopt' : catId === 2 ? 'pc-badge-lost' : 'pc-badge-support';
-  const catIcon    = catId === 1 ? '🏠' : catId === 2 ? '🔍' : '❤️';
+  const getBadgeInfo = (catId, post) => {
+    const id = catId === 0 ? post.category_id : catId;
+    return {
+      class: id === 1 ? 'pc-badge-adopt' : id === 2 ? 'pc-badge-lost' : 'pc-badge-support',
+      icon:  id === 1 ? '🏠'             : id === 2 ? '🔍'            : '❤️'
+    };
+  };
 
-  DOM.postsGrid.innerHTML = posts.length ? posts.map(p => `
-    <div class="post-card" data-id="${p.id}">
-      <div class="pc-img-wrap">
-        <img class="pc-img" src="${p.images[0]}" alt="${p.title}" loading="lazy" onerror="this.src='https://picsum.photos/seed/${p.id}/400/300'">
-        <span class="pc-badge ${badgeClass}">${catIcon}${p.especie ? ' ' + p.especie : ''}</span>
-      </div>
-      <div class="pc-body">
-        <div class="pc-loc">📍 ${p.ciudad}, ${p.provincia}</div>
-        <h4>${p.title}</h4>
-        <p>${p.desc}</p>
-        <div class="pc-foot">
-          <div class="pc-author">
-            <img class="pc-author-av" src="${p.authorImg}" alt="${p.author}" loading="lazy" onerror="this.src='https://i.pravatar.cc/40?img=1'">
-            <span>${p.author.substring(0,16)}${p.author.length>16?'…':''}</span>
+  DOM.postsGrid.innerHTML = posts.length ? posts.map(p => {
+    const postBadge = getBadgeInfo(catId, p);
+
+    // Construir la URL en JS en vez de usar asset() del PHP
+    const imgSrc = (p.images && p.images.length)
+      ? `/storage/${p.images[0].url}`
+      : `/img/defaults/post_default.png`;
+
+    // El autor puede ser null si la relación no se cargó
+    const autorNombre = p.author?.username ?? 'Usuario';
+    const autorFoto   = p.author?.foto_perfil ? `/storage/${p.author.foto_perfil}` : `/img/defaults/foto_perfil_generica.png`;
+    const autorLabel  = autorNombre.substring(0, 16) + (autorNombre.length > 16 ? '…' : '');
+
+    return `
+      <div class="post-card" data-id="${p.id}">
+        <div class="pc-img-wrap">
+          <img class="pc-img"
+               src="${imgSrc}"
+               alt="${p.titulo}"
+               loading="lazy"
+          <span class="pc-badge ${postBadge.class}">
+            ${postBadge.icon}${p.animal_especie ? ' ' + p.animal_especie : ''}
+          </span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-loc">📍 ${p.ciudad}, ${p.provincia}</div>
+          <h4>${p.titulo}</h4>
+          <p>${p.descripcion}</p>
+          <div class="pc-foot">
+            <div class="pc-author">
+              <img class="pc-author-av"
+                   src="${autorFoto}"
+                   alt="${autorNombre}"
+                   loading="lazy"
+              <span>${autorLabel}</span>
+            </div>
+            <button class="btn-sm" data-id="${p.id}">Saber más</button>
           </div>
-          <button class="btn-sm" data-id="${p.id}">Saber más</button>
         </div>
       </div>
-    </div>
-  `).join('') : '<div style="text-align:center;padding:60px 20px;color:var(--muted);"><div style="font-size:2.5rem;margin-bottom:12px">🐾</div><p>No hay publicaciones en esta zona todavía.</p></div>';
+    `;
+  }).join('') : `
+    <div style="text-align:center;padding:60px 20px;color:var(--muted);">
+      <div style="font-size:2.5rem;margin-bottom:12px">🐾</div>
+      <p>No hay publicaciones en esta zona todavía.</p>
+    </div>`;
 }
 
 // ========== ENVIAR MENSAJE ==========
-function sendMsg() {
+async function sendMsg() {
   const input = document.getElementById('msgInput');
-  if (!input.value.trim()) { showToast('Escribe un mensaje antes de enviar 💬'); return; }
-  input.value = '';
-  showToast('Mensaje enviado correctamente ✉️');
+  if (!input.value.trim()) { showToast('Escribe un comentario antes de enviar 💬'); return; }
+
+  try {
+    const response = await fetch(`/posts/${currentPost.id}/comments`, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ comentario: input.value.trim() }),
+    });
+
+    if (response.ok) {
+      input.value = '';
+      loadComments(currentPost.id);
+      showToast('Comentario enviado ✉️');
+    } else {
+      showToast('Error al enviar comentario');
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    showToast('Error de conexión');
+  }
 }
 
 // ========== FUNCIONES COMPLETAS DEL CHAT ==========
-function openFcChat(id) {
-  const chat = CHATS.find(c => c.id === id);
-  if (!chat) return;
-  activeFcChat = chat;
+let activeChatUserId = null;
 
-  document.querySelectorAll('.fc-list .cp-item, #fcList .cp-item').forEach(i => i.classList.remove('selected'));
-  const el = document.getElementById('fci-'+id);
+async function openFcChat(id) {
+  activeChatId = id;
+
+  document.querySelectorAll('.fc-list .cp-item').forEach(i => i.classList.remove('selected'));
+  const el = document.getElementById('fci-' + id);
   if (el) el.classList.add('selected');
 
-  // Borrar el aviso (icono) de "no leído"
-  const badge = document.getElementById('fci-badge-'+id);
-  if (badge) badge.remove();
-  chat.unread = 0;
-  renderChatPanel();
+  await loadChats();
+  renderFcList(); 
 
-  document.getElementById('fcActiveAv').textContent = chat.av;
-  document.getElementById('fcActiveName').textContent = chat.name;
-  document.getElementById('fcActiveStatus').textContent = chat.online ? 'En línea' : 'Desconectado';
-  document.getElementById('fcOnlineDot').style.background = chat.online ? 'var(--green-l)' : 'var(--muted)';
-  document.getElementById('fcInputWrap').style.display = 'flex';
+  try {
+    const response = await fetch(`/chats/${id}`);
+    const data = await response.json();
+    const chat = data.chat;
+    activeChatUserId = data.chat.other_user_id ?? null;
+
+    const avEl = document.getElementById('fcActiveAv');
+      if (chat.foto) {
+        avEl.style.backgroundImage = `url(${chat.foto})`;
+        avEl.style.backgroundSize = 'cover';
+        avEl.textContent = '';
+      } else {
+        avEl.style.backgroundImage = '';
+        avEl.textContent = chat.nombre.substring(0,2).toUpperCase();
+      }
+    document.getElementById('fcActiveName').textContent = chat.nombre;
+    document.getElementById('fcActiveName').textContent = chat.nombre;
+    document.getElementById('fcActiveStatus').textContent = '';
+    document.getElementById('fcInputWrap').style.display = 'flex';
+
+    renderMessages(chat.messages);
+
+    clearInterval(chatPollingInterval);
+    chatPollingInterval = setInterval(() => pollMessages(id), 5000);
+    
+  } catch (error) {
+    console.error('Error cargando chat:', error);
+    showToast('Error al cargar el chat');
+  }
+}
+
+function renderMessages(messages) {
+    console.log('📨 Mensajes:', messages.map(m => ({tipo: m.tipo, texto: m.texto, mine: m.mine})));
 
   const msgs = document.getElementById('fcMessages');
+  if (!messages.length) {
+    msgs.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-size:0.85rem;">Sé el primero en escribir 🐾</div>`;
+    return;
+  }
+
   msgs.innerHTML = `<div class="sys-msg">🔒 Inicio de la conversación</div>` +
-    chat.msgs.map(m => `
-      <div class="bubble-wrap ${m.mine ? 'mine' : ''}">
-        <div class="bubble ${m.mine ? 'mine' : 'theirs'}">${escHtml(m.text)}</div>
-      </div>
-    `).join('');
+    messages.map(m => {
+      const bubble = renderBubbleContent(m);
+      return `
+        <div class="bubble-wrap ${m.mine ? 'mine' : ''}">
+          <div class="bubble ${m.mine ? 'mine' : 'theirs'}">${bubble}
+            <span style="font-size:0.65rem;opacity:0.6;display:block;text-align:right;margin-top:2px;">${m.time}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
   msgs.scrollTop = msgs.scrollHeight;
 }
 
-function sendFcMsg() {
-  if (!activeFcChat) return;
+function renderBubbleContent(m) {
+  const url = `/storage/${m.texto}`;
+  switch (m.tipo) {
+    case 'imagen':
+      return `<img src="${url}" style="max-width:100%;border-radius:8px;cursor:zoom-in;display:block;" onclick="openLightbox(['${url}'], 0)">`;
+    case 'video':
+      return `<video controls style="max-width:100%;border-radius:8px;display:block;"><source src="${url}"></video>`;
+    case 'pdf':
+      return `<a href="${url}" target="_blank" style="display:flex;align-items:center;gap:8px;color:inherit;text-decoration:none;">
+        <i class="fa-solid fa-file-pdf" style="font-size:1.5rem;color:var(--terra);"></i>
+        <span style="font-size:0.8rem;">Ver PDF</span>
+      </a>`;
+    case 'archivo':
+      const nombre = m.texto.split('/').pop();
+      return `<a href="${url}" target="_blank" style="display:flex;align-items:center;gap:8px;color:inherit;text-decoration:none;">
+        <i class="fa-solid fa-file-zipper" style="font-size:1.5rem;"></i>
+        <span style="font-size:0.8rem;">${nombre}</span>
+      </a>`;
+    default:
+      return escHtml(m.texto);
+  }
+}
+
+async function pollMessages(chatId) {
+  if (!activeChatId || activeChatId !== chatId) return;
+  try {
+    const response = await fetch(`/chats/${chatId}`);
+    const data = await response.json();
+    renderMessages(data.chat.messages);
+  } catch {}
+}
+
+async function sendFcMsg() {
+  if (!activeChatId) return;
   const inp = document.getElementById('fcMsgInput');
+  const fileInput = document.getElementById('fcFileInput');
   const txt = inp.value.trim();
-  if (!txt) return;
-  activeFcChat.msgs.push({ mine:true, text:txt });
-  const msgs = document.getElementById('fcMessages');
-  msgs.innerHTML += `<div class="bubble-wrap mine"><div class="bubble mine">${escHtml(txt)}</div></div>`;
-  inp.value = '';
-  inp.style.height = '';
-  msgs.scrollTop = msgs.scrollHeight;
+  const file = fileInput?.files?.[0];
+
+  if (!txt && !file) return;
+
+  const formData = new FormData();
+  if (txt) formData.append('contenido', txt);
+  if (file) formData.append('archivo', file);
+  formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+  try {
+    const response = await fetch(`/chats/${activeChatId}/messages`, {
+      method: 'POST',
+      body: formData
+    });
+
+    if (response.ok) {
+      inp.value = '';
+      inp.style.height = '';
+      if (fileInput) { fileInput.value = ''; }
+      document.getElementById('fcFilePreview').style.display = 'none';
+      const data = await (await fetch(`/chats/${activeChatId}`)).json();
+      renderMessages(data.chat.messages);
+      loadChats();
+    } else {
+      showToast('Error al enviar mensaje');
+    }
+  } catch (error) {
+    showToast('Error de conexión');
+  }
 }
 
 function autoResize(el) {
@@ -182,6 +303,30 @@ function autoResize(el) {
 
 function escHtml(str) {
   return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function startChatWith(userId) {
+  if (!window.AUTH_USER_ID) { openLoginModal(); return; }
+  if (userId === window.AUTH_USER_ID) { showToast('No puedes chatear contigo mismo 😄'); return; }
+
+  try {
+    const response = await fetch('/chats', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ user_id: userId, is_group: false })
+    });
+
+    const data = await response.json();
+    closePostModal();
+    await loadChats();
+    openFullChat();
+    setTimeout(() => openFcChat(data.chat.id), 100);
+  } catch (error) {
+    showToast('Error al iniciar chat');
+  }
 }
 
 // ========== FUNCIONES DE LOGIN ==========
@@ -213,6 +358,8 @@ const faqData = [
 
 function renderFaq() {
   const list = document.getElementById('faqList');
+  if (!list) return;
+
   list.innerHTML = faqData.map((f,i) => `
     <div class="faq-item" id="faq-${i}">
       <div class="faq-q" onclick="toggleFaq(${i})">
@@ -224,11 +371,13 @@ function renderFaq() {
   `).join('');
 }
 
-// ========== INIT ==========
+// ========== INICIALIZACION ==========
 DOM.init();
-renderPosts(1);
+loadPosts();
 renderFaq();
 renderChatPanel();
+loadChats();
+if (window.AUTH_USER_ID) loadNotifications();
 
 document.addEventListener('click', e => {
   const card = e.target.closest('.post-card[data-id]');
@@ -237,7 +386,118 @@ document.addEventListener('click', e => {
   if (smBtn) { e.stopPropagation(); openPostModal(+smBtn.dataset.id); }
 });
 
-// Arreglo para el codigo de ayer (REVISAR)
+// Vista previa de imágenes
+// Almacén acumulativo de archivos
+function previewImages(input) {
+  const container = document.getElementById('imagePreviewContainer');
+  const list = document.getElementById('imagePreviewList');
+
+  // Añadir los nuevos archivos al acumulador (sin duplicados por nombre)
+  Array.from(input.files).forEach(file => {
+    const yaExiste = Array.from(selectedFiles.files).some(f => f.name === file.name);
+    if (!yaExiste) selectedFiles.items.add(file);
+  });
+
+  // Limitar a 10 las fotos
+  if (selectedFiles.files.length > 10) {
+    showToast('Máximo 10 imágenes permitidas');
+    const dt = new DataTransfer();
+    Array.from(selectedFiles.files).slice(0, 10).forEach(f => dt.items.add(f));
+    selectedFiles = dt;
+  }
+
+  // Sincronizar el input con el acumulador
+  input.files = selectedFiles.files;
+
+  // Render del preview
+  if (selectedFiles.files.length > 0) {
+    container.style.display = 'block';
+    list.innerHTML = Array.from(selectedFiles.files).map((file, idx) => `
+      <div id="prev-${idx}" style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--bg-secondary);border-radius:6px;font-size:0.8rem;color:var(--text);max-width:100%;">
+        <i class="fa-solid fa-image" style="color:var(--terra);"></i>
+        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${file.name}">${file.name}</span>
+        <span style="color:var(--muted);font-size:0.75rem;">(${(file.size/1024).toFixed(1)}KB)</span>
+        <button type="button" onclick="removeFile(${idx})" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;">✕</button>
+      </div>
+    `).join('');
+  } else {
+    container.style.display = 'none';
+    list.innerHTML = '';
+  }
+}
+
+function removeFile(idx) {
+  const dt = new DataTransfer();
+  Array.from(selectedFiles.files)
+    .filter((_, i) => i !== idx)
+    .forEach(f => dt.items.add(f));
+  selectedFiles = dt;
+
+  // Sincronizar el input
+  document.getElementById('postImages').files = selectedFiles.files;
+  previewImages({ files: new DataTransfer().files }); // re-render sin añadir nada nuevo
+
+  // Re-render manual (previewImages con files vacíos no re-renderiza bien)
+  const list = document.getElementById('imagePreviewList');
+  const container = document.getElementById('imagePreviewContainer');
+  if (selectedFiles.files.length === 0) {
+    container.style.display = 'none';
+    list.innerHTML = '';
+  } else {
+    container.style.display = 'block';
+    list.innerHTML = Array.from(selectedFiles.files).map((file, i) => `
+      <div style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--bg-secondary);border-radius:6px;font-size:0.8rem;color:var(--text);max-width:100%;">
+        <i class="fa-solid fa-image" style="color:var(--terra);"></i>
+        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${file.name}">${file.name}</span>
+        <span style="color:var(--muted);font-size:0.75rem;">(${(file.size/1024).toFixed(1)}KB)</span>
+        <button type="button" onclick="removeFile(${i})" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;">✕</button>
+      </div>
+    `).join('');
+  }
+}
+
+// Formulario de nueva publicación
+document.getElementById('newPostForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+
+  try {
+    const response = await fetch('/posts', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+      },
+      body: formData,
+    });
+
+    const data = await response.json();
+    
+    if (response.ok) {
+      showToast('Publicación creada correctamente! 🎉');
+      closeNewPostModal();
+      // Limpiar el formulario
+      document.getElementById('newPostForm').reset();
+      selectedFiles = new DataTransfer();
+      document.getElementById('imagePreviewContainer').style.display = 'none';
+      loadPosts(); // Recargar posts
+    } else {
+      // Si es un error de validación, mostrar primer error disponible
+      if (data.errors && typeof data.errors === 'object') {
+        const firstError = Object.values(data.errors)[0];
+        const errorMsg = Array.isArray(firstError) ? firstError[0] : firstError;
+        showToast('Error: ' + errorMsg);
+      } else if (data.message) {
+        showToast('Error: ' + data.message);
+      } else {
+        showToast('Error al crear publicación. Inténtalo de nuevo.');
+      }
+    }
+  } catch (error) {
+    console.error('Error:', error);
+    showToast('Error de conexión. Verifica tu conexión a internet.');
+  }
+});
+
 const _postOverlay = document.getElementById('postOverlay');
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {

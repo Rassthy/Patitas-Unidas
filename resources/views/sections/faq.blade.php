@@ -52,17 +52,17 @@
       <div class="team-card">
         <div class="team-av" style="background:#C8582E;">CL</div>
         <div class="team-name">César Leonardo Calderón</div>
-        <div class="team-role">Desarrollo & Base de Datos</div>
+        <div class="team-role">Backend & Arquitectura</div>
       </div>
       <div class="team-card">
         <div class="team-av" style="background:#4E7A38;">JD</div>
         <div class="team-name">Jonathan Díez de Artazcoz</div>
-        <div class="team-role">Backend & Arquitectura</div>
+        <div class="team-role">Frontend & Diseño UI</div>
       </div>
       <div class="team-card">
         <div class="team-av" style="background:#EDB840;color:var(--dark);">AF</div>
         <div class="team-name">Alejandro Fraile Lobato</div>
-        <div class="team-role">Frontend & Diseño UI</div>
+        <div class="team-role">Desarrollo & Base de Datos</div>
       </div>
     </div>
   </div>

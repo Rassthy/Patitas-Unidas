@@ -5,27 +5,33 @@
     <span class="hdr-logo-txt">PatitasUnidas</span>
   </a>
   <nav>
-    <button class="nav-btn active" onclick="setNav(this,'bienvenida')">
+    <button class="nav-btn active" onclick="if(document.getElementById('sec-bienvenida')){ setNav(this,'bienvenida'); return false; } window.location.href='{{ route('home', ['tab' => 'bienvenida']) }}';">
       <span class="nav-paw">🐾</span>Bienvenida
     </button>
-    <button class="nav-btn" onclick="setNav(this,'principal')">
+    <button class="nav-btn" onclick="if(document.getElementById('sec-principal')){ setNav(this,'principal'); return false; } window.location.href='{{ route('home', ['tab' => 'principal']) }}';">
       <span class="nav-paw">🐾</span>Principal
     </button>
-    <button class="nav-btn" onclick="setNav(this,'faq')">
+    <button class="nav-btn" onclick="if(document.getElementById('sec-faq')){ setNav(this,'faq'); return false; } window.location.href='{{ route('home', ['tab' => 'faq']) }}';">
       <span class="nav-paw">🐾</span>Información / FAQ
     </button>
   </nav>
   <div class="hdr-right">
-    <button class="hdr-icon-btn" onclick="openLoginModal()">
-      <i class="fa-solid fa-bell"></i>
-      <span class="hdr-badge">3</span>
-    </button>
-    <button class="login-btn" id="headerLoginBtn" onclick="openLoginModal()">
-      <i class="fa-solid fa-right-to-bracket"></i> Iniciar sesión
-    </button>
-    <div class="user-chip hidden" id="userChip" onclick="openLoginModal()">
-      <img src="https://i.pravatar.cc/40?img=5" alt="User">
-      <span class="user-chip-name">@usuario</span>
-    </div>
+    @auth
+      <button class="hdr-icon-btn" onclick="openNotificationsPanel()">
+        <i class="fa-solid fa-bell"></i>
+        <span class="hdr-badge" id="notifBadge">0</span>
+      </button>
+      <div class="user-chip" onclick="window.location.href='{{ route('profile.show') }}'">
+        <img src="{{ Auth::user()->foto_perfil_url }}" alt="Foto de perfil">
+        <span class="user-chip-name">Hola {{ Auth::user()->username }}!</span>
+      </div>
+    @else
+      <button class="hdr-icon-btn" onclick="openLoginModal()">
+        <i class="fa-solid fa-bell"></i>
+      </button>
+      <button class="login-btn" onclick="openLoginModal()">
+        <i class="fa-solid fa-right-to-bracket"></i> Acceder
+      </button>
+    @endauth
   </div>
 </header>

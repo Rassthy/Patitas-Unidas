@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Chat;
+use App\Models\User;
+
+class Message extends Model
+{
+    use HasFactory;
+
+    protected $table = 'messages';
+
+    protected $fillable = [
+        'chat_id',
+        'sender_id',
+        'tipo_contenido',
+        'contenido',
+        'leido',
+        'fecha_lectura',
+    ];
+
+    protected $casts = [
+        'leido' => 'boolean',
+        'fecha_lectura' => 'datetime',
+    ];
+
+    public function chat()
+    {
+        return $this->belongsTo(Chat::class);
+    }
+
+    public function sender()
+    {
+        return $this->belongsTo(User::class, 'sender_id');
+    }
+}
