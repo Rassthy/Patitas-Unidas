@@ -9,7 +9,7 @@
       <!-- generado por JS -->
     </div>
     <div class="cp-foot">
-      <button class="btn-new-chat" onclick="showToast('Nuevo chat disponible próximamente 🐾')">
+      <button class="btn-new-chat" onclick="openNewMessageModal()">
         <i class="fa-solid fa-plus"></i> Nuevo mensaje
       </button>
       <button class="btn-open-full" onclick="openFullChat()">

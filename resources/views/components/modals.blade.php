@@ -126,11 +126,33 @@
     </div>
     <div class="fc-list" id="fcList"></div>
     <div class="fc-sb-foot">
-      <button class="btn-new-chat" onclick="showToast('Nuevo chat disponible próximamente 🐾')">
-        <i class="fa-solid fa-plus"></i> Nuevo chat / Grupo
+      <button class="btn-new-chat" onclick="openNewMessageModal()">
+        <i class="fa-solid fa-plus"></i> Nuevo mensaje
       </button>
     </div>
   </div>
+
+<!-- MODAL NUEVO MENSAJE -->
+<div id="newMsgOverlay" onclick="if(event.target===this)closeNewMessageModal()"
+     style="display:flex;opacity:0;pointer-events:none;position:fixed;inset:0;z-index:10000;
+            background:rgba(0,0,0,0.5);align-items:center;justify-content:center;transition:opacity 0.2s;">
+  <div onclick="event.stopPropagation()"
+       style="background:var(--cream);border-radius:14px;padding:24px;width:min(90vw,400px);
+              box-shadow:var(--sh-l);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h3 style="margin:0;font-size:1rem;">✉️ Nuevo mensaje</h3>
+      <button onclick="closeNewMessageModal()"
+              style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--muted);">✕</button>
+    </div>
+    <input id="newMsgUserInput" type="text" placeholder="Buscar usuario por nombre..."
+           oninput="searchUsersForChat(this.value)"
+           style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;
+                  font-size:0.85rem;background:var(--soft);color:var(--txt);outline:none;
+                  box-sizing:border-box;">
+    <div id="newMsgUserResults"
+         style="margin-top:8px;max-height:200px;overflow-y:auto;"></div>
+  </div>
+</div>
 
   <!-- Main: panel de mensajes -->
   <div class="fc-main">

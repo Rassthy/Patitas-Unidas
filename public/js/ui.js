@@ -371,6 +371,60 @@ function renderFcList() {
   `).join('');
 }
 
+function openNewMessageModal() {
+
+  const chatModal = document.getElementById('fullChatModal');
+  if (!chatModal.classList.contains('open')) {
+    openFullChat();
+  }
+
+  const overlay = document.getElementById('newMsgOverlay');
+  overlay.style.opacity = '1';
+  overlay.style.pointerEvents = 'all';
+  document.getElementById('newMsgUserInput').value = '';
+  document.getElementById('newMsgUserResults').innerHTML = '';
+  setTimeout(() => document.getElementById('newMsgUserInput')?.focus(), 150);
+}
+
+function closeNewMessageModal() {
+  const overlay = document.getElementById('newMsgOverlay');
+  overlay.style.opacity = '0';
+  overlay.style.pointerEvents = 'none';
+}
+
+let searchUsersTimer;
+async function searchUsersForChat(query) {
+  clearTimeout(searchUsersTimer);
+  if (query.length < 2) {
+    document.getElementById('newMsgUserResults').innerHTML = '';
+    return;
+  }
+  searchUsersTimer = setTimeout(async () => {
+    try {
+      const response = await fetch(`/users/search?q=${encodeURIComponent(query)}`);
+      const data = await response.json();
+      const results = document.getElementById('newMsgUserResults');
+      if (!data.users || !data.users.length) {
+        results.innerHTML = `<div style="font-size:0.8rem;color:var(--muted);padding:4px;">No se encontraron usuarios</div>`;
+        return;
+      }
+      results.innerHTML = data.users.map(u => `
+        <div onclick="startChatWith(${u.id}); closeNewMessageModal();"
+            style="display:flex;align-items:center;gap:10px;padding:8px 10px;cursor:pointer;
+                    border-radius:8px;transition:background 0.15s;"
+            onmouseover="this.style.background='var(--soft)'"
+            onmouseout="this.style.background='transparent'">
+          <img src="${u.foto_perfil ? `/storage/${u.foto_perfil}` : '/img/defaults/foto_perfil_generica.png'}"
+              style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+          <span style="font-size:0.85rem;color:var(--txt);font-weight:500;">${u.username}</span>
+        </div>
+      `).join('');
+    } catch (error) {
+      console.error('Error buscando usuarios:', error);
+    }
+  }, 300);
+}
+
 function openFullChat() {
   renderFcList();
   document.getElementById('chatOverlayEl').classList.add('open');
@@ -388,6 +442,7 @@ function closeFullChat(e) {
   if (e && e.target !== document.getElementById('chatOverlayEl')) return;
   clearInterval(chatPollingInterval);
   activeChatId = null;
+  closeNewMessageModal();
   document.getElementById('chatOverlayEl').classList.remove('open');
   document.getElementById('fullChatModal').classList.remove('open');
   document.body.style.overflow = '';
@@ -731,7 +786,8 @@ async function loadNotifications() {
 
     list.innerHTML = data.notifications.map(n => {
       const icons = {
-        mensaje: '❤️',
+        like: '❤️',
+        mensaje: '✉️',
         comentario_post: '💬',
         recordatorio_mascota: '🐾',
         reporte: '🚨',

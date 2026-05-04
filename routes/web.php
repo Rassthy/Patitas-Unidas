@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
     // Recursos de Usuario y Mascotas
     Route::resource('users', UserController::class)->only(['index', 'update', 'destroy']);
     Route::resource('pets', PetController::class)->except(['create', 'edit']);
+    Route::get('users/search', [UserController::class, 'search'])->name('users.search');
 
     // Publicaciones e Interacciones
     Route::post('posts', [PostController::class, 'store'])->name('posts.store');

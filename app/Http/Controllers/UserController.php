@@ -39,6 +39,19 @@ class UserController extends Controller
         return response()->json(['user' => $user], 200);
     }
 
+    public function search(Request $request)
+    {
+        $q = $request->get('q', '');
+        $users = \App\Models\User::where('username', 'like', "%{$q}%")
+            ->where('id', '!=', Auth::id())
+            ->where('activo', true)
+            ->select('id', 'username', 'foto_perfil', 'tipo')
+            ->limit(10)
+            ->get();
+
+        return response()->json(['users' => $users]);
+    }
+
     public function destroy(User $user)
     {
         abort_if(Auth::id() !== $user->id, 403, 'No autorizado.');
