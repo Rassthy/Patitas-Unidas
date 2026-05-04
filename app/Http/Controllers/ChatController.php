@@ -111,6 +111,7 @@ class ChatController extends Controller
     public function sendMessage(Request $request, $id)
     {
         $chat = Chat::whereHas('participants', fn($q) => $q->where('user_id', Auth::id()))
+            ->with('participants')
             ->findOrFail($id);
 
         $request->validate([
@@ -145,6 +146,18 @@ class ChatController extends Controller
             'leido'          => false,
         ]);
 
+        $chat->participants
+        ->where('user_id', '!=', Auth::id())
+        ->each(function($participant) use ($id) {
+            $this->createNotification(
+                $participant->user_id,
+                'mensaje',
+                'Nuevo mensaje',
+                Auth::user()->username . ' te ha enviado un mensaje',
+                '/chats/' . $id
+            );
+        });
+
         return response()->json([
             'message' => [
                 'id'     => $message->id,
@@ -155,5 +168,19 @@ class ChatController extends Controller
                 'time'   => $message->created_at->format('H:i'),
             ]
         ], 201);
+    }
+
+    private function createNotification($userId, $tipo, $titulo, $mensaje, $enlaceUrl = null)
+    {
+        if ($userId === Auth::id()) return;
+
+        \App\Models\Notification::create([
+            'user_id'    => $userId,
+            'tipo'       => $tipo,
+            'titulo'     => $titulo,
+            'mensaje'    => $mensaje,
+            'enlace_url' => $enlaceUrl,
+            'leida'      => false,
+        ]);
     }
 }

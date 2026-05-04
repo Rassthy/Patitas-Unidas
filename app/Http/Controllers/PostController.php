@@ -112,7 +112,7 @@ class PostController extends Controller
             // Notificar al autor del post
             $this->createNotification(
                 $post->author_id,
-                'mensaje',
+                'like',
                 'Nuevo like',
                 Auth::user()->username . ' le dio like a tu publicación: ' . $post->titulo,
                 '/posts/' . $id
@@ -185,7 +185,7 @@ class PostController extends Controller
             // Notificar al autor del comentario
             $this->createNotification(
                 $comment->author_id,
-                'mensaje',
+                'like',
                 'Like en comentario',
                 Auth::user()->username . ' le dio like a tu comentario: "' . substr($comment->comentario, 0, 50) . '"',
                 '/posts/' . $comment->post_id
