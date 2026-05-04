@@ -255,6 +255,10 @@
     transform: rotate(90deg);
 }
 
+.modal-actions {
+    padding-bottom: 20px;
+}
+
 /* FOTOS */
 .modal-gallery {
     position: relative;

@@ -529,3 +529,17 @@ document.addEventListener('keydown', e => {
     }, 150);
   });
 })();
+
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Miramos si en la URL existe el parámetro "open_post"
+    const urlParams = new URLSearchParams(window.location.search);
+    const postIdToOpen = urlParams.get('open_post');
+
+    // 2. Si existe, llamamos a la función que abre el modal
+    if (postIdToOpen) {
+        // Asumiendo que tu función en ui.js se llama openPostModal
+        if (typeof openPostModal === 'function') {
+            openPostModal(postIdToOpen);
+        }
+    }
+});

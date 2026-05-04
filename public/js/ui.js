@@ -89,7 +89,12 @@ function setCategory(btn, id) {
 // Gestión de modal
 async function openPostModal(id) {
   try {
-    const response = await fetch(`/posts/${id}`);
+    const response = await fetch(`/posts/${id}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    });
     const data = await response.json();
     const post = data.post;
     if (!post) return;
@@ -873,3 +878,20 @@ async function submitReport() {
     showToast('Error de conexión');
   }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const postId = urlParams.get('open_post');
+
+    if (postId) {
+        if (typeof showSection === 'function') {
+            showSection('principal');
+        }
+
+        if (typeof openPostModal === 'function') {
+            setTimeout(() => openPostModal(postId), 300);
+        }
+        
+        window.history.replaceState({}, document.title, "/");
+    }
+});
