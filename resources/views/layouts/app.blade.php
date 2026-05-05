@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="{{ asset('css/components.css') }}">
   <link rel="stylesheet" href="{{ asset('css/sections.css') }}">
   <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/donations.css') }}">
 </head>
 
 <body>
@@ -52,7 +53,6 @@
 </script>
 
 <!-- JS -->
-<!-- <script src="{{ asset('js/api.js') }}"></script> -->
 <script src="{{ asset('js/ui.js') }}"></script>
 <script src="{{ asset('js/app.js') }}"></script>
 

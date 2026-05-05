@@ -78,9 +78,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('reports', ReportController::class)->except(['create', 'edit']);
 
     // Donaciones
-    Route::get('/donar', function () {
-        return view('sections.donate');
-    })->name('donate');
+    Route::get('/donar', [DonationController::class, 'index'])->name('donate');
 
     Route::post('/donations/create-order', [DonationController::class, 'createOrder']);
     Route::post('/donations/capture-order', [DonationController::class, 'captureOrder']);
