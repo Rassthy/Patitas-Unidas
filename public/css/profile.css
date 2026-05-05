@@ -67,6 +67,12 @@
   padding: 5px 14px; border-radius: 50px;
   font-size: .78rem; font-weight: 600; color: var(--brown, #5C3218); margin-bottom: 12px;
 }
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--cream-d); border: 1.5px solid var(--border);
+  padding: 5px 14px; border-radius: 50px;
+  font-size: .78rem; font-weight: 600; color: var(--brown, #5C3218); margin-bottom: 12px;
+}
 .profile-name {
   font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700;
   color: var(--dark); line-height: 1.2; margin-bottom: 6px;

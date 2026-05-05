@@ -153,7 +153,7 @@ async function openPostModal(id) {
         <button class="btn-outline" onclick="startChatWith(${post.author.id})">
           <i class="fa-solid fa-comment"></i> Mensaje
         </button>
-        <button class="btn-outline" onclick="showToast('Perfil de ${post.author.username} — disponible próximamente')">
+        <button class="btn-outline" onclick="window.location.href='/profile/${post.author.username}'">
           <i class="fa-solid fa-user"></i> Perfil
         </button>
       </div>
@@ -470,8 +470,18 @@ function toggleChatOptions(e) {
 }
 
 function viewChatUserProfile() {
-  showToast('Vista de perfil — próximamente 🐾');
-  toggleChatOptions({ stopPropagation: () => {} });
+  // 1. Cerramos el menú desplegable
+  if (typeof toggleChatOptions === 'function') {
+    toggleChatOptions({ stopPropagation: () => {} });
+  }
+
+  // 2. Comprobamos si tenemos el username
+  if (activeChatUsername) {
+    // Redirigimos a la ruta de perfil usando el username
+    window.location.href = `/profile/${activeChatUsername}`;
+  } else {
+    showToast('No se pudo encontrar el nombre de usuario para este perfil 🐾');
+  }
 }
 
 // Cerrar dropdown al hacer clic fuera
@@ -531,9 +541,13 @@ async function loadComments(postId) {
         <div class="comment-item ${isReply ? 'comment-reply' : ''}" id="comment-${comment.id}"
              style="${isReply ? 'margin-left:44px;margin-top:8px;' : ''}">
           <img class="comment-av" src="${foto}" alt="${username}"
-               onerror="this.src='/img/defaults/foto_perfil_generica.png'">
+            style="cursor:pointer;" 
+            onclick="window.location.href='/profile/${username}'"
+            onerror="this.src='/img/defaults/foto_perfil_generica.png'">
           <div class="comment-bubble">
-            <div class="comment-name">${username}</div>
+            <div class="comment-name" 
+              style="cursor:pointer;" 
+              onclick="window.location.href='/profile/${username}'">${username}</div>
             <div class="comment-txt">${comment.comentario}</div>
             <div class="comment-foot" style="display:flex;align-items:center;gap:12px;margin-top:6px;flex-wrap:wrap;">
               <span class="comment-time">${fechaStr} ${horaStr}</span>

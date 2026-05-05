@@ -81,6 +81,16 @@
           <div class="profile-type">
             <i class="fa-solid fa-user"></i> Usuario
           </div>
+
+          <!-- BOTÓN DE MENSAJE en perfil -->
+          @auth
+            @if(Auth::id() !== $user->id)
+              <br><button class="btn-primary" 
+                      onclick="startChatWith({{ $user->id }})" style="margin-top: 5px;">
+                <i class="fa-solid fa-comment"></i> Mensaje
+              </button>
+            @endif
+          @endauth
         </div>
 
       </div>
@@ -239,7 +249,7 @@
 </div>
 
 <script>
-  /* ---- Control de pestañas ---- */
+  /* Control de pestañas */
   function switchTab(btn, tabId) {
     document.querySelectorAll('.profile-tabs .profile-tab').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-valoraciones').style.display = 'none';
@@ -248,11 +258,7 @@
     document.getElementById(tabId).style.display = '';
   }
 
-  /* ---- Sistema de valoración con medias estrellas (FA6) ---- */
   document.addEventListener('DOMContentLoaded', function () {
-    /* Mide el ancho real de la scrollbar y lo expone como --scrollbar-compensation.
-     * profile.css lo usa para compensar el padding-right del body cuando
-     * overflow:hidden elimina la barra al abrir el modal de sobrescritura. */
     const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
     document.documentElement.style.setProperty('--scrollbar-compensation', scrollbarW + 'px');
 
@@ -260,40 +266,25 @@
     const ratingInput   = document.getElementById('ratingInput');
     const rateForm      = document.getElementById('rateForm');
 
-    if (!starContainer) return;                   // Vista pública sin formulario
+    if (!starContainer) return;
     const stars = starContainer.querySelectorAll('i');
 
-    let selectedValue = 0;                        // Valor confirmado por clic
+    let selectedValue = 0;
 
-    /* Calcula el valor (0.5 ó 1.0 por estrella) según posición X del ratón */
     function valueFromEvent(star, e) {
       const rect  = star.getBoundingClientRect();
       const isHalf = (e.clientX - rect.left) < rect.width / 2;
       return parseInt(star.dataset.index) + (isHalf ? 0.5 : 1);
     }
 
-    /* Pinta las estrellas según un valor numérico (0 – 5, paso 0.5).
-     *
-     *  FA6 requiere cambiar el NOMBRE del icono, no solo fa-solid/fa-regular:
-     *    Entera  → fa-solid   fa-star
-     *    Media   → fa-solid   fa-star-half-stroke   (≠ fa-star)
-     *    Vacía   → fa-regular fa-star
-     *
-     *  El parámetro `mode` controla si aplicamos las clases CSS de color:
-     *    'selected'  → .star-lit     (naranja fijo)
-     *    'preview'   → .star-preview (naranja suave + scale)
-     *    'reset'     → sin clase extra (gris del CSS base)
-     */
     function paintStars(value, mode) {
       stars.forEach((s, idx) => {
-        // 1. Limpiar todas las clases de estado y de icono FA6
         s.classList.remove(
           'fa-solid', 'fa-regular',
           'fa-star', 'fa-star-half-stroke',
           'star-lit', 'star-preview'
         );
 
-        // 2. Asignar icono y estilo según posición
         if (value >= idx + 1) {
           s.classList.add('fa-solid', 'fa-star');
           if (mode === 'selected') s.classList.add('star-lit');
@@ -304,19 +295,16 @@
           if (mode === 'preview')  s.classList.add('star-preview');
         } else {
           s.classList.add('fa-regular', 'fa-star');
-          // Las vacías siempre en gris
         }
       });
     }
 
-    /* Hover: previsualiza la puntuación sin confirmarla */
     starContainer.addEventListener('mousemove', function (e) {
       const star = e.target.closest('i[data-index]');
       if (!star) return;
       paintStars(valueFromEvent(star, e), 'preview');
     });
 
-    /* Al salir del contenedor, volvemos al valor seleccionado (o vacío) */
     starContainer.addEventListener('mouseleave', function () {
       if (selectedValue) {
         paintStars(selectedValue, 'selected');
@@ -325,7 +313,6 @@
       }
     });
 
-    /* Clic: confirma el valor */
     starContainer.addEventListener('click', function (e) {
       const star = e.target.closest('i[data-index]');
       if (!star) return;
@@ -334,7 +321,6 @@
       paintStars(selectedValue, 'selected');
     });
 
-    /* Interceptar envío del formulario */
     if (rateForm) {
       rateForm.addEventListener('submit', function (e) {
         e.preventDefault();
@@ -346,7 +332,6 @@
           return;
         }
 
-        // Comprobamos si el usuario ya ha valorado (dato inyectado desde Laravel)
         const hasRated = {{ auth()->check() && $user->ratings->where('voter_id', Auth::id())->count() > 0 ? 'true' : 'false' }};
 
         if (hasRated) {
@@ -358,7 +343,6 @@
     }
   });
 
-  /* Forzar el envío desde el botón de confirmación del modal */
   function submitRatingAnyway() {
     document.getElementById('overwriteWarning').style.display = 'none';
     document.getElementById('rateForm').submit();

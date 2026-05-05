@@ -167,42 +167,47 @@ let activeChatUserId = null;
 
 async function openFcChat(id) {
   activeChatId = id;
-
   document.querySelectorAll('.fc-list .cp-item').forEach(i => i.classList.remove('selected'));
   const el = document.getElementById('fci-' + id);
   if (el) el.classList.add('selected');
 
-  await loadChats();
-  renderFcList();
-
   try {
     const response = await fetch(`/chats/${id}`);
+    if (!response.ok) throw new Error('No se pudo obtener el chat');
+    
     const data = await response.json();
     const chat = data.chat;
-    activeChatUserId = data.chat.other_user_id ?? null;
+
+    activeChatUserId = chat.other_user_id ?? null;
+    activeChatUsername = chat.other_username ?? chat.username ?? null;
 
     const avEl = document.getElementById('fcActiveAv');
-    if (chat.foto) {
-      avEl.style.backgroundImage = `url(${chat.foto})`;
-      avEl.style.backgroundSize = 'cover';
-      avEl.textContent = '';
-    } else {
-      avEl.style.backgroundImage = '';
-      avEl.textContent = chat.nombre.substring(0, 2).toUpperCase();
+    if (avEl) {
+      if (chat.foto) {
+        avEl.style.backgroundImage = `url(${chat.foto})`;
+        avEl.style.backgroundSize = 'cover';
+        avEl.textContent = '';
+      } else {
+        avEl.style.backgroundImage = '';
+        avEl.textContent = chat.nombre ? chat.nombre.substring(0, 2).toUpperCase() : '??';
+      }
     }
+
     document.getElementById('fcActiveName').textContent = chat.nombre;
-    document.getElementById('fcActiveName').textContent = chat.nombre;
-    document.getElementById('fcActiveStatus').textContent = '';
+    document.getElementById('fcActiveStatus').textContent = ''; // Aquí podrías poner 'En línea' en el futuro
     document.getElementById('fcInputWrap').style.display = 'flex';
 
     renderMessages(chat.messages);
+    
+    await loadChats(); 
+    renderFcList();
 
     clearInterval(chatPollingInterval);
     chatPollingInterval = setInterval(() => pollMessages(id), 5000);
 
   } catch (error) {
     console.error('Error cargando chat:', error);
-    showToast('Error al cargar el chat');
+    showToast('Error al cargar la conversación 🐾');
   }
 }
 

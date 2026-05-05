@@ -91,11 +91,12 @@ class ChatController extends Controller
 
         return response()->json([
             'chat' => [
-                'id'       => $chat->id,
-                'nombre'   => $chat->is_group ? $chat->nombre_grupo : ($other?->user?->username ?? 'Usuario'),
-                'foto'     => $other?->user?->foto_perfil ? '/storage/' . $other->user->foto_perfil : null,
+                'id'            => $chat->id,
+                'nombre'        => $chat->is_group ? $chat->nombre_grupo : ($other?->user?->username ?? 'Usuario'),
+                'foto'          => $other?->user?->foto_perfil ? '/storage/' . $other->user->foto_perfil : null,
                 'other_user_id' => $other?->user_id,
-                'messages' => $chat->messages->map(fn($m) => [
+                'other_username' => $other?->user?->username,
+                'messages'      => $chat->messages->map(fn($m) => [
                     'id'        => $m->id,
                     'mine'      => $m->sender_id === Auth::id(),
                     'tipo'      => $m->tipo_contenido,
