@@ -1,0 +1,389 @@
+/* =============================================
+   donations.css — Página de donaciones PayPal
+   Requiere: variables.css, layout.css, components.css
+   ============================================= */
+
+/* ======= CONTENEDOR PRINCIPAL ======= */
+#donations-container {
+  margin-left: var(--sidebar);
+  margin-top: var(--header);
+  min-height: calc(100vh - var(--header));
+  background: var(--cream);
+  padding: 48px 44px 80px;
+}
+
+/* ======= HERO ======= */
+.don-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: center;
+  max-width: 1100px;
+  margin: 0 auto 56px;
+}
+
+.don-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #FFF0E4;
+  border: 1.5px solid rgba(200,88,46,.25);
+  padding: 5px 14px;
+  border-radius: 50px;
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--terra);
+  margin-bottom: 18px;
+}
+
+.don-hero-title {
+  font-family: 'Fraunces', serif;
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--dark);
+  margin-bottom: 16px;
+}
+.don-hero-title em { font-style: italic; color: var(--terra); }
+
+.don-hero-desc {
+  font-size: .95rem;
+  line-height: 1.75;
+  color: var(--muted);
+  margin-bottom: 28px;
+  max-width: 480px;
+}
+
+/* Stats del hero */
+.don-hero-stats {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.don-hstat           { display: flex; flex-direction: column; gap: 3px; }
+.don-hstat-num       { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 700; color: var(--terra); }
+.don-hstat-lbl       { font-size: .75rem; color: var(--muted); }
+.don-hstat-sep       { width: 1px; height: 36px; background: var(--border); }
+
+/* Imagen del hero */
+.don-hero-img-wrap { position: relative; }
+.don-hero-img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: 20px;
+  box-shadow: var(--sh-l);
+  display: block;
+}
+
+/* ======= GRID PRINCIPAL ======= */
+.don-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 28px;
+  max-width: 1100px;
+  margin: 0 auto;
+  align-items: flex-start;
+}
+
+/* ======= COLUMNAS ======= */
+.don-form-col,
+.don-history-col {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ======= TARJETA BASE ======= */
+.don-card {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  padding: 28px;
+  box-shadow: var(--sh-s);
+}
+.don-card--soft {
+  background: var(--cream);
+  box-shadow: none;
+}
+
+.don-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.don-card-head h2 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin: 0;
+}
+
+/* ======= FORMULARIO DE DONACIÓN ======= */
+
+/* Chips de cantidad */
+.don-amount-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.don-chip {
+  flex: 1;
+  min-width: 56px;
+  padding: 10px 8px;
+  border: 1.5px solid var(--border);
+  border-radius: 50px;
+  background: #fff;
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color .2s, color .2s, background .2s, transform .15s;
+}
+.don-chip:hover {
+  border-color: var(--terra);
+  color: var(--terra);
+  transform: translateY(-2px);
+}
+.don-chip.active {
+  background: var(--terra);
+  border-color: var(--terra);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(200,88,46,.35);
+}
+
+/* Input personalizado */
+.don-custom-wrap    { margin-bottom: 20px; }
+.don-custom-label   { display: block; font-size: .82rem; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+.don-custom-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-s);
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.don-custom-input-wrap:focus-within { border-color: var(--terra); }
+.don-euro {
+  padding: 0 14px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--terra);
+  background: var(--soft);
+  border-right: 1.5px solid var(--border);
+  height: 46px;
+  display: flex;
+  align-items: center;
+}
+.don-amount-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 0 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--dark);
+  height: 46px;
+  background: #fff;
+}
+/* Ocultar flechas nativas del input number */
+.don-amount-input::-webkit-inner-spin-button,
+.don-amount-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.don-amount-input[type=number]               { -moz-appearance: textfield; }
+
+/* Resumen */
+.don-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--soft);
+  border-radius: var(--r-s);
+  padding: 13px 18px;
+  margin-bottom: 22px;
+  font-size: .9rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+.don-summary-val {
+  font-family: 'Fraunces', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--terra);
+}
+
+/* Botón PayPal */
+.don-paypal-wrap  { margin-bottom: 4px; }
+.don-paypal-label {
+  font-size: .74rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+.don-paypal-label i { color: var(--green); }
+
+/* Banner de éxito */
+.don-success-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #EBF5E2;
+  border: 1.5px solid #c3e6a8;
+  border-radius: var(--r-s);
+  padding: 14px 18px;
+  margin-top: 18px;
+  animation: fadeInUp .4s ease both;
+}
+.don-success-banner i     { color: var(--green); font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+.don-success-banner strong { font-size: .9rem; color: var(--dark); display: block; margin-bottom: 3px; }
+.don-success-banner p      { font-size: .82rem; color: var(--muted); margin: 0; }
+
+/* ======= USOS DEL DINERO ======= */
+.don-uses        { display: flex; flex-direction: column; gap: 16px; }
+.don-use-item    { display: flex; align-items: flex-start; gap: 14px; }
+.don-use-ico     { font-size: 1.6rem; flex-shrink: 0; line-height: 1; }
+.don-use-title   { font-size: .88rem; font-weight: 700; color: var(--dark); margin-bottom: 3px; }
+.don-use-desc    { font-size: .8rem; color: var(--muted); line-height: 1.55; }
+
+/* ======= FEED DE DONACIONES RECIENTES ======= */
+.don-feed { display: flex; flex-direction: column; }
+
+.don-feed-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(224,204,186,.5);
+  transition: background .15s;
+}
+.don-feed-item:last-child { border-bottom: none; }
+
+/* Avatar circular con inicial — mismo patrón que .cp-av-circle */
+.don-feed-av {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--terra);
+  color: #fff;
+  font-family: 'Fraunces', serif;
+  font-weight: 700;
+  font-size: .95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.don-feed-info  { flex: 1; min-width: 0; }
+.don-feed-name  { font-size: .84rem; font-weight: 600; color: var(--dark); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.don-feed-time  { font-size: .72rem; color: var(--muted); }
+.don-feed-amount {
+  font-family: 'Fraunces', serif;
+  font-size: .95rem;
+  font-weight: 700;
+  color: var(--green);
+  flex-shrink: 0;
+}
+
+/* ======= TABLA DE MIS DONACIONES ======= */
+.don-my-table-wrap { overflow-x: auto; }
+
+.don-my-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .85rem;
+}
+.don-my-table th {
+  text-align: left;
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--muted);
+  padding: 0 10px 12px;
+  border-bottom: 1.5px solid var(--border);
+}
+.don-my-table td {
+  padding: 12px 10px;
+  color: var(--txt);
+  border-bottom: 1px solid rgba(224,204,186,.4);
+}
+.don-my-table tbody tr:last-child td { border-bottom: none; }
+.don-my-table tfoot td {
+  padding-top: 14px;
+  border-top: 1.5px solid var(--border);
+  border-bottom: none;
+  font-size: .85rem;
+}
+
+.don-td-amount { font-weight: 600; color: var(--dark); }
+.don-td-total  { font-family: 'Fraunces', serif; font-size: 1rem; color: var(--terra); }
+
+/* Badges de estado */
+.don-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 50px;
+  font-size: .72rem;
+  font-weight: 700;
+}
+.don-status--completed { background: #EBF5E2; color: var(--green); }
+.don-status--pending   { background: #FFF8E0; color: #A07000; }
+.don-status--failed    { background: #FFF0E4; color: var(--terra); }
+
+/* ======= ESTADO VACÍO ======= */
+.don-empty {
+  text-align: center;
+  padding: 32px 20px;
+  color: var(--muted);
+}
+.don-empty-ico { font-size: 2.4rem; margin-bottom: 10px; opacity: .5; }
+.don-empty p   { font-size: .88rem; margin: 0; line-height: 1.6; }
+
+/* ======= ANIMACIONES ======= */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ======= RESPONSIVE ======= */
+@media (max-width: 1024px) {
+  .don-grid {
+    grid-template-columns: 1fr;
+  }
+  .don-history-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 900px) {
+  #donations-container {
+    margin-left: 0;
+    padding: 28px 18px 64px;
+  }
+  .don-hero {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .don-hero-img-wrap { display: none; }
+  .don-hero-title    { font-size: 2rem; }
+}
+
+@media (max-width: 600px) {
+  .don-history-col {
+    grid-template-columns: 1fr;
+  }
+  .don-amount-chips { gap: 6px; }
+  .don-chip         { font-size: .82rem; padding: 8px 6px; }
+}
