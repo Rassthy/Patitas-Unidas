@@ -1,4 +1,4 @@
-// Funciones de interfaz de usuario para la manipulación del DOM (abrir modales, cambiar secciones)
+// Funciones de interfaz de usuario para la manipulación del DOM
 
 // DOM Cache
 const DOM = {
@@ -62,7 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
     showSection(requested);
     return;
   }
-
   if (document.querySelector('.profile-container') || !document.getElementById('sec-bienvenida')) {
     clearNavSelection();
   }
@@ -78,10 +77,10 @@ function setCategory(btn, id) {
   currentCat = id;
   loadPosts();
   const titles = {
-    0: '📋 Todas las publicaciones',
-    1: '🏠 Adoptar mascota',
-    2: '🔍 Mascota perdida o robada',
-    3: '❤️ Apoyar animales'
+    0: t('📋 Todas las publicaciones'),
+    1: t('🏠 Adoptar mascota'),
+    2: t('🔍 Mascota perdida o robada'),
+    3: t('❤️ Apoyar animales')
   };
   DOM.paTitle.textContent = titles[id];
 }
@@ -90,10 +89,10 @@ function setCategory(btn, id) {
 async function openPostModal(id) {
   try {
     const response = await fetch(`/posts/${id}`, {
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-        }
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+      }
     });
     const data = await response.json();
     const post = data.post;
@@ -111,7 +110,9 @@ async function openPostModal(id) {
     document.getElementById('modalImg').style.cursor = 'zoom-in';
 
     const dots = document.getElementById('galDots');
-    dots.innerHTML = (post.images || []).map((_, i) => `<button class="gal-dot ${i===0?'act':''}" onclick="setGalIdx(${i})"></button>`).join('');
+    dots.innerHTML = (post.images || []).map((_, i) =>
+      `<button class="gal-dot ${i===0?'act':''}" onclick="setGalIdx(${i})"></button>`
+    ).join('');
     const showArr = post.images && post.images.length > 1;
     document.querySelectorAll('.gal-arr').forEach(a => a.style.display = showArr ? '' : 'none');
 
@@ -135,9 +136,9 @@ async function openPostModal(id) {
     if (post.animal_nombre || post.animal_especie || post.animal_raza) {
       animalBox.style.display = 'flex';
       animalBox.innerHTML = `
-        ${post.animal_nombre  ? `<div class="ai-item"><div class="ai-lbl">Nombre</div><div class="ai-val">${post.animal_nombre}</div></div>` : ''}
-        ${post.animal_especie ? `<div class="ai-item"><div class="ai-lbl">Especie</div><div class="ai-val">${post.animal_especie}</div></div>` : ''}
-        ${post.animal_raza    ? `<div class="ai-item"><div class="ai-lbl">Raza</div><div class="ai-val">${post.animal_raza}</div></div>` : ''}
+        ${post.animal_nombre  ? `<div class="ai-item"><div class="ai-lbl">${t('Nombre')}</div><div class="ai-val">${post.animal_nombre}</div></div>` : ''}
+        ${post.animal_especie ? `<div class="ai-item"><div class="ai-lbl">${t('Especie')}</div><div class="ai-val">${post.animal_especie}</div></div>` : ''}
+        ${post.animal_raza    ? `<div class="ai-item"><div class="ai-lbl">${t('Raza')}</div><div class="ai-val">${post.animal_raza}</div></div>` : ''}
       `;
     } else {
       animalBox.style.display = 'none';
@@ -147,22 +148,24 @@ async function openPostModal(id) {
       <img src="${post.author.foto_perfil ? `/storage/${post.author.foto_perfil}` : `/img/defaults/foto_perfil_generica.png`}" ...>
       <div>
         <div class="modal-author-name">${post.author.username}</div>
-        <div class="modal-author-role">${post.author.tipo === 'protectora' ? '🏥 Protectora verificada' : post.author.tipo === 'organizacion' ? '🌟 Organización' : '👤 Usuario'}</div>
+        <div class="modal-author-role">${
+          post.author.tipo === 'protectora'   ? t('🏥 Protectora verificada') :
+          post.author.tipo === 'organizacion' ? t('🌟 Organización') :
+                                                t('👤 Usuario')
+        }</div>
       </div>
       <div class="modal-author-btns">
         <button class="btn-outline" onclick="startChatWith(${post.author.id})">
-          <i class="fa-solid fa-comment"></i> Mensaje
+          <i class="fa-solid fa-comment"></i> ${t('Mensaje')}
         </button>
         <button class="btn-outline" onclick="window.location.href='/profile/${post.author.username}'">
-          <i class="fa-solid fa-user"></i> Perfil
+          <i class="fa-solid fa-user"></i> ${t('Perfil')}
         </button>
       </div>
-  `;
+    `;
 
-    // Cargar comentarios
     loadComments(id);
 
-    // Actualizar botón de like
     const likeBtn = document.getElementById('likeBtn');
     likeBtn.classList.toggle('liked', post.liked_by_user);
 
@@ -178,13 +181,12 @@ async function openPostModal(id) {
     if (reportBtn) reportBtn.onclick = () =>
       openReportModal('post', post.id, post.author.id);
 
-    // Mostrar modal
     document.getElementById('postOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
 
   } catch (error) {
     console.error('Error loading post:', error);
-    showToast('Error al cargar la publicación');
+    showToast(t('Error al cargar la publicación'));
   }
 }
 
@@ -196,16 +198,12 @@ function closePostModal(e) {
 
 function updateGallery() {
   const modalImg = document.getElementById('modalImg');
-  
   if (!currentPost || !currentPost.images || !currentPost.images.length) {
-
-    // Sin fotos muestra foto predeterminada
     modalImg.src = '/img/defaults/post_default.png';
     document.querySelectorAll('.gal-arr').forEach(a => a.style.display = 'none');
     document.getElementById('galDots').innerHTML = '';
     return;
   }
-
   const img = currentPost.images[currentGalIdx];
   modalImg.src = `/storage/${img.url}`;
   document.querySelectorAll('.gal-dot').forEach((d,i) => d.classList.toggle('act', i === currentGalIdx));
@@ -286,7 +284,6 @@ function setLoginTab(btn, tab) {
   _registerForm.classList.toggle('hidden', tab !== 'register');
 }
 
-// Para los diferentes tipos de registro (usuario u organización)
 function setRegisterTipo(tipo) {
   const usuarioBtn = document.getElementById('tipoUsuarioBtn');
   const orgBtn = document.getElementById('tipoOrgBtn');
@@ -324,7 +321,7 @@ function renderChatPanel() {
   if (!list) return;
 
   if (!CHATS.length) {
-    list.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:0.85rem;">No tienes conversaciones aún 🐾</div>`;
+    list.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:0.85rem;">${t('No tienes conversaciones aún 🐾')}</div>`;
     return;
   }
 
@@ -335,7 +332,7 @@ function renderChatPanel() {
       </div>
       <div class="cp-info">
         <div class="cp-name">${c.nombre}</div>
-        <div class="cp-prev">${c.last_msg || 'Sin mensajes aún'}</div>
+        <div class="cp-prev">${c.last_msg || t('Sin mensajes aún')}</div>
       </div>
       <div class="cp-meta">
         <span class="cp-time">${c.last_time || ''}</span>
@@ -350,7 +347,7 @@ function renderFcList() {
   if (!list) return;
 
   if (!CHATS.length) {
-    list.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:0.85rem;">No tienes conversaciones aún 🐾</div>`;
+    list.innerHTML = `<div style="text-align:center;padding:30px;color:var(--muted);font-size:0.85rem;">${t('No tienes conversaciones aún 🐾')}</div>`;
     return;
   }
 
@@ -361,7 +358,7 @@ function renderFcList() {
       </div>
       <div class="cp-info">
         <div class="cp-name">${c.nombre}</div>
-        <div class="cp-prev">${c.last_msg || 'Sin mensajes aún'}</div>
+        <div class="cp-prev">${c.last_msg || t('Sin mensajes aún')}</div>
       </div>
       <div class="cp-meta">
         <span class="cp-time">${c.last_time || ''}</span>
@@ -372,12 +369,8 @@ function renderFcList() {
 }
 
 function openNewMessageModal() {
-
   const chatModal = document.getElementById('fullChatModal');
-  if (!chatModal.classList.contains('open')) {
-    openFullChat();
-  }
-
+  if (!chatModal.classList.contains('open')) openFullChat();
   const overlay = document.getElementById('newMsgOverlay');
   overlay.style.opacity = '1';
   overlay.style.pointerEvents = 'all';
@@ -405,7 +398,7 @@ async function searchUsersForChat(query) {
       const data = await response.json();
       const results = document.getElementById('newMsgUserResults');
       if (!data.users || !data.users.length) {
-        results.innerHTML = `<div style="font-size:0.8rem;color:var(--muted);padding:4px;">No se encontraron usuarios</div>`;
+        results.innerHTML = `<div style="font-size:0.8rem;color:var(--muted);padding:4px;">${t('No se encontraron usuarios')}</div>`;
         return;
       }
       results.innerHTML = data.users.map(u => `
@@ -470,21 +463,16 @@ function toggleChatOptions(e) {
 }
 
 function viewChatUserProfile() {
-  // 1. Cerramos el menú desplegable
   if (typeof toggleChatOptions === 'function') {
     toggleChatOptions({ stopPropagation: () => {} });
   }
-
-  // 2. Comprobamos si tenemos el username
   if (activeChatUsername) {
-    // Redirigimos a la ruta de perfil usando el username
     window.location.href = `/profile/${activeChatUsername}`;
   } else {
-    showToast('No se pudo encontrar el nombre de usuario para este perfil 🐾');
+    showToast(t('No se pudo encontrar el nombre de usuario para este perfil 🐾'));
   }
 }
 
-// Cerrar dropdown al hacer clic fuera
 document.addEventListener('click', e => {
   const dropdown = document.getElementById('chatOptionsDropdown');
   if (dropdown && !dropdown.contains(e.target)) {
@@ -521,7 +509,7 @@ async function loadComments(postId) {
     const commentsEl = document.getElementById('modalComments');
 
     if (!data.comments || !data.comments.length) {
-      commentsEl.innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:0.85rem;">Sé el primero en comentar 🐾</div>`;
+      commentsEl.innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:0.85rem;">${t('Sé el primero en comentar 🐾')}</div>`;
       return;
     }
 
@@ -541,12 +529,12 @@ async function loadComments(postId) {
         <div class="comment-item ${isReply ? 'comment-reply' : ''}" id="comment-${comment.id}"
              style="${isReply ? 'margin-left:44px;margin-top:8px;' : ''}">
           <img class="comment-av" src="${foto}" alt="${username}"
-            style="cursor:pointer;" 
+            style="cursor:pointer;"
             onclick="window.location.href='/profile/${username}'"
             onerror="this.src='/img/defaults/foto_perfil_generica.png'">
           <div class="comment-bubble">
-            <div class="comment-name" 
-              style="cursor:pointer;" 
+            <div class="comment-name"
+              style="cursor:pointer;"
               onclick="window.location.href='/profile/${username}'">${username}</div>
             <div class="comment-txt">${comment.comentario}</div>
             <div class="comment-foot" style="display:flex;align-items:center;gap:12px;margin-top:6px;flex-wrap:wrap;">
@@ -559,17 +547,17 @@ async function loadComments(postId) {
               ${!isReply ? `
                 <button onclick="toggleReplyInput(${comment.id}, '${username}', ${postId})"
                   style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.75rem;padding:0;">
-                  💬 Responder
+                  ${t('💬 Responder')}
                 </button>` : ''}
               ${esPropio ? `
                 <button onclick="deleteComment(${comment.id}, ${postId})"
                   style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.75rem;padding:0;">
-                  🗑️ Eliminar
+                  ${t('🗑️ Eliminar')}
                 </button>` : ''}
               ${!esPropio ? `
                 <button onclick="openReportModal('post_comentario', ${comment.id}, ${comment.author_id})"
                   style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.75rem;padding:0;">
-                  🚨 Reportar
+                  ${t('🚨 Reportar')}
                 </button>` : ''}
             </div>
           </div>
@@ -589,12 +577,11 @@ async function loadComments(postId) {
 }
 
 function toggleReplyInput(commentId, username, postId) {
-  if (!window.AUTH_USER_ID) { showToast('Inicia sesión para responder 🐾'); return; }
+  if (!window.AUTH_USER_ID) { showToast(t('Inicia sesión para responder 🐾')); return; }
 
   const container = document.getElementById(`reply-input-${commentId}`);
   if (!container) return;
 
-  // Si ya está abierto, cerrarlo
   if (container.style.display !== 'none') {
     container.style.display = 'none';
     container.innerHTML = '';
@@ -607,7 +594,7 @@ function toggleReplyInput(commentId, username, postId) {
       <div style="flex:1;background:var(--bg-secondary);border-radius:10px;padding:8px 12px;border:1px solid var(--border);">
         <span style="font-size:0.75rem;color:var(--terra);font-weight:600;">@${username}</span>
         <textarea id="reply-text-${commentId}"
-          placeholder="Escribe tu respuesta..."
+          placeholder="${t('Escribe tu respuesta...')}"
           rows="2"
           style="width:100%;background:none;border:none;outline:none;resize:none;font-size:0.85rem;color:var(--text);margin-top:4px;font-family:inherit;"
         ></textarea>
@@ -615,11 +602,11 @@ function toggleReplyInput(commentId, username, postId) {
       <div style="display:flex;flex-direction:column;gap:4px;">
         <button onclick="submitReply(${commentId}, ${postId})"
           style="background:var(--terra);color:#fff;border:none;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:0.8rem;white-space:nowrap;">
-          Enviar
+          ${t('Enviar')}
         </button>
         <button onclick="toggleReplyInput(${commentId}, '${username}', ${postId})"
           style="background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:0.8rem;color:var(--muted);">
-          Cancelar
+          ${t('Cancelar')}
         </button>
       </div>
     </div>
@@ -631,7 +618,7 @@ function toggleReplyInput(commentId, username, postId) {
 async function submitReply(parentCommentId, postId) {
   const textarea = document.getElementById(`reply-text-${parentCommentId}`);
   const texto = textarea?.value.trim();
-  if (!texto) { showToast('Escribe algo antes de responder 💬'); return; }
+  if (!texto) { showToast(t('Escribe algo antes de responder 💬')); return; }
 
   try {
     const response = await fetch(`/posts/${postId}/comments`, {
@@ -648,26 +635,26 @@ async function submitReply(parentCommentId, postId) {
 
     if (response.ok) {
       loadComments(postId);
-      showToast('Respuesta enviada 💬');
+      showToast(t('Respuesta enviada 💬'));
     } else {
-      showToast('Error al enviar respuesta');
+      showToast(t('Error al enviar respuesta'));
     }
   } catch (error) {
-    showToast('Error de conexión');
+    showToast(t('Error de conexión'));
   }
 }
 
 function deleteComment(commentId, postId) {
   DOM.toastMsg.innerHTML = `
-    ¿Eliminar comentario?
+    ${t('¿Eliminar comentario?')}
     <span style="display:flex;gap:8px;margin-top:8px;justify-content:center;">
       <button onclick="confirmDeleteComment(${commentId}, ${postId})"
         style="background:var(--terra);color:#fff;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:0.8rem;">
-        Eliminar
+        ${t('Eliminar')}
       </button>
       <button onclick="DOM.toast.classList.remove('show')"
         style="background:var(--bg-secondary);color:var(--text);border:none;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:0.8rem;">
-        Cancelar
+        ${t('Cancelar')}
       </button>
     </span>
   `;
@@ -686,12 +673,12 @@ async function confirmDeleteComment(commentId, postId) {
     });
     if (response.ok) {
       loadComments(postId);
-      showToast('Comentario eliminado 🗑️');
+      showToast(t('Comentario eliminado 🗑️'));
     } else {
-      showToast('Error al eliminar comentario');
+      showToast(t('Error al eliminar comentario'));
     }
   } catch (error) {
-    showToast('Error de conexión');
+    showToast(t('Error de conexión'));
   }
 }
 
@@ -713,18 +700,18 @@ async function toggleLike(postId) {
       likeBtn.classList.toggle('liked', data.liked);
       likeIcon.className = data.liked ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
       likeCount.innerHTML = `<i class="fa-regular fa-heart"></i>${data.likes_count} likes`;
-      showToast(data.liked ? 'Like añadido ❤️' : 'Like quitado 💔');
+      showToast(data.liked ? t('Like añadido ❤️') : t('Like quitado 💔'));
     } else {
-      showToast('Error al procesar like');
+      showToast(t('Error al procesar like'));
     }
   } catch (error) {
     console.error('Error:', error);
-    showToast('Error de conexión');
+    showToast(t('Error de conexión'));
   }
 }
 
 async function toggleCommentLike(commentId, btn) {
-  if (!window.AUTH_USER_ID) { showToast('Inicia sesión para dar like 🐾'); return; }
+  if (!window.AUTH_USER_ID) { showToast(t('Inicia sesión para dar like 🐾')); return; }
   try {
     const response = await fetch(`/comments/${commentId}/like`, {
       method: 'POST',
@@ -740,7 +727,7 @@ async function toggleCommentLike(commentId, btn) {
       btn.innerHTML = `${data.liked ? '❤️' : '🤍'} <span>${data.likes_count}</span>`;
     }
   } catch (error) {
-    showToast('Error de conexión');
+    showToast(t('Error de conexión'));
   }
 }
 
@@ -789,7 +776,7 @@ async function loadNotifications() {
     const badge = document.getElementById('notifBadge');
 
     if (!data.notifications || !data.notifications.length) {
-      list.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:0.85rem;">Sin notificaciones por ahora 🐾</div>`;
+      list.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:0.85rem;">${t('Sin notificaciones por ahora 🐾')}</div>`;
       badge.style.display = 'none';
       return;
     }
@@ -828,10 +815,11 @@ async function loadNotifications() {
         </div>
       `;
     }).join('');
+
     const notifDot = document.getElementById('notifDot');
-      if (notifDot) {
-        notifDot.style.display = unread > 0 ? '' : 'none';
-      }
+    if (notifDot) {
+      notifDot.style.display = unread > 0 ? '' : 'none';
+    }
   } catch (error) {
     console.error('Error cargando notificaciones:', error);
   }
@@ -850,7 +838,6 @@ async function markNotificationRead(id, el) {
     el.style.background = 'transparent';
     const dot = el.querySelector('span[style*="border-radius:50%"]');
     if (dot) dot.remove();
-    // Actualizar badge
     const badge = document.getElementById('notifBadge');
     const current = parseInt(badge.textContent) || 0;
     if (current > 0) {
@@ -863,8 +850,6 @@ async function markNotificationRead(id, el) {
 }
 
 async function markAllNotificationsRead() {
-  const items = document.querySelectorAll('#notifList [style*="bg-secondary"]');
-  // Recargar tras marcar todas
   try {
     const response = await fetch('/notifications');
     const data = await response.json();
@@ -880,9 +865,9 @@ async function markAllNotificationsRead() {
       })
     ));
     loadNotifications();
-    showToast('Todas las notificaciones leídas ✅');
+    showToast(t('Todas las notificaciones leídas ✅'));
   } catch (error) {
-    showToast('Error de conexión');
+    showToast(t('Error de conexión'));
   }
 }
 
@@ -893,7 +878,7 @@ function openReportModal(tipo, entidadId, reportedUserId = null) {
   if (!window.AUTH_USER_ID) { openLoginModal(); return; }
   reportData = { tipo, entidadId, reportedUserId };
   document.getElementById('reportMotivo').value = '';
-  
+
   const overlay = document.getElementById('reportOverlay');
   overlay.classList.add('open');
   overlay.style.pointerEvents = 'all';
@@ -921,7 +906,7 @@ function closeReportModal() {
 
 async function submitReport() {
   const motivo = document.getElementById('reportMotivo').value;
-  if (!motivo) { showToast('Selecciona un motivo para el reporte'); return; }
+  if (!motivo) { showToast(t('Selecciona un motivo para el reporte')); return; }
 
   try {
     const response = await fetch('/reports', {
@@ -940,28 +925,22 @@ async function submitReport() {
 
     if (response.ok) {
       closeReportModal();
-      showToast('Reporte enviado correctamente ✅');
+      showToast(t('Reporte enviado correctamente ✅'));
     } else {
-      showToast('Error al enviar el reporte');
+      showToast(t('Error al enviar el reporte'));
     }
   } catch (error) {
-    showToast('Error de conexión');
+    showToast(t('Error de conexión'));
   }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const postId = urlParams.get('open_post');
+  const urlParams = new URLSearchParams(window.location.search);
+  const postId = urlParams.get('open_post');
 
-    if (postId) {
-        if (typeof showSection === 'function') {
-            showSection('principal');
-        }
-
-        if (typeof openPostModal === 'function') {
-            setTimeout(() => openPostModal(postId), 300);
-        }
-        
-        window.history.replaceState({}, document.title, "/");
-    }
+  if (postId) {
+    if (typeof showSection === 'function') showSection('principal');
+    if (typeof openPostModal === 'function') setTimeout(() => openPostModal(postId), 300);
+    window.history.replaceState({}, document.title, "/");
+  }
 });

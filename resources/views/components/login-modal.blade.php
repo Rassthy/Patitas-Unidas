@@ -1,6 +1,5 @@
 <!-- LOGIN MODAL -->
 <div class="login-overlay" id="loginOverlay" onclick="closeLoginModal(event)">
-  <!-- Prevenimos que clics dentro del modal lo cierren -->
   <div class="login-modal" onclick="event.stopPropagation()">
 
     <button class="lm-close" onclick="closeLoginModal()">
@@ -15,78 +14,66 @@
 
     <!-- TABS -->
     <div class="lm-tabs">
-      <button class="lm-tab active" onclick="setLoginTab(this,'login')">Iniciar sesión</button>
-      <button class="lm-tab" onclick="setLoginTab(this,'register')">Registrarse</button>
+      <button class="lm-tab active" onclick="setLoginTab(this,'login')">{{ __('Iniciar sesión') }}</button>
+      <button class="lm-tab" onclick="setLoginTab(this,'register')">{{ __('Registrarse') }}</button>
     </div>
 
     @php
       $isLoginAttempt = old('login') !== null;
       $isRegisterAttempt = (old('username') !== null || old('nombre') !== null) && !request()->routeIs('profile.*');
-      $openModal = ($errors->any() && !request()->routeIs('profile.*')) || $isLoginAttempt || $isRegisterAttempt; 
+      $openModal = ($errors->any() && !request()->routeIs('profile.*')) || $isLoginAttempt || $isRegisterAttempt;
     @endphp
 
     <!-- LOGIN FORM -->
     <div id="loginForm">
-      <h2 class="lm-h2">Bienvenido de vuelta 👋</h2>
+      <h2 class="lm-h2">{{ __('Bienvenido de vuelta 👋') }}</h2>
 
       <form method="POST" action="{{ route('login') }}" id="loginFormEl">
         @csrf
 
         <div class="fg">
-          <label class="fl">Usuario o Correo electrónico</label>
-          <input class="fi @error('login') input-error @enderror" 
-                 type="text" 
-                 name="login" 
-                 value="{{ old('login') }}" 
-                 placeholder="tu@email.com o @tunombre" 
-                 required>
-          @error('login')
-            <span class="error-msg">{{ $message }}</span>
-          @enderror
+          <label class="fl">{{ __('Usuario o Correo electrónico') }}</label>
+          <input class="fi @error('login') input-error @enderror"
+                 type="text" name="login" value="{{ old('login') }}"
+                 placeholder="{{ __('tu@email.com o @tunombre') }}" required>
+          @error('login') <span class="error-msg">{{ $message }}</span> @enderror
         </div>
 
         <div class="fg">
-          <label class="fl">Contraseña</label>
-          <input class="fi @error('password') input-error @enderror" 
-                 type="password" 
-                 name="password" 
-                 placeholder="••••••••" 
-                 required>
-          @error('password')
-            <span class="error-msg">{{ $message }}</span>
-          @enderror
+          <label class="fl">{{ __('Contraseña') }}</label>
+          <input class="fi @error('password') input-error @enderror"
+                 type="password" name="password" placeholder="••••••••" required>
+          @error('password') <span class="error-msg">{{ $message }}</span> @enderror
         </div>
 
-        <div class="fg" style="display: flex; align-items: center; gap: 8px;">
-          <input type="checkbox" name="remember" id="rememberLogin" style="width: 16px; cursor: pointer;">
-          <label for="rememberLogin" style="margin: 0; cursor: pointer; font-size: 0.9em;">Recuérdame</label>
+        <div class="fg" style="display:flex;align-items:center;gap:8px;">
+          <input type="checkbox" name="remember" id="rememberLogin" style="width:16px;cursor:pointer;">
+          <label for="rememberLogin" style="margin:0;cursor:pointer;font-size:0.9em;">{{ __('Recuérdame') }}</label>
         </div>
 
-        <button class="lm-submit" type="submit">
-          Entrar a PatitasUnidas
-        </button>
+        <button class="lm-submit" type="submit">{{ __('Entrar a PatitasUnidas') }}</button>
       </form>
 
       <p class="lm-footer">
-        <a href="#">¿Olvidaste tu contraseña?</a>
+        <a href="#">{{ __('¿Olvidaste tu contraseña?') }}</a>
       </p>
     </div>
 
     <!-- REGISTER FORM -->
     <div id="registerForm" class="hidden">
-      <h2 class="lm-h2">Crea tu cuenta 🐾</h2>
+      <h2 class="lm-h2">{{ __('Crea tu cuenta 🐾') }}</h2>
 
       <!-- Selector tipo de cuenta -->
       <div style="display:flex;gap:8px;margin-bottom:16px;">
-        <button type="button" id="tipoUsuarioBtn"
-          onclick="setRegisterTipo('usuario')"
-          style="flex:1;padding:10px;border:2px solid var(--terra);border-radius:var(--r-s);background:var(--terra);color:#fff;cursor:pointer;font-weight:600;font-size:0.85rem;">
-          👤 Usuario
+        <button type="button" id="tipoUsuarioBtn" onclick="setRegisterTipo('usuario')"
+          style="flex:1;padding:10px;border:2px solid var(--terra);border-radius:var(--r-s);
+                 background:var(--terra);color:#fff;cursor:pointer;font-weight:600;font-size:0.85rem;">
+          👤 {{ __('Usuario') }}
         </button>
-        <button type="button" id="tipoOrgBtn"
-          onclick="setRegisterTipo('organizacion')"
-          style="flex:1;padding:10px;border:2px solid var(--terra);border-radius:var(--r-s);background:transparent;color:var(--terra);cursor:pointer;font-weight:600;font-size:0.85rem;">
-          🏥 Organización
+        <button type="button" id="tipoOrgBtn" onclick="setRegisterTipo('organizacion')"
+          style="flex:1;padding:10px;border:2px solid var(--terra);border-radius:var(--r-s);
+                 background:transparent;color:var(--terra);cursor:pointer;font-weight:600;font-size:0.85rem;">
+          🏥 {{ __('Organización') }}
         </button>
       </div>
 
@@ -97,54 +84,64 @@
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div class="fg">
-            <label class="fl">Nombre</label>
-            <input class="fi @error('nombre') input-error @enderror" type="text" name="nombre" value="{{ old('nombre') }}" placeholder="Tu nombre" required>
+            <label class="fl">{{ __('Nombre') }}</label>
+            <input class="fi @error('nombre') input-error @enderror" type="text" name="nombre"
+                   value="{{ old('nombre') }}" placeholder="{{ __('Nombre') }}" required>
             @error('nombre') <span class="error-msg">{{ $message }}</span> @enderror
           </div>
           <div class="fg">
-            <label class="fl">Apellidos</label>
-            <input class="fi @error('apellidos') input-error @enderror" type="text" name="apellidos" value="{{ old('apellidos') }}" placeholder="Tus apellidos" required>
+            <label class="fl">{{ __('Apellidos') }}</label>
+            <input class="fi @error('apellidos') input-error @enderror" type="text" name="apellidos"
+                   value="{{ old('apellidos') }}" placeholder="{{ __('Apellidos') }}" required>
             @error('apellidos') <span class="error-msg">{{ $message }}</span> @enderror
           </div>
         </div>
 
         <div class="fg">
-          <label class="fl">Nombre de usuario</label>
-          <input class="fi @error('username') input-error @enderror" type="text" name="username" value="{{ old('username') }}" placeholder="@tunombre" required>
+          <label class="fl">{{ __('Nombre de usuario') }}</label>
+          <input class="fi @error('username') input-error @enderror" type="text" name="username"
+                 value="{{ old('username') }}" placeholder="@tunombre" required>
           @error('username') <span class="error-msg">{{ $message }}</span> @enderror
         </div>
 
         <div class="fg">
-          <label class="fl">Correo electrónico</label>
-          <input class="fi @error('email') input-error @enderror" type="email" name="email" value="{{ old('email') }}" placeholder="tu@email.com" required>
+          <label class="fl">{{ __('Correo electrónico') }}</label>
+          <input class="fi @error('email') input-error @enderror" type="email" name="email"
+                 value="{{ old('email') }}" placeholder="tu@email.com" required>
           @error('email') <span class="error-msg">{{ $message }}</span> @enderror
         </div>
 
         <div class="fg">
-          <label class="fl">DNI / NIE</label>
-          <input class="fi @error('dni_nie') input-error @enderror" type="text" name="dni_nie" value="{{ old('dni_nie') }}" placeholder="12345678A" required>
+          <label class="fl">{{ __('DNI / NIE') }}</label>
+          <input class="fi @error('dni_nie') input-error @enderror" type="text" name="dni_nie"
+                 value="{{ old('dni_nie') }}" placeholder="12345678A" required>
           @error('dni_nie') <span class="error-msg">{{ $message }}</span> @enderror
         </div>
 
         <div class="fg">
-          <label class="fl">Teléfono</label>
-          <input class="fi @error('telefono') input-error @enderror" type="tel" name="telefono" value="{{ old('telefono') }}" placeholder="+34 600 000 000" required>
+          <label class="fl">{{ __('Teléfono') }}</label>
+          <input class="fi @error('telefono') input-error @enderror" type="tel" name="telefono"
+                 value="{{ old('telefono') }}" placeholder="+34 600 000 000" required>
           @error('telefono') <span class="error-msg">{{ $message }}</span> @enderror
         </div>
 
         <div class="fg">
-          <label class="fl">Contraseña</label>
-          <input class="fi @error('password') input-error @enderror" type="password" name="password" placeholder="Mín. 8 caracteres, mayús., números" required>
+          <label class="fl">{{ __('Contraseña') }}</label>
+          <input class="fi @error('password') input-error @enderror" type="password" name="password"
+                 placeholder="{{ __('Mín. 8 caracteres, mayús., números') }}" required>
           @error('password') <span class="error-msg">{{ $message }}</span> @enderror
-          <small style="display:block;margin-top:4px;color:var(--muted);font-size:0.85em;">Debe contener: mayúscula, minúscula y número</small>
+          <small style="display:block;margin-top:4px;color:var(--muted);font-size:0.85em;">
+            {{ __('Debe contener: mayúscula, minúscula y número') }}
+          </small>
         </div>
 
         <div class="fg">
-          <label class="fl">Confirmar contraseña</label>
-          <input class="fi" type="password" name="password_confirmation" placeholder="Repite tu contraseña" required>
+          <label class="fl">{{ __('Confirmar contraseña') }}</label>
+          <input class="fi" type="password" name="password_confirmation"
+                 placeholder="{{ __('Repite tu contraseña') }}" required>
         </div>
 
-        <button class="lm-submit" type="submit">Crear cuenta</button>
+        <button class="lm-submit" type="submit">{{ __('Crear cuenta') }}</button>
       </form>
 
       <!-- FORM ORGANIZACIÓN -->
@@ -153,77 +150,84 @@
         <input type="hidden" name="tipo" value="organizacion">
 
         <div class="fg">
-          <label class="fl">Nombre de la organización *</label>
-          <input class="fi" type="text" name="nombre_organizacion" placeholder="Ej: Protectora Huellas Felices" required>
+          <label class="fl">{{ __('Nombre de la organización *') }}</label>
+          <input class="fi" type="text" name="nombre_organizacion"
+                 placeholder="{{ __('Nombre de la organización *') }}" required>
         </div>
 
         <div class="fg">
-          <label class="fl">Tipo de organización *</label>
+          <label class="fl">{{ __('Tipo de organización *') }}</label>
           <select class="fi" name="tipo_organizacion" required>
-            <option value="">Selecciona un tipo</option>
-            <option value="protectora">🏠 Protectora de animales</option>
-            <option value="veterinaria">🏥 Clínica veterinaria</option>
-            <option value="refugio">🌿 Refugio</option>
-            <option value="asociacion">🤝 Asociación</option>
+            <option value="">{{ __('Selecciona un tipo') }}</option>
+            <option value="protectora">🏠 {{ __('Protectora de animales') }}</option>
+            <option value="veterinaria">🏥 {{ __('Clínica veterinaria') }}</option>
+            <option value="refugio">🌿 {{ __('Refugio') }}</option>
+            <option value="asociacion">🤝 {{ __('Asociación') }}</option>
           </select>
         </div>
 
         <div class="fg">
-          <label class="fl">Nombre de usuario *</label>
+          <label class="fl">{{ __('Nombre de usuario') }}</label>
           <input class="fi" type="text" name="username" placeholder="@tuorganizacion" required>
         </div>
 
         <div class="fg">
-          <label class="fl">Correo electrónico *</label>
+          <label class="fl">{{ __('Correo electrónico') }}</label>
           <input class="fi" type="email" name="email" placeholder="contacto@organizacion.com" required>
         </div>
 
         <div class="fg">
-          <label class="fl">CIF *</label>
+          <label class="fl">{{ __('CIF *') }}</label>
           <input class="fi" type="text" name="cif" placeholder="A12345678" required>
         </div>
 
         <div class="fg">
-          <label class="fl">Teléfono *</label>
+          <label class="fl">{{ __('Teléfono') }}</label>
           <input class="fi" type="tel" name="telefono" placeholder="+34 600 000 000" required>
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div class="fg">
-            <label class="fl">Provincia</label>
-            <input class="fi" type="text" name="provincia" placeholder="Madrid">
+            <label class="fl">{{ __('Provincia') }}</label>
+            <input class="fi" type="text" name="provincia" placeholder="{{ __('Provincia') }}">
           </div>
           <div class="fg">
-            <label class="fl">Ciudad</label>
-            <input class="fi" type="text" name="ciudad" placeholder="Madrid">
+            <label class="fl">{{ __('Ciudad') }}</label>
+            <input class="fi" type="text" name="ciudad" placeholder="{{ __('Ciudad') }}">
           </div>
         </div>
 
         <div class="fg">
-          <label class="fl">Dirección</label>
-          <input class="fi" type="text" name="direccion" placeholder="Calle Mayor 1">
+          <label class="fl">{{ __('Dirección') }}</label>
+          <input class="fi" type="text" name="direccion" placeholder="{{ __('Dirección') }}">
         </div>
 
         <div class="fg">
-          <label class="fl">Web <span style="color:var(--muted);font-size:0.8rem;">(opcional)</span></label>
+          <label class="fl">{{ __('Web') }} <span style="color:var(--muted);font-size:0.8rem;">({{ __('opcional') }})</span></label>
           <input class="fi" type="url" name="web" placeholder="https://tuorganizacion.com">
         </div>
 
         <div class="fg">
-          <label class="fl">Contraseña *</label>
-          <input class="fi" type="password" name="password" placeholder="Mín. 8 caracteres, mayús., números" required>
-          <small style="display:block;margin-top:4px;color:var(--muted);font-size:0.85em;">Debe contener: mayúscula, minúscula y número</small>
+          <label class="fl">{{ __('Contraseña *') }}</label>
+          <input class="fi" type="password" name="password"
+                 placeholder="{{ __('Mín. 8 caracteres, mayús., números') }}" required>
+          <small style="display:block;margin-top:4px;color:var(--muted);font-size:0.85em;">
+            {{ __('Debe contener: mayúscula, minúscula y número') }}
+          </small>
         </div>
 
         <div class="fg">
-          <label class="fl">Confirmar contraseña *</label>
-          <input class="fi" type="password" name="password_confirmation" placeholder="Repite tu contraseña" required>
+          <label class="fl">{{ __('Confirmar contraseña *') }}</label>
+          <input class="fi" type="password" name="password_confirmation"
+                 placeholder="{{ __('Repite tu contraseña') }}" required>
         </div>
 
-        <button class="lm-submit" type="submit">Registrar organización</button>
+        <button class="lm-submit" type="submit">{{ __('Registrar organización') }}</button>
       </form>
 
-      <p class="lm-footer">Al registrarte aceptas nuestros <a href="#">términos de uso</a></p>
+      <p class="lm-footer">
+        {{ __('Al registrarte aceptas nuestros') }} <a href="#">{{ __('términos de uso') }}</a>
+      </p>
     </div>
 
   </div>
@@ -244,8 +248,6 @@
 
     if (openModal) {
       openLoginModal();
-      
-      // Decidimos qué pestaña abrir basándonos en lo que intentó el usuario
       if (tabs.length > 1) {
         if (isRegisterAttempt) {
           setLoginTab(tabs[1], 'register');

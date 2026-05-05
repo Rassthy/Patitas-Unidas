@@ -12,6 +12,9 @@ let CHATS = [];
 let activeChatId = null;
 let chatPollingInterval = null;
 
+// Helper de traducción
+const t = (key) => window.i18n?.[key] ?? key;
+
 // ========== CARGA DE CHATS ==========
 async function loadChats() {
   if (!window.AUTH_USER_ID) return;
@@ -21,7 +24,6 @@ async function loadChats() {
     CHATS = data.chats || [];
     renderChatPanel();
 
-    // Actualizar dot de mensajes
     const chatDot = document.getElementById('chatDot');
     if (chatDot) {
       const totalUnread = CHATS.reduce((acc, c) => acc + (c.unread || 0), 0);
@@ -61,7 +63,7 @@ async function loadPosts() {
     renderPosts(currentCat, currentFilter);
   } catch (error) {
     console.error('Error loading posts:', error);
-    showToast('Error al cargar publicaciones');
+    showToast(t('Error al cargar publicaciones'));
   }
 }
 
@@ -74,7 +76,8 @@ function renderPosts(catId, filter = '') {
   if (!DOM.paCount || !DOM.postsGrid) return;
 
   const posts = allPosts.filter(p => !filter || p.provincia === filter);
-  DOM.paCount.textContent = posts.length + ' publicacion' + (posts.length !== 1 ? 'es' : '');
+  const word = posts.length !== 1 ? t('publicaciones') : t('publicacion');
+  DOM.paCount.textContent = posts.length + ' ' + word;
 
   const getBadgeInfo = (catId, post) => {
     const id = catId === 0 ? post.category_id : catId;
@@ -87,16 +90,15 @@ function renderPosts(catId, filter = '') {
   DOM.postsGrid.innerHTML = posts.length ? posts.map(p => {
     const postBadge = getBadgeInfo(catId, p);
 
-    // Lógica de imágenes y autor (Tu versión preferida)
-    const imgSrc = (p.images && p.images.length > 0) 
-      ? `/storage/${p.images[0].url}` 
+    const imgSrc = (p.images && p.images.length > 0)
+      ? `/storage/${p.images[0].url}`
       : '/img/defaults/foto_post_generica.png';
 
     const autorNombre = p.author ? p.author.nombre : 'Usuario';
-    const autorFoto = p.author && p.author.foto_perfil 
-      ? `/storage/${p.author.foto_perfil}` 
+    const autorFoto = p.author && p.author.foto_perfil
+      ? `/storage/${p.author.foto_perfil}`
       : '/img/defaults/foto_perfil_generica.png';
-      
+
     const autorLabel = p.author ? `@${p.author.username}` : 'Anónimo';
 
     return `
@@ -122,7 +124,7 @@ function renderPosts(catId, filter = '') {
                    loading="lazy">
               <span>${autorLabel}</span>
             </div>
-            <button class="btn-sm" data-id="${p.id}">Saber más</button>
+            <button class="btn-sm" data-id="${p.id}">${t('Saber más')}</button>
           </div>
         </div>
       </div>
@@ -130,14 +132,14 @@ function renderPosts(catId, filter = '') {
   }).join('') : `
     <div style="text-align:center;padding:60px 20px;color:var(--muted);">
       <div style="font-size:2.5rem;margin-bottom:12px">🐾</div>
-      <p>No hay publicaciones en esta zona todavía.</p>
+      <p>${t('No hay publicaciones en esta zona todavía.')}</p>
     </div>`;
 }
 
 // ========== ENVIAR MENSAJE ==========
 async function sendMsg() {
   const input = document.getElementById('msgInput');
-  if (!input.value.trim()) { showToast('Escribe un comentario antes de enviar 💬'); return; }
+  if (!input.value.trim()) { showToast(t('Escribe un comentario antes de enviar 💬')); return; }
 
   try {
     const response = await fetch(`/posts/${currentPost.id}/comments`, {
@@ -152,13 +154,13 @@ async function sendMsg() {
     if (response.ok) {
       input.value = '';
       loadComments(currentPost.id);
-      showToast('Comentario enviado ✉️');
+      showToast(t('Comentario enviado ✉️'));
     } else {
-      showToast('Error al enviar comentario');
+      showToast(t('Error al enviar comentario'));
     }
   } catch (error) {
     console.error('Error:', error);
-    showToast('Error de conexión');
+    showToast(t('Error de conexión'));
   }
 }
 
@@ -174,7 +176,7 @@ async function openFcChat(id) {
   try {
     const response = await fetch(`/chats/${id}`);
     if (!response.ok) throw new Error('No se pudo obtener el chat');
-    
+
     const data = await response.json();
     const chat = data.chat;
 
@@ -194,12 +196,12 @@ async function openFcChat(id) {
     }
 
     document.getElementById('fcActiveName').textContent = chat.nombre;
-    document.getElementById('fcActiveStatus').textContent = ''; // Aquí podrías poner 'En línea' en el futuro
+    document.getElementById('fcActiveStatus').textContent = '';
     document.getElementById('fcInputWrap').style.display = 'flex';
 
     renderMessages(chat.messages);
-    
-    await loadChats(); 
+
+    await loadChats();
     renderFcList();
 
     clearInterval(chatPollingInterval);
@@ -207,7 +209,7 @@ async function openFcChat(id) {
 
   } catch (error) {
     console.error('Error cargando chat:', error);
-    showToast('Error al cargar la conversación 🐾');
+    showToast(t('Error al cargar la conversación 🐾'));
   }
 }
 
@@ -216,11 +218,11 @@ function renderMessages(messages) {
 
   const msgs = document.getElementById('fcMessages');
   if (!messages.length) {
-    msgs.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-size:0.85rem;">Sé el primero en escribir 🐾</div>`;
+    msgs.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted);font-size:0.85rem;">${t('Sé el primero en escribir 🐾')}</div>`;
     return;
   }
 
-  msgs.innerHTML = `<div class="sys-msg">🔒 Inicio de la conversación</div>` +
+  msgs.innerHTML = `<div class="sys-msg">${t('🔒 Inicio de la conversación')}</div>` +
     messages.map(m => {
       const bubble = renderBubbleContent(m);
       return `
@@ -296,10 +298,10 @@ async function sendFcMsg() {
       renderMessages(data.chat.messages);
       loadChats();
     } else {
-      showToast('Error al enviar mensaje');
+      showToast(t('Error al enviar mensaje'));
     }
   } catch (error) {
-    showToast('Error de conexión');
+    showToast(t('Error de conexión'));
   }
 }
 
@@ -314,7 +316,7 @@ function escHtml(str) {
 
 async function startChatWith(userId) {
   if (!window.AUTH_USER_ID) { openLoginModal(); return; }
-  if (userId === window.AUTH_USER_ID) { showToast('No puedes chatear contigo mismo 😄'); return; }
+  if (userId === window.AUTH_USER_ID) { showToast(t('No puedes chatear contigo mismo 😄')); return; }
 
   try {
     const response = await fetch('/chats', {
@@ -332,7 +334,7 @@ async function startChatWith(userId) {
     openFullChat();
     setTimeout(() => openFcChat(data.chat.id), 100);
   } catch (error) {
-    showToast('Error al iniciar chat');
+    showToast(t('Error al iniciar chat'));
   }
 }
 
@@ -342,7 +344,7 @@ function doLogin() {
   document.body.style.overflow = '';
   document.getElementById('headerLoginBtn').classList.add('hidden');
   document.getElementById('userChip').classList.remove('hidden');
-  showToast('¡Bienvenido de vuelta a PatitasUnidas! 🐾');
+  showToast(t('¡Bienvenido de vuelta a PatitasUnidas! 🐾'));
 }
 
 function doRegister() {
@@ -350,17 +352,17 @@ function doRegister() {
   document.body.style.overflow = '';
   document.getElementById('headerLoginBtn').classList.add('hidden');
   document.getElementById('userChip').classList.remove('hidden');
-  showToast('¡Cuenta creada! Bienvenido a PatitasUnidas 🐾🎉');
+  showToast(t('¡Cuenta creada! Bienvenido a PatitasUnidas 🐾🎉'));
 }
 
 // ========== DATOS FAQ / INFO ==========
 const faqData = [
-  { q: "¿Es gratuito registrarse en PatitasUnidas?", a: "Sí, el registro es completamente gratuito. Pedimos DNI/NIE y teléfono para garantizar la seguridad de todos los usuarios y evitar perfiles falsos o fraudes en adopciones." },
-  { q: "¿Cómo puedo publicar un animal en adopción?", a: "Una vez registrado y verificado tu perfil, puedes ir a la sección 'Principal', elegir 'Adoptar mascota' y pulsar el botón 'Publicar'. Podrás añadir fotos, descripción, ubicación y datos del animal." },
-  { q: "¿Qué hago si encuentro a mi mascota perdida?", a: "Actualiza tu publicación indicando que ha sido encontrada para que la comunidad sepa que ya está a salvo. También puedes contactar con los administradores para cerrar el caso." },
-  { q: "¿Cómo sé si una protectora está verificada?", a: "Los perfiles de protectoras y organizaciones pasan por un proceso de verificación adicional. Verás una insignia de verificación en su perfil. Siempre recomendamos visitar las instalaciones antes de una adopción." },
-  { q: "¿Puedo hacer donaciones a través de la plataforma?", a: "Actualmente estamos integrando un sistema de donaciones seguro mediante pasarela de pago. Muy pronto podrás donar directamente a protectoras y causas desde la plataforma." },
-  { q: "¿Es posible reportar contenido inapropiado?", a: "Sí. Cada publicación, comentario y perfil tiene un botón de reporte. Nuestro equipo revisa todos los reportes en menos de 24 horas. El sistema de insignias y valoraciones también ayuda a identificar usuarios de confianza." },
+  { q: t('faq_q1'), a: t('faq_a1') },
+  { q: t('faq_q2'), a: t('faq_a2') },
+  { q: t('faq_q3'), a: t('faq_a3') },
+  { q: t('faq_q4'), a: t('faq_a4') },
+  { q: t('faq_q5'), a: t('faq_a5') },
+  { q: t('faq_q6'), a: t('faq_a6') },
 ];
 
 function renderFaq() {
@@ -393,30 +395,24 @@ document.addEventListener('click', e => {
   if (smBtn) { e.stopPropagation(); openPostModal(+smBtn.dataset.id); }
 });
 
-// Vista previa de imágenes
-// Almacén acumulativo de archivos
 function previewImages(input) {
   const container = document.getElementById('imagePreviewContainer');
   const list = document.getElementById('imagePreviewList');
 
-  // Añadir los nuevos archivos al acumulador (sin duplicados por nombre)
   Array.from(input.files).forEach(file => {
     const yaExiste = Array.from(selectedFiles.files).some(f => f.name === file.name);
     if (!yaExiste) selectedFiles.items.add(file);
   });
 
-  // Limitar a 10 las fotos
   if (selectedFiles.files.length > 10) {
-    showToast('Máximo 10 imágenes permitidas');
+    showToast(t('Máximo 10 imágenes permitidas'));
     const dt = new DataTransfer();
     Array.from(selectedFiles.files).slice(0, 10).forEach(f => dt.items.add(f));
     selectedFiles = dt;
   }
 
-  // Sincronizar el input con el acumulador
   input.files = selectedFiles.files;
 
-  // Render del preview
   if (selectedFiles.files.length > 0) {
     container.style.display = 'block';
     list.innerHTML = Array.from(selectedFiles.files).map((file, idx) => `
@@ -440,7 +436,6 @@ function removeFile(idx) {
     .forEach(f => dt.items.add(f));
   selectedFiles = dt;
 
-  // Sincronizar el input
   document.getElementById('postImages').files = selectedFiles.files;
   previewImages({ files: new DataTransfer().files });
 
@@ -462,7 +457,6 @@ function removeFile(idx) {
   }
 }
 
-// Formulario de nueva publicación
 document.getElementById('newPostForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const formData = new FormData(e.target);
@@ -479,28 +473,26 @@ document.getElementById('newPostForm').addEventListener('submit', async (e) => {
     const data = await response.json();
 
     if (response.ok) {
-      showToast('Publicación creada correctamente! 🎉');
+      showToast(t('Publicación creada correctamente! 🎉'));
       closeNewPostModal();
-      // Limpiar el formulario
       document.getElementById('newPostForm').reset();
       selectedFiles = new DataTransfer();
       document.getElementById('imagePreviewContainer').style.display = 'none';
-      loadPosts(); // Recargar posts
+      loadPosts();
     } else {
-      // Si es un error de validación, mostrar primer error disponible
       if (data.errors && typeof data.errors === 'object') {
         const firstError = Object.values(data.errors)[0];
         const errorMsg = Array.isArray(firstError) ? firstError[0] : firstError;
-        showToast('Error: ' + errorMsg);
+        showToast(t('Error') + ': ' + errorMsg);
       } else if (data.message) {
-        showToast('Error: ' + data.message);
+        showToast(t('Error') + ': ' + data.message);
       } else {
-        showToast('Error al crear publicación. Inténtalo de nuevo.');
+        showToast(t('Error al crear publicación. Inténtalo de nuevo.'));
       }
     }
   } catch (error) {
     console.error('Error:', error);
-    showToast('Error de conexión. Verifica tu conexión a internet.');
+    showToast(t('Error de conexión. Verifica tu conexión a internet.'));
   }
 });
 
@@ -534,10 +526,8 @@ document.addEventListener('keydown', e => {
     });
   }
 
-  // Panel lateral
   initSearch(document.querySelector('#chatPanel .cp-search'), 'cpList');
 
-  // Chat completo — esperar a que se abra
   document.addEventListener('click', e => {
     if (e.target.closest('.btn-open-full, #sidebarChatBtn')) {
       setTimeout(() => {
@@ -548,15 +538,11 @@ document.addEventListener('keydown', e => {
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Miramos si en la URL existe el parámetro "open_post"
-    const urlParams = new URLSearchParams(window.location.search);
-    const postIdToOpen = urlParams.get('open_post');
-
-    // 2. Si existe, llamamos a la función que abre el modal
-    if (postIdToOpen) {
-        // Asumiendo que tu función en ui.js se llama openPostModal
-        if (typeof openPostModal === 'function') {
-            openPostModal(postIdToOpen);
-        }
+  const urlParams = new URLSearchParams(window.location.search);
+  const postIdToOpen = urlParams.get('open_post');
+  if (postIdToOpen) {
+    if (typeof openPostModal === 'function') {
+      openPostModal(postIdToOpen);
     }
+  }
 });

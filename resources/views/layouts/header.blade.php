@@ -6,13 +6,13 @@
   </a>
   <nav>
     <button class="nav-btn active" onclick="if(document.getElementById('sec-bienvenida')){ setNav(this,'bienvenida'); return false; } window.location.href='{{ route('home', ['tab' => 'bienvenida']) }}';">
-      <span class="nav-paw">🐾</span>Bienvenida
+      <span class="nav-paw">🐾</span>{{ __('Bienvenida') }}
     </button>
     <button class="nav-btn" onclick="if(document.getElementById('sec-principal')){ setNav(this,'principal'); return false; } window.location.href='{{ route('home', ['tab' => 'principal']) }}';">
-      <span class="nav-paw">🐾</span>Principal
+      <span class="nav-paw">🐾</span>{{ __('Principal') }}
     </button>
     <button class="nav-btn" onclick="if(document.getElementById('sec-faq')){ setNav(this,'faq'); return false; } window.location.href='{{ route('home', ['tab' => 'faq']) }}';">
-      <span class="nav-paw">🐾</span>Información / FAQ
+      <span class="nav-paw">🐾</span>{{ __('Información / FAQ') }}
     </button>
   </nav>
   <div class="hdr-right">
@@ -23,14 +23,14 @@
       </button>
       <div class="user-chip" onclick="window.location.href='{{ route('profile.show') }}'">
         <img src="{{ Auth::user()->foto_perfil_url }}" alt="Foto de perfil">
-        <span class="user-chip-name">Hola {{ Auth::user()->username }}!</span>
+        <span class="user-chip-name">{{ __('Hola') }} {{ Auth::user()->username }}!</span>
       </div>
     @else
       <button class="hdr-icon-btn" onclick="openLoginModal()">
         <i class="fa-solid fa-bell"></i>
       </button>
       <button class="login-btn" onclick="openLoginModal()">
-        <i class="fa-solid fa-right-to-bracket"></i> Acceder
+        <i class="fa-solid fa-right-to-bracket"></i> {{ __('Acceder') }}
       </button>
     @endauth
   </div>

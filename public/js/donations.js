@@ -15,22 +15,18 @@ function initDonationForm() {
   const amountInput = document.getElementById('amount');
   const summaryVal  = document.getElementById('don-summary-val');
 
-  // Formatear a euros
   function fmtEur(n) {
     return parseFloat(n).toLocaleString('es-ES', { minimumFractionDigits: 2 }) + ' €';
   }
 
-  // Sincronizar resumen
   function syncSummary() {
     summaryVal.textContent = fmtEur(amountInput.value || 0);
   }
 
-  // Limpiar todos los chips
   function clearChips() {
     chips.forEach(c => c.classList.remove('active'));
   }
 
-  // Listeners en chips
   chips.forEach(chip => {
     chip.addEventListener('click', () => {
       clearChips();
@@ -40,13 +36,11 @@ function initDonationForm() {
     });
   });
 
-  // Listener en input personalizado
   amountInput.addEventListener('input', () => {
     clearChips();
     syncSummary();
   });
 
-  // Sincronizar al cargar
   syncSummary();
 }
 
@@ -79,9 +73,7 @@ function initPayPalButtons() {
       })
       .then(res => res.json())
       .then(data => {
-        if (data.error) {
-          throw new Error(data.error);
-        }
+        if (data.error) throw new Error(data.error);
         return data.id;
       });
     },
@@ -95,7 +87,7 @@ function initPayPalButtons() {
       .then(res => res.json())
       .then(() => {
         if (typeof showToast === 'function') {
-          showToast('¡Donación completada! Gracias por tu apoyo ❤️');
+          showToast(t('¡Donación completada! Gracias por tu apoyo ❤️'));
         }
         setTimeout(() => location.reload(), 1800);
       });
@@ -104,8 +96,9 @@ function initPayPalButtons() {
     onError: function (err) {
       console.error('PayPal error', err);
       if (typeof showToast === 'function') {
-        showToast('Algo fue mal con el pago. Inténtalo de nuevo.');
+        showToast(t('Algo fue mal con el pago. Inténtalo de nuevo.'));
       }
     }
+
   }).render('#paypal-button');
 }
