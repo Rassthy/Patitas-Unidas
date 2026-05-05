@@ -9,8 +9,7 @@
           para todos.</p>
         <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
           <button class="btn-p" onclick="openLoginModal()">Únete gratis</button>
-          <button class="btn-s" onclick="showToast('Próximamente podrás donar en nuestra plataforma 🐾')">💛
-            Donar</button>
+          <a href="{{ route('donate') }}" class="btn-s" style="text-decoration:none; display:inline-block;">💛 Donar</a>
         </div>
       </div>
       <img class="faq-intro-img" src="https://images.unsplash.com/photo-1450778869180-41d0601e046e?w=500&q=80"

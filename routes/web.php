@@ -9,6 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DonationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -75,6 +76,14 @@ Route::middleware('auth')->group(function () {
     Route::post('chats/{id}/messages', [ChatController::class, 'sendMessage'])->name('chats.messages.store');
     Route::resource('notifications', NotificationController::class)->only(['index', 'show', 'update']);
     Route::resource('reports', ReportController::class)->except(['create', 'edit']);
+
+    // Donaciones
+    Route::get('/donar', function () {
+        return view('sections.donate');
+    })->name('donate');
+
+    Route::post('/donations/create-order', [DonationController::class, 'createOrder']);
+    Route::post('/donations/capture-order', [DonationController::class, 'captureOrder']);
 });
 
 /*
