@@ -23,7 +23,7 @@ class DonationController extends Controller
 
         // Últimas donaciones (público)
         $recentDonations = Donation::where('status', 'completed')
-            ->with('user:id,nombre')
+            ->with('user:id,nombre,foto_perfil')
             ->orderByDesc('created_at')
             ->limit(5)
             ->get();

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\App;
 use App\Models\User;
 
 class ProfileController extends Controller
@@ -29,7 +30,9 @@ class ProfileController extends Controller
             },
             'ratings.voter',
             'posts.images',
-            'posts.category'
+            'posts.category',
+            'donations',
+            'ratingsGiven'
         ]);
 
         return view('profile.show', compact('user'));
@@ -59,6 +62,17 @@ class ProfileController extends Controller
             'comentario' => $request->comentario,
         ]);
 
+        $this->createNotification(
+            $user->id,
+            'rating',
+            __('Nueva valoración'),
+            __(':usuario ha valorado tu perfil con :puntuacion estrellas', [
+                'usuario'    => Auth::user()->username,
+                'puntuacion' => $request->puntuacion,
+            ]),
+            '/profile/' . $user->username
+        );
+
         return back()->with('success', '¡Valoración publicada correctamente!');
     }
 
@@ -78,11 +92,13 @@ class ProfileController extends Controller
             'settings.idioma' => 'nullable|string|in:es,en',
         ]);
 
-        $user->update([
-            'user_settings' => $request->settings
-        ]);
+        $currentSettings = $user->user_settings ?? [];
+        $newSettings = array_merge($currentSettings, $request->settings);
 
-        return redirect()->route('profile.settings')->with('success', 'Preferencias actualizadas correctamente.');
+        $user->update(['user_settings' => $newSettings]);
+        
+        App::setLocale($newSettings['idioma'] ?? 'es');
+        return redirect()->route('profile.settings')->with('success', __('Preferencias actualizadas correctamente.'));
     }
 
     public function edit()
@@ -92,7 +108,7 @@ class ProfileController extends Controller
     }
 
     public function update(Request $request)
-    {
+    {   
         $user = Auth::user();
 
         $request->validate([
@@ -126,7 +142,77 @@ class ProfileController extends Controller
         }
 
         $user->update($data);
+        
+        return redirect()->route('profile.show')->with('success', __('Perfil actualizado correctamente.'));
 
-        return redirect()->route('profile.show', $user->username)->with('success', 'Perfil actualizado correctamente.');
+    }
+
+    public function changePassword(Request $request)
+    {
+        $user = Auth::user();
+
+        $validator = \Validator::make($request->all(), [
+            'current_password' => 'required|string',
+            'password'         => 'required|string|min:8|confirmed',
+        ], [
+            'current_password.required' => __('La contraseña actual es obligatoria.'),
+            'password.required'         => __('La nueva contraseña es obligatoria.'),
+            'password.min'              => __('La contraseña debe tener al menos 8 caracteres.'),
+            'password.confirmed'        => __('Las contraseñas no coinciden.'),
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->route('profile.settings')
+                ->withErrors($validator)
+                ->withInput()
+                ->with('tab', 'st-cuenta');
+        }
+
+        if (!\Hash::check($request->current_password, $user->password_hash)) {
+            return redirect()->route('profile.settings')
+                ->withErrors(['current_password' => __('La contraseña actual no es correcta.')])
+                ->withInput()
+                ->with('tab', 'st-cuenta');
+        }
+
+        $user->update(['password_hash' => \Hash::make($request->password)]);
+
+        return redirect()->route('profile.settings')
+            ->with('success', __('Contraseña cambiada correctamente.'))
+            ->with('tab', 'st-cuenta');
+    }
+
+    public function deleteAccount(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'confirm_password' => 'required|string',
+        ], [
+            'confirm_password.required' => __('Debes introducir tu contraseña para confirmar.'),
+        ]);
+
+        if (!\Hash::check($request->confirm_password, $user->password_hash)) {
+            return redirect()->route('profile.settings')->withInput()->withErrors(['confirm_password' => __('La contraseña no es correcta.')])->with('tab', 'st-cuenta');
+        }
+
+        Auth::logout();
+        $user->delete();
+
+        return redirect()->route('home')->with('success', __('Tu cuenta ha sido eliminada correctamente.'));
+    }
+
+    private function createNotification($userId, $tipo, $titulo, $mensaje, $enlaceUrl = null)
+    {
+        if ($userId === Auth::id()) return;
+
+        \App\Models\Notification::create([
+            'user_id'    => $userId,
+            'tipo'       => $tipo,
+            'titulo'     => $titulo,
+            'mensaje'    => $mensaje,
+            'enlace_url' => $enlaceUrl,
+            'leida'      => false,
+        ]);
     }
 }

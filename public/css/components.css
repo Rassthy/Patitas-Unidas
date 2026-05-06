@@ -727,6 +727,26 @@
     transform: scale(1) translateY(0);
 }
 
+#termsModal {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .28s;
+}
+
+#termsModal.open {
+    opacity: 1;
+    pointer-events: all;
+}
+
+#termsModal > div {
+    transform: scale(.95) translateY(18px);
+    transition: transform .35s cubic-bezier(.34, 1.2, .64, 1);
+}
+
+#termsModal.open > div {
+    transform: scale(1) translateY(0);
+}
+
 .lm-logo {
     display: flex;
     align-items: center;

@@ -30,6 +30,12 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::get('/check-auth', [AuthController::class, 'checkAuth'])->name('check-auth');
 
+// Restablecimiento de Contraseña
+Route::get('/forgot-password', [App\Http\Controllers\PasswordResetController::class, 'showForgotForm'])->name('password.request');
+Route::post('/forgot-password', [App\Http\Controllers\PasswordResetController::class, 'sendResetLink'])->name('password.email');
+Route::get('/reset-password/{token}', [App\Http\Controllers\PasswordResetController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [App\Http\Controllers\PasswordResetController::class, 'resetPassword'])->name('password.update');
+
 // Contenido público (Lectura)
 Route::get('posts', [PostController::class, 'index'])->name('posts.index');
 Route::get('posts/{post}', [PostController::class, 'show'])->name('posts.show');
@@ -55,6 +61,8 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::get('/profile/settings', [ProfileController::class, 'settings'])->name('profile.settings');
     Route::put('/profile/settings', [ProfileController::class, 'updateSettings'])->name('profile.settings.update');
+    Route::put('/profile/password', [ProfileController::class, 'changePassword'])->name('profile.password');
+    Route::delete('/profile/account', [ProfileController::class, 'deleteAccount'])->name('profile.account.destroy');
 
     // Recursos de Usuario y Mascotas
     Route::resource('users', UserController::class)->only(['index', 'update', 'destroy']);

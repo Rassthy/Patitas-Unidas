@@ -307,6 +307,15 @@ function setRegisterTipo(tipo) {
   }
 }
 
+function togglePassword(btn) {
+    const input = btn.closest('div').querySelector('input');
+    const icon  = btn.querySelector('i');
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    icon.classList.toggle('fa-eye',      !isHidden);
+    icon.classList.toggle('fa-eye-slash', isHidden);
+}
+
 // Panel de chat
 function toggleChatPanel() {
   chatPanelOpen = !chatPanelOpen;
@@ -551,12 +560,12 @@ async function loadComments(postId) {
                 </button>` : ''}
               ${esPropio ? `
                 <button onclick="deleteComment(${comment.id}, ${postId})"
-                  style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.75rem;padding:0;">
+                  style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.75rem;padding:0;margin-left:auto;">
                   ${t('🗑️ Eliminar')}
                 </button>` : ''}
               ${!esPropio ? `
                 <button onclick="openReportModal('post_comentario', ${comment.id}, ${comment.author_id})"
-                  style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.75rem;padding:0;">
+                  style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.75rem;padding:0;margin-left:auto;">
                   ${t('🚨 Reportar')}
                 </button>` : ''}
             </div>

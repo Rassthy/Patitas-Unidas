@@ -98,7 +98,7 @@ class PostController extends Controller
         }
 
         $post->delete();
-        return response()->json(['message' => 'Post deleted successfully.'], 200);
+        return response()->json(['message' => __('Post deleted successfully.')], 200);
     }
 
     public function toggleLike($id)
@@ -116,8 +116,8 @@ class PostController extends Controller
             $this->createNotification(
                 $post->author_id,
                 'like',
-                'Nuevo like',
-                Auth::user()->username . ' le dio like a tu publicación: ' . $post->titulo,
+                __('Nuevo like'),
+                __(':usuario le dio like a tu publicación: :titulo', ['usuario' => Auth::user()->username, 'titulo' => $post->titulo]),
                 '/posts/' . $id
             );
 
@@ -147,8 +147,8 @@ class PostController extends Controller
             $this->createNotification(
                 $parentComment->author_id,
                 'comentario_post',
-                'Nueva respuesta',
-                Auth::user()->username . ' respondió a tu comentario: "' . substr($parentComment->comentario, 0, 50) . '"',
+                __('Nueva respuesta'),
+                __(':usuario respondió a tu comentario: ":comentario"', ['usuario' => Auth::user()->username, 'comentario' => substr($parentComment->comentario, 0, 50)]),
                 '/posts/' . $id
             );
         } else {
@@ -156,8 +156,8 @@ class PostController extends Controller
             $this->createNotification(
                 $post->author_id,
                 'comentario_post',
-                'Nuevo comentario',
-                Auth::user()->username . ' comentó en tu publicación: ' . $post->titulo,
+                __('Nuevo comentario'),
+                __(':usuario comentó en tu publicación: :titulo', ['usuario' => Auth::user()->username, 'titulo' => $post->titulo]),
                 '/posts/' . $id
             );
         }
@@ -171,7 +171,7 @@ class PostController extends Controller
         ->where('author_id', Auth::id())
         ->firstOrFail();
     $comment->delete();
-    return response()->json(['message' => 'Comentario eliminado'], 200);
+    return response()->json(['message' => __('Comentario eliminado')], 200);
     }
 
     public function toggleCommentLike($id)
@@ -189,8 +189,8 @@ class PostController extends Controller
             $this->createNotification(
                 $comment->author_id,
                 'like',
-                'Like en comentario',
-                Auth::user()->username . ' le dio like a tu comentario: "' . substr($comment->comentario, 0, 50) . '"',
+                __('Like en comentario'),
+                __(':usuario le dio like a tu comentario: ":comentario"', ['usuario' => Auth::user()->username, 'comentario' => substr($comment->comentario, 0, 50)]),
                 '/posts/' . $comment->post_id
             );
 
@@ -229,4 +229,5 @@ class PostController extends Controller
             'leida'      => false,
         ]);
     }
+    
 }

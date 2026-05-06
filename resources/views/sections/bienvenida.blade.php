@@ -9,7 +9,9 @@
         <button class="btn-p" onclick="setNav(document.querySelectorAll('.nav-btn')[1],'principal')">
           {{ __('Explorar publicaciones →') }}
         </button>
-        <button class="btn-s" onclick="openLoginModal()">{{ __('Registrarse gratis') }}</button>
+        @guest
+          <button class="btn-s" onclick="openLoginModal()">{{ __('Registrarse gratis') }}</button>
+        @endguest
       </div>
     </div>
     <div class="hero-img-wrap">

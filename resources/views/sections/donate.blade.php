@@ -139,9 +139,16 @@
           <div class="don-feed">
             @foreach($recentDonations as $d)
             <div class="don-feed-item">
-              <div class="don-feed-av">
-                {{ strtoupper(substr($d->user->nombre ?? __('Anónimo'), 0, 1)) }}
-              </div>
+              @if($d->user && $d->user->foto_perfil_url)
+                <img src="{{ $d->user->foto_perfil_url }}"
+                    alt="{{ $d->user->nombre }}"
+                    class="don-feed-av"
+                    style="object-fit:cover;border-radius:50%;">
+              @else
+                <div class="don-feed-av">
+                  {{ strtoupper(substr($d->user->nombre ?? __('Anónimo'), 0, 1)) }}
+                </div>
+              @endif
               <div class="don-feed-info">
                 <span class="don-feed-name">
                   {{ $d->user->nombre ?? __('Anónimo') }}

@@ -58,6 +58,6 @@ class ReportController extends Controller
     {
         $report = Report::where('reporter_id', Auth::id())->findOrFail($id);
         $report->delete();
-        return response()->json(['message' => 'Report deleted successfully.'], 200);
+        return response()->json(['message' => __('Report deleted successfully.')], 200);
     }
 }

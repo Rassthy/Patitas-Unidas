@@ -41,8 +41,16 @@
 
         <div class="fg">
           <label class="fl">{{ __('Contraseña') }}</label>
-          <input class="fi @error('password') input-error @enderror"
-                 type="password" name="password" placeholder="••••••••" required>
+          <div style="position:relative;">
+            <input class="fi @error('password') input-error @enderror"
+                  type="password" name="password" placeholder="••••••••" required
+                  style="padding-right:40px;">
+            <button type="button" onclick="togglePassword(this)"
+                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                          background:none;border:none;cursor:pointer;color:var(--muted);padding:0;">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
           @error('password') <span class="error-msg">{{ $message }}</span> @enderror
         </div>
 
@@ -55,7 +63,7 @@
       </form>
 
       <p class="lm-footer">
-        <a href="#">{{ __('¿Olvidaste tu contraseña?') }}</a>
+        <a href="{{ route('password.request') }}">{{ __('¿Olvidaste tu contraseña?') }}</a>
       </p>
     </div>
 
@@ -127,8 +135,16 @@
 
         <div class="fg">
           <label class="fl">{{ __('Contraseña') }}</label>
-          <input class="fi @error('password') input-error @enderror" type="password" name="password"
-                 placeholder="{{ __('Mín. 8 caracteres, mayús., números') }}" required>
+          <div style="position:relative;">
+            <input class="fi @error('password') input-error @enderror" type="password" name="password"
+                  placeholder="{{ __('Mín. 8 caracteres, mayús., números') }}" required
+                  style="padding-right:40px;">
+            <button type="button" onclick="togglePassword(this)"
+                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                          background:none;border:none;cursor:pointer;color:var(--muted);padding:0;">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
           @error('password') <span class="error-msg">{{ $message }}</span> @enderror
           <small style="display:block;margin-top:4px;color:var(--muted);font-size:0.85em;">
             {{ __('Debe contener: mayúscula, minúscula y número') }}
@@ -137,8 +153,16 @@
 
         <div class="fg">
           <label class="fl">{{ __('Confirmar contraseña') }}</label>
-          <input class="fi" type="password" name="password_confirmation"
-                 placeholder="{{ __('Repite tu contraseña') }}" required>
+          <div style="position:relative;">
+            <input class="fi" type="password" name="password_confirmation"
+                  placeholder="{{ __('Repite tu contraseña') }}" required
+                  style="padding-right:40px;">
+            <button type="button" onclick="togglePassword(this)"
+                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                          background:none;border:none;cursor:pointer;color:var(--muted);padding:0;">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
         </div>
 
         <button class="lm-submit" type="submit">{{ __('Crear cuenta') }}</button>
@@ -226,10 +250,11 @@
       </form>
 
       <p class="lm-footer">
-        {{ __('Al registrarte aceptas nuestros') }} <a href="#">{{ __('términos de uso') }}</a>
+        {{ __('Al registrarte aceptas nuestros') }}
+        <a href="#" onclick="event.preventDefault(); openTermsModal()">
+          {{ __('términos de uso') }}
+        </a>
       </p>
-    </div>
-
   </div>
 </div>
 

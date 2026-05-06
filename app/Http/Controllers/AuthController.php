@@ -52,8 +52,8 @@ class AuthController extends Controller
             $user = User::create($userData);
             Auth::login($user);
 
-            return redirect()->route('dashboard')->with('success', '¡Bienvenido a PatitasUnidas! 🐾');
-
+            return redirect()->route('dashboard')->with('success', __('¡Bienvenido a PatitasUnidas! 🐾'));
+            
         } catch (\Exception $e) {
             return back()
                 ->withInput($request->except('password', 'password_confirmation'))

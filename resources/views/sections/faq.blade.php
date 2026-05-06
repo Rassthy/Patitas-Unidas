@@ -6,7 +6,10 @@
         <h2>{{ __('Todo lo que necesitas saber sobre PatitasUnidas') }}</h2>
         <p>{{ __('faq_intro_desc') }}</p>
         <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">
+          @guest
           <button class="btn-p" onclick="openLoginModal()">{{ __('Únete gratis') }}</button>
+          @endguest
+          <button class="btn-s" onclick="openTermsModal()">{{ __('📋 Términos de uso') }}</button>
           <a href="{{ route('donate') }}" class="btn-s" style="text-decoration:none; display:inline-block;">{{ __('💛 Donar') }}</a>
         </div>
       </div>

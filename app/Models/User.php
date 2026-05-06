@@ -95,6 +95,16 @@ class User extends Authenticatable
         return $this->hasMany(UserRating::class, 'user_id');
     }
 
+        public function donations()
+    {
+        return $this->hasMany(Donation::class);
+    }
+
+    public function ratingsGiven()
+    {
+        return $this->hasMany(UserRating::class, 'voter_id');
+    }
+    
     // RELACIONES
     public function pets() { return $this->hasMany(Pet::class); }
     public function posts() { return $this->hasMany(Post::class, 'author_id'); }

@@ -355,6 +355,14 @@ function doRegister() {
   showToast(t('¡Cuenta creada! Bienvenido a PatitasUnidas 🐾🎉'));
 }
 
+function openTermsModal() {
+    document.getElementById('termsModal').classList.add('open');
+}
+
+function closeTermsModal() {
+    document.getElementById('termsModal').classList.remove('open');
+}
+
 // ========== DATOS FAQ / INFO ==========
 const faqData = [
   { q: t('faq_q1'), a: t('faq_a1') },

@@ -26,7 +26,7 @@ class ChatController extends Controller
                 return [
                     'id'          => $chat->id,
                     'is_group'    => $chat->is_group,
-                    'nombre'      => $chat->is_group ? $chat->nombre_grupo : ($other?->user?->username ?? 'Usuario'),
+                    'nombre'      => $chat->is_group ? $chat->nombre_grupo : ($other?->user?->username ?? __('Usuario')),
                     'foto'        => $other?->user?->foto_perfil ? '/storage/' . $other->user->foto_perfil : null,
                     'last_msg'    => $chat->lastMessage?->contenido ?? '',
                     'last_time'   => $chat->lastMessage?->created_at?->format('H:i') ?? '',
@@ -92,7 +92,7 @@ class ChatController extends Controller
         return response()->json([
             'chat' => [
                 'id'            => $chat->id,
-                'nombre'        => $chat->is_group ? $chat->nombre_grupo : ($other?->user?->username ?? 'Usuario'),
+                'nombre'        => $chat->is_group ? $chat->nombre_grupo : ($other?->user?->username ?? __('Usuario')),
                 'foto'          => $other?->user?->foto_perfil ? '/storage/' . $other->user->foto_perfil : null,
                 'other_user_id' => $other?->user_id,
                 'other_username' => $other?->user?->username,
@@ -136,7 +136,7 @@ class ChatController extends Controller
         }
 
         if (!$contenido) {
-            return response()->json(['error' => 'Mensaje vacío'], 422);
+            return response()->json(['error' => __('Mensaje vacío')], 422);
         }
 
         $message = Message::create([
@@ -153,8 +153,8 @@ class ChatController extends Controller
             $this->createNotification(
                 $participant->user_id,
                 'mensaje',
-                'Nuevo mensaje',
-                Auth::user()->username . ' te ha enviado un mensaje',
+                __('Nuevo mensaje'),
+                __(':usuario te ha enviado un mensaje', ['usuario' => Auth::user()->username]),
                 '/chats/' . $id
             );
         });

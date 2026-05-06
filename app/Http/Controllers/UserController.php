@@ -22,7 +22,7 @@ class UserController extends Controller
 
     public function update(Request $request, User $user)
     {
-        abort_if(Auth::id() !== $user->id, 403, 'No autorizado.');
+        abort_if(Auth::id() !== $user->id, 403, __('No autorizado.'));
 
         $data = $request->validate([
             'username' => ['sometimes', 'required', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
@@ -54,9 +54,9 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        abort_if(Auth::id() !== $user->id, 403, 'No autorizado.');
+        abort_if(Auth::id() !== $user->id, 403, __('No autorizado.'));
 
         $user->delete();
-        return response()->json(['message' => 'Usuario eliminado correctamente.'], 200);
+        return response()->json(['message' => __('Usuario eliminado correctamente.')], 200);
     }
 }

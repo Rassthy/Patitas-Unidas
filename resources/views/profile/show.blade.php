@@ -111,16 +111,16 @@
   <div class="profile-sections">
     <div class="profile-stats">
       <div class="stat-item">
-        <div class="stat-item-num">0</div>
+        <div class="stat-item-num">{{ $user->posts->count() }}</div>
         <div class="stat-item-lbl">{{ __('Publicaciones') }}</div>
       </div>
       <div class="stat-item">
-        <div class="stat-item-num">0</div>
+        <div class="stat-item-num">{{ $user->donations->count() }}</div>
         <div class="stat-item-lbl">{{ __('Donaciones') }}</div>
       </div>
       <div class="stat-item">
-        <div class="stat-item-num">0</div>
-        <div class="stat-item-lbl">{{ __('Valoraciones enviadas') }}</div>
+        <div class="stat-item-num">{{ $user->ratings->count() }}</div>
+        <div class="stat-item-lbl">{{ __('Valoraciones recibidas') }}</div>
       </div>
     </div>
 
@@ -191,9 +191,14 @@
         <div class="review-list">
           @forelse($user->ratings as $rating)
           <div class="review-item">
-            <div class="review-header">
-              <strong>{{ $rating->voter->username }}</strong>
-              <span class="review-stars">
+              <div class="review-header">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <img src="{{ $rating->voter->foto_perfil_url }}"
+                      alt="{{ $rating->voter->username }}"
+                      style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;">
+                  <strong>{{ $rating->voter->username }}</strong>
+                </div>
+                <span class="review-stars">
                 @php
                   $entera = floor($rating->puntuacion);
                   $media  = ($rating->puntuacion - $entera) >= 0.5 ? 1 : 0;

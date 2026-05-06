@@ -317,6 +317,81 @@
        style="position:absolute;bottom:20px;color:#fff;font-size:0.9rem;opacity:0.7;"></div>
 </div>
 
+<!-- MODAL TÉRMINOS DE USO -->
+<div id="termsModal"
+     onclick="if(event.target===this)closeTermsModal()"
+     style="display:flex;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.6);
+            align-items:center;justify-content:center;padding:20px;">
+  <div onclick="event.stopPropagation()"
+       style="background:var(--cream);border-radius:16px;width:min(90vw,720px);
+              max-height:85vh;display:flex;flex-direction:column;box-shadow:var(--sh-l);">
+
+    {{-- Cabecera --}}
+    <div style="padding:20px 28px;border-bottom:1px solid var(--border);
+                display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+      <h3 style="margin:0;font-size:1.1rem;">🐾 {{ __('Términos de uso') }}</h3>
+      <button onclick="closeTermsModal()"
+              style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--muted);">✕</button>
+    </div>
+
+    {{-- Contenido en dos columnas --}}
+    <div style="padding:28px;overflow-y:auto;font-size:0.875rem;color:var(--txt);line-height:1.7;
+                display:grid;grid-template-columns:1fr 1fr;gap:20px 32px;">
+
+      <div>
+        <strong>1. {{ __('Aceptación de los términos') }}</strong>
+        <p style="margin:6px 0 0;">{{ __('Al registrarte en PatitasUnidas aceptas estos términos en su totalidad. Si no estás de acuerdo con alguna parte, te pedimos que no utilices la plataforma.') }}</p>
+      </div>
+
+      <div>
+        <strong>2. {{ __('Uso de la plataforma') }}</strong>
+        <p style="margin:6px 0 0;">{{ __('PatitasUnidas es una plataforma de ayuda animal. Queda prohibido publicar contenido falso, engañoso o con fines lucrativos no autorizados. El incumplimiento puede resultar en la suspensión de la cuenta.') }}</p>
+      </div>
+
+      <div>
+        <strong>3. {{ __('Registro y verificación') }}</strong>
+        <p style="margin:6px 0 0;">{{ __('Los datos proporcionados durante el registro deben ser verídicos. PatitasUnidas se reserva el derecho de verificar la identidad de los usuarios para garantizar la seguridad de los animales.') }}</p>
+      </div>
+
+      <div>
+        <strong>4. {{ __('Protección de datos') }}</strong>
+        <p style="margin:6px 0 0;">{{ __('Tus datos personales serán tratados conforme al Reglamento General de Protección de Datos (RGPD). No compartiremos tu información con terceros sin tu consentimiento expreso.') }}</p>
+      </div>
+
+      <div>
+        <strong>5. {{ __('Publicaciones y contenido') }}</strong>
+        <p style="margin:6px 0 0;">{{ __('Eres responsable del contenido que publicas. PatitasUnidas puede eliminar cualquier publicación que vulnere estas normas o ponga en riesgo el bienestar animal.') }}</p>
+      </div>
+
+      <div>
+        <strong>6. {{ __('Adopciones') }}</strong>
+        <p style="margin:6px 0 0;">{{ __('PatitasUnidas actúa como intermediario y no se hace responsable del resultado final de los procesos de adopción. Recomendamos seguir siempre los protocolos establecidos por las protectoras.') }}</p>
+      </div>
+
+      <div>
+        <strong>7. {{ __('Modificaciones') }}</strong>
+        <p style="margin:6px 0 0;">{{ __('PatitasUnidas se reserva el derecho de modificar estos términos en cualquier momento. Los usuarios serán notificados de cambios significativos a través de la plataforma.') }}</p>
+      </div>
+
+      <div>
+        <strong>8. {{ __('Contacto') }}</strong>
+        <p style="margin:6px 0 0;">{{ __('Para cualquier consulta relacionada con estos términos puedes contactarnos en') }}
+          <a href="mailto:noreply.patitasunidas@gmail.com" style="color:var(--terra);">noreply.patitasunidas@gmail.com</a>.
+        </p>
+      </div>
+
+    </div>
+
+    {{-- Footer --}}
+    <div style="padding:16px 28px;border-top:1px solid var(--border);flex-shrink:0;text-align:right;">
+      <button onclick="closeTermsModal()" class="btn-p">
+        {{ __('Entendido') }}
+      </button>
+    </div>
+
+  </div>
+</div>
+
 <!-- MODAL REPORTE -->
 <div id="reportOverlay" onclick="if(event.target===this)closeReportModal()"
      style="display:flex;opacity:0;pointer-events:none;position:fixed;inset:0;z-index:10000;

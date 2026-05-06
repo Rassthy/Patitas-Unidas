@@ -140,15 +140,91 @@
         <p style="color:var(--muted);font-size:.9rem;margin-bottom:20px;">
           {{ __('Gestiona tu contraseña y la seguridad de tu cuenta.') }}
         </p>
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <button class="btn-s" style="width:fit-content;" disabled>
-            <i class="fa-solid fa-key"></i> {{ __('Cambiar contraseña') }}
-            <span style="font-size:.75rem;margin-left:6px;opacity:.6">({{ __('próximamente') }})</span>
-          </button>
-          <button class="btn-s" style="width:fit-content;color:#c0392b;border-color:#f5c6a8;" disabled>
-            <i class="fa-solid fa-trash"></i> {{ __('Eliminar cuenta') }}
-            <span style="font-size:.75rem;margin-left:6px;opacity:.6">({{ __('próximamente') }})</span>
-          </button>
+
+        <div style="display:flex;flex-direction:column;gap:24px;">
+
+          {{-- CAMBIAR CONTRASEÑA --}}
+          <form method="POST" action="{{ route('profile.password') }}">
+            @csrf @method('PUT')
+            <div style="display:flex;flex-direction:column;gap:12px;max-width:400px;">
+              <div class="fg">
+                <label class="fl">{{ __('Contraseña actual') }}</label>
+                <div style="position:relative;">
+                  <input class="fi @error('current_password') input-error @enderror"
+                        type="password" name="current_password"
+                        placeholder="••••••••" style="padding-right:40px;" required>
+                  <button type="button" onclick="togglePassword(this)"
+                          style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                                background:none;border:none;cursor:pointer;color:var(--muted);padding:0;">
+                    <i class="fa-regular fa-eye"></i>
+                  </button>
+                </div>
+                @error('current_password') <span class="error-msg">{{ $message }}</span> @enderror
+              </div>
+              <div class="fg">
+                <label class="fl">{{ __('Nueva contraseña') }}</label>
+                <div style="position:relative;">
+                  <input class="fi @error('password') input-error @enderror"
+                        type="password" name="password"
+                        placeholder="{{ __('Mín. 8 caracteres') }}" style="padding-right:40px;" required>
+                  <button type="button" onclick="togglePassword(this)"
+                          style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                                background:none;border:none;cursor:pointer;color:var(--muted);padding:0;">
+                    <i class="fa-regular fa-eye"></i>
+                  </button>
+                </div>
+                @error('password') <span class="error-msg">{{ $message }}</span> @enderror
+              </div>
+              <div class="fg">
+                <label class="fl">{{ __('Confirmar nueva contraseña') }}</label>
+                <div style="position:relative;">
+                  <input class="fi" type="password" name="password_confirmation"
+                        placeholder="{{ __('Repite tu contraseña') }}" style="padding-right:40px;" required>
+                  <button type="button" onclick="togglePassword(this)"
+                          style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                                background:none;border:none;cursor:pointer;color:var(--muted);padding:0;">
+                    <i class="fa-regular fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+              <button type="submit" class="btn-s" style="width:fit-content;">
+                <i class="fa-solid fa-key"></i> {{ __('Cambiar contraseña') }}
+              </button>
+            </div>
+          </form>
+
+          <hr style="border:none;border-top:1px solid var(--border);">
+
+          {{-- ELIMINAR CUENTA --}}
+          <div>
+            <p style="font-size:0.85rem;color:#c0392b;margin-bottom:12px;">
+              ⚠️ {{ __('Esta acción es irreversible. Se eliminarán todos tus datos permanentemente.') }}
+            </p>
+            <form method="POST" action="{{ route('profile.account.destroy') }}"
+                  onsubmit="return confirm('{{ __('¿Estás seguro? Esta acción no se puede deshacer.') }}')">
+              @csrf @method('DELETE')
+              <div style="display:flex;flex-direction:column;gap:12px;max-width:400px;">
+                <div class="fg">
+                  <label class="fl">{{ __('Introduce tu contraseña para confirmar') }}</label>
+                  <div style="position:relative;">
+                    <input class="fi @error('confirm_password') input-error @enderror"
+                          type="password" name="confirm_password"
+                          placeholder="••••••••" style="padding-right:40px;" required>
+                    <button type="button" onclick="togglePassword(this)"
+                            style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                                  background:none;border:none;cursor:pointer;color:var(--muted);padding:0;">
+                      <i class="fa-regular fa-eye"></i>
+                    </button>
+                  </div>
+                  @error('confirm_password') <span class="error-msg">{{ $message }}</span> @enderror
+                </div>
+                <button type="submit" class="btn-s" style="width:fit-content;color:#c0392b;border-color:#f5c6a8;">
+                  <i class="fa-solid fa-trash"></i> {{ __('Eliminar cuenta') }}
+                </button>
+              </div>
+            </form>
+          </div>
+
         </div>
       </div>
     </div>
@@ -171,6 +247,16 @@
       document.querySelectorAll('.settings-option').forEach(o => o.classList.remove('selected'));
       r.closest('.settings-option').classList.add('selected');
     });
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const tab = '{{ session('tab') }}';
+    if (tab) {
+      const btn = document.querySelector(`[onclick*="${tab}"]`);
+      if (btn) btn.click();
+    }
   });
 </script>
 @endsection
