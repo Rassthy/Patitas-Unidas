@@ -232,7 +232,7 @@
 
 <!-- LIGHTBOX -->
 <div id="lightboxOverlay" onclick="if(event.target===this)closeLightbox()"
-    style="display:flex;pointer-events:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;">
+    style="display:flex;opacity:0;pointer-events:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;transition:opacity 0.25s ease;">
   <button onclick="closeLightbox()" style="position:absolute;top:16px;right:20px;background:none;border:none;color:#fff;font-size:1.8rem;cursor:pointer;">✕</button>
   <button class="lb-arr" onclick="lightboxNav(-1)" style="position:absolute;left:16px;background:rgba(255,255,255,0.15);border:none;color:#fff;font-size:2rem;padding:10px 16px;border-radius:50%;cursor:pointer;">‹</button>
   <img id="lightboxImg" src="" style="max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px;">

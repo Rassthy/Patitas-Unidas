@@ -49,6 +49,19 @@
 <!-- Auth user para JS -->
 <script>
   window.AUTH_USER_ID = {{ Auth::check() ? Auth::id() : 'null' }};
+  window.APP_URL = "{{ rtrim(url('/'), '/') }}";
+  // Interceptor: prefija APP_URL a todas las llamadas fetch con ruta absoluta
+  (function () {
+    var _base = window.APP_URL || '';
+    if (!_base) return;
+    var _orig = window.fetch.bind(window);
+    window.fetch = function (url, opts) {
+      if (typeof url === 'string' && url.charAt(0) === '/' && url.charAt(1) !== '/') {
+        url = _base + url;
+      }
+      return _orig(url, opts);
+    };
+  })();
 </script>
 
 <!-- JS -->

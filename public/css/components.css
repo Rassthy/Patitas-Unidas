@@ -1409,6 +1409,8 @@
     .inline-form {
         flex-direction: column;
     }
+}
+
 #notifDropdown {
   transition: opacity 0.2s ease;
 }

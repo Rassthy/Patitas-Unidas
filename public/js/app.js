@@ -103,7 +103,7 @@ function renderPosts(catId, filter='') {
           <img class="pc-img"
                src="${imgSrc}"
                alt="${p.titulo}"
-               loading="lazy"
+               loading="lazy">
           <span class="pc-badge ${postBadge.class}">
             ${postBadge.icon}${p.animal_especie ? ' ' + p.animal_especie : ''}
           </span>
@@ -117,7 +117,7 @@ function renderPosts(catId, filter='') {
               <img class="pc-author-av"
                    src="${autorFoto}"
                    alt="${autorNombre}"
-                   loading="lazy"
+                   loading="lazy">
               <span>${autorLabel}</span>
             </div>
             <button class="btn-sm" data-id="${p.id}">Saber más</button>

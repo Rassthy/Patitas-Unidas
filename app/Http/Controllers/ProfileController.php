@@ -25,6 +25,8 @@ class ProfileController extends Controller
             }
         }
 
+        $user->load('pets');
+
         return view('profile.show', compact('user'));
     }
 

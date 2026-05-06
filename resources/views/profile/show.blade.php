@@ -89,7 +89,7 @@
   <div class="profile-sections">
     <div class="profile-stats">
       <div class="stat-item">
-        <div class="stat-item-num">0</div>
+        <div class="stat-item-num">{{ $user->posts()->count() }}</div>
         <div class="stat-item-lbl">Publicaciones</div>
       </div>
       <div class="stat-item">
@@ -97,8 +97,8 @@
         <div class="stat-item-lbl">Donaciones</div>
       </div>
       <div class="stat-item">
-        <div class="stat-item-num">0</div>
-        <div class="stat-item-lbl">Valoraciones enviadas</div>
+        <div class="stat-item-num">{{ $user->pets->count() }}</div>
+        <div class="stat-item-lbl">Mascotas</div>
       </div>
     </div>
 
@@ -139,11 +139,64 @@
         </div>
 
         <div id="tab-animales" class="profile-tab-content" style="display:none;">
-          <div class="empty-state">
-            <div class="empty-state-ico">🐶</div>
-            <div class="empty-state-title">Todavía no tienes animales registrados</div>
-            <p class="empty-state-desc">ÁREA EN CONSTRUCCIÓN...</p>
-          </div>
+          @if($user->pets->isEmpty())
+            <div class="empty-state">
+              <div class="empty-state-ico">🐶</div>
+              <div class="empty-state-title">Sin animales registrados</div>
+              <p class="empty-state-desc">
+                @if(Auth::id() === $user->id)
+                  Aún no tienes mascotas registradas.
+                  <a href="{{ route('mis-mascotas.index') }}" class="btn-p" style="margin-top:12px;display:inline-block;">
+                    <i class="fa-solid fa-plus"></i> Añadir mascota
+                  </a>
+                @else
+                  Este usuario no tiene animales registrados.
+                @endif
+              </p>
+            </div>
+          @else
+            @if(Auth::id() === $user->id)
+              <div style="text-align:right;margin-bottom:12px;">
+                <a href="{{ route('mis-mascotas.index') }}" class="btn-s">
+                  <i class="fa-solid fa-gear"></i> Gestionar mascotas
+                </a>
+              </div>
+            @endif
+            <div class="pets-grid pets-grid--profile">
+              @foreach($user->pets as $pet)
+                <div class="pet-card">
+                  <div class="pet-card__photo">
+                    @if($pet->foto)
+                      <img src="{{ Storage::url($pet->foto) }}" alt="{{ $pet->nombre }}">
+                    @else
+                      <div class="pet-card__no-photo"><i class="fa-solid fa-paw"></i></div>
+                    @endif
+                  </div>
+                  <div class="pet-card__body">
+                    <h3 class="pet-card__name">{{ $pet->nombre }}</h3>
+                    <p class="pet-card__meta">
+                      @if($pet->especie)<span>{{ $pet->especie }}</span>@endif
+                      @if($pet->raza)<span>· {{ $pet->raza }}</span>@endif
+                      @if($pet->edad !== null)<span>· {{ $pet->edad }} años</span>@endif
+                    </p>
+                    @if($pet->descripcion)
+                      <p class="pet-card__desc">{{ Str::limit($pet->descripcion, 80) }}</p>
+                    @endif
+                  </div>
+                  @if(Auth::id() === $user->id)
+                    <div class="pet-card__actions">
+                      <a href="{{ route('mis-mascotas.show', $pet) }}" class="btn-outline">
+                        <i class="fa-solid fa-eye"></i> Ver
+                      </a>
+                      <a href="{{ route('mis-mascotas.edit', $pet) }}" class="btn-outline">
+                        <i class="fa-solid fa-pen"></i> Editar
+                      </a>
+                    </div>
+                  @endif
+                </div>
+              @endforeach
+            </div>
+          @endif
         </div>
     </div>
 
