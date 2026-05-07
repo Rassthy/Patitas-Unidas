@@ -113,7 +113,7 @@
         <!-- Botón añadir mascota (solo propietario) -->
         @if($isOwner && $user->pets->isNotEmpty())
           <button class="btn-p" id="addPetButton" onclick="openAddPetModal()">
-            <i class="fa-solid fa-plus"></i> Añadir mascota
+            <i class="fa-solid fa-plus"></i> {{ __('Añadir mascota') }}
           </button>
         @endif
       </div>
@@ -183,7 +183,7 @@
 
       <!-- TAB ANIMALES -->
       <div id="tab-animales" class="profile-tab-content" style="display:none;">
-        <!-- Privacidad: visitante sin acceso -->
+
         @if(!$canSeePets)
         <div style="position:relative;overflow:hidden;border-radius:var(--r);min-height:200px;">
           <div class="pets-private-blur">
@@ -195,25 +195,32 @@
           </div>
           <div class="pets-private-overlay">
             <span style="font-size:2.5rem;">🔒</span>
-            <p style="font-family:'Fraunces',serif;font-size:1.05rem;font-weight:700;color:var(--dark);margin:0;">Mascotas privadas</p>
-            <p style="font-size:.85rem;color:var(--muted);margin:0;text-align:center;">El dueño ha hecho sus mascotas privadas.</p>
+            <p style="font-family:'Fraunces',serif;font-size:1.05rem;font-weight:700;color:var(--dark);margin:0;">
+              {{ __('Mascotas privadas') }}
+            </p>
+            <p style="font-size:.85rem;color:var(--muted);margin:0;text-align:center;">
+              {{ __('El dueño ha hecho sus mascotas privadas.') }}
+            </p>
           </div>
         </div>
 
         @elseif($user->pets->isEmpty())
         <div class="empty-state">
           <div class="empty-state-ico">🐶</div>
-          <div class="empty-state-title">{{ $isOwner ? 'Todavía no tienes animales registrados' : 'Este usuario no tiene animales registrados.' }}</div>
+          <div class="empty-state-title">
+            {{ $isOwner
+              ? __('Todavía no tienes animales registrados')
+              : __('Este usuario no tiene animales registrados.') }}
+          </div>
           @if($isOwner)
-          <p class="empty-state-desc">¡Añade a tu primer compañero peludo!</p>
+          <p class="empty-state-desc">{{ __('¡Añade a tu primer compañero peludo!') }}</p>
           <button class="btn-p" onclick="openAddPetModal()" style="margin-top:8px;">
-            <i class="fa-solid fa-plus"></i> Añadir mascota
+            <i class="fa-solid fa-plus"></i> {{ __('Añadir mascota') }}
           </button>
           @endif
         </div>
 
         @else
-        <!-- Grid de tarjetas de mascotas -->
         <div class="pets-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;">
           @foreach($user->pets as $pet)
           @php
@@ -222,13 +229,17 @@
           @endphp
           <div class="pet-card" onclick="openPetDetailModal({{ $pet->id }})">
             <img class="pet-card-img" src="{{ $petImgUrl }}" alt="{{ $pet->nombre }}"
-                 loading="lazy" onerror="this.src='/img/defaults/foto_perfil_generica.png'">
+                loading="lazy" onerror="this.src='/img/defaults/foto_perfil_generica.png'">
             <div class="pet-card-body">
               <div class="pet-card-name">{{ $pet->nombre }}</div>
               <div class="pet-card-tags">
                 @if($pet->especie) <span class="pet-card-tag">🐾 {{ $pet->especie }}</span> @endif
                 @if($pet->raza)    <span class="pet-card-tag">🏷️ {{ $pet->raza }}</span> @endif
-                @if($pet->edad)    <span class="pet-card-tag">📅 {{ $pet->edad }} año{{ $pet->edad != 1 ? 's' : '' }}</span> @endif
+                @if($pet->edad)
+                  <span class="pet-card-tag">
+                    📅 {{ $pet->edad }} {{ $pet->edad != 1 ? __('años') : __('año') }}
+                  </span>
+                @endif
               </div>
               @if($pet->descripcion)
                 <p class="pet-card-desc">{{ $pet->descripcion }}</p>
@@ -239,7 +250,6 @@
         </div>
         @endif
       </div>
-    </div>
 
     <!-- PUBLICACIONES -->
     <div class="profile-card">
@@ -283,23 +293,32 @@
 <div class="pet-overlay" id="petModalOverlay" onclick="closePetModal(event)">
   <div class="pet-modal" onclick="event.stopPropagation()">
     <div style="padding:24px 28px 0;display:flex;align-items:center;justify-content:space-between;">
-      <h2 id="petModalTitle" style="font-family:'Fraunces',serif;font-size:1.3rem;font-weight:700;margin:0;">🐾 Añadir mascota</h2>
-      <button onclick="closePetModal()" style="background:var(--soft);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:13px;color:var(--muted);display:flex;align-items:center;justify-content:center;">✕</button>
+      <h2 id="petModalTitle" style="font-family:'Fraunces',serif;font-size:1.3rem;font-weight:700;margin:0;">
+        {{ __('🐾 Añadir mascota') }}
+      </h2>
+      <button onclick="closePetModal()"
+              style="background:var(--soft);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:13px;color:var(--muted);display:flex;align-items:center;justify-content:center;">✕</button>
     </div>
 
     <form id="petForm" onsubmit="submitPetForm(event)" style="padding:20px 28px 28px;">
 
       <!-- Imágenes existentes (edit) -->
       <div id="petExistingImagesWrap" style="display:none;margin-bottom:14px;">
-        <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">Fotos actuales (clic en ✕ para quitar)</label>
+        <label style="font-size:.82rem;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;">
+          {{ __('Fotos actuales (clic en ✕ para quitar)') }}
+        </label>
         <div id="petExistingImages" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
       </div>
 
       <!-- Subir imágenes -->
       <div class="form-group" style="margin-bottom:14px;">
-        <label style="font-size:.83rem;font-weight:600;">📷 Fotos <span style="color:var(--muted);font-weight:400;">(máx. 5)</span></label>
+        <label style="font-size:.83rem;font-weight:600;">
+          📷 {{ __('Fotos') }} <span style="color:var(--muted);font-weight:400;">({{ __('máx. 5') }})</span>
+        </label>
         <div class="pet-img-input-wrap" style="min-height:48px;">
-          <span style="font-size:.82rem;color:var(--muted);pointer-events:none;">📁 Selecciona imágenes (JPG/PNG · máx. 2 MB c/u)</span>
+          <span style="font-size:.82rem;color:var(--muted);pointer-events:none;">
+            📁 {{ __('Selecciona imágenes (JPG/PNG · máx. 2 MB c/u)') }}
+          </span>
           <input type="file" id="petImagesInput" accept="image/*" multiple onchange="handlePetImages(this)">
         </div>
         <div id="petImgPreviewList" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;"></div>
@@ -308,38 +327,45 @@
       <!-- Nombre + Especie -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
         <div class="form-group" style="margin:0;">
-          <label style="font-size:.83rem;font-weight:600;">Nombre *</label>
-          <input type="text" id="petNombre" name="nombre" class="fi" placeholder="Ej: Firulais" required maxlength="100">
+          <label style="font-size:.83rem;font-weight:600;">{{ __('Nombre *') }}</label>
+          <input type="text" id="petNombre" name="nombre" class="fi"
+                 placeholder="{{ __('Ej: Firulais') }}" required maxlength="100">
         </div>
         <div class="form-group" style="margin:0;">
-          <label style="font-size:.83rem;font-weight:600;">Especie</label>
-          <input type="text" id="petEspecie" name="especie" class="fi" placeholder="Ej: Perro" maxlength="50">
+          <label style="font-size:.83rem;font-weight:600;">{{ __('Especie') }}</label>
+          <input type="text" id="petEspecie" name="especie" class="fi"
+                 placeholder="{{ __('Ej: Perro') }}" maxlength="50">
         </div>
       </div>
 
       <!-- Raza + Edad -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
         <div class="form-group" style="margin:0;">
-          <label style="font-size:.83rem;font-weight:600;">Raza</label>
-          <input type="text" id="petRaza" name="raza" class="fi" placeholder="Ej: Golden Retriever" maxlength="50">
+          <label style="font-size:.83rem;font-weight:600;">{{ __('Raza') }}</label>
+          <input type="text" id="petRaza" name="raza" class="fi"
+                 placeholder="{{ __('Ej: Golden Retriever') }}" maxlength="50">
         </div>
         <div class="form-group" style="margin:0;">
-          <label style="font-size:.83rem;font-weight:600;">Edad (años)</label>
-          <input type="number" id="petEdad" name="edad" class="fi" placeholder="0" min="0" max="100">
+          <label style="font-size:.83rem;font-weight:600;">{{ __('Edad (años)') }}</label>
+          <input type="number" id="petEdad" name="edad" class="fi"
+                 placeholder="0" min="0" max="100">
         </div>
       </div>
 
       <!-- Descripción -->
       <div class="form-group" style="margin-bottom:16px;">
-        <label style="font-size:.83rem;font-weight:600;">Descripción</label>
+        <label style="font-size:.83rem;font-weight:600;">{{ __('Descripción') }}</label>
         <textarea id="petDescripcion" name="descripcion" class="fi" rows="3"
-                  placeholder="Cuenta algo sobre tu mascota..." style="resize:vertical;font-family:'DM Sans',sans-serif;"></textarea>
+                  placeholder="{{ __('Cuenta algo sobre tu mascota...') }}"
+                  style="resize:vertical;font-family:'DM Sans',sans-serif;"></textarea>
       </div>
 
       <!-- Vacunas -->
       <div class="form-group" style="margin-bottom:18px;">
-        <label style="font-size:.83rem;font-weight:600;">💉 Vacunas registradas</label>
-        <p style="font-size:.74rem;color:var(--muted);margin:4px 0 10px;">Selecciona las vacunas que tiene tu mascota.</p>
+        <label style="font-size:.83rem;font-weight:600;">💉 {{ __('Vacunas registradas') }}</label>
+        <p style="font-size:.74rem;color:var(--muted);margin:4px 0 10px;">
+          {{ __('Selecciona las vacunas que tiene tu mascota.') }}
+        </p>
         <div id="vaccineTagsContainer" style="display:flex;flex-wrap:wrap;gap:7px;"></div>
       </div>
 
@@ -347,24 +373,24 @@
       <div id="petReminderSection" style="display:none;align-items:center;gap:8px;margin-bottom:16px;
            padding:12px 14px;background:var(--soft);border-radius:var(--r-s);border:1.5px solid var(--border);">
         <i class="fa-solid fa-bell" style="color:var(--terra);"></i>
-        <span style="font-size:.83rem;color:var(--muted);flex:1;">Añade recordatorios para vacunas, revisiones…</span>
+        <span style="font-size:.83rem;color:var(--muted);flex:1;">
+          {{ __('Añade recordatorios para vacunas, revisiones…') }}
+        </span>
         <button type="button" class="btn-sm" onclick="closePetModal();openAddReminderModal(currentPetId);">
-          <i class="fa-solid fa-plus"></i> Recordatorio
+          <i class="fa-solid fa-plus"></i> {{ __('Recordatorio') }}
         </button>
       </div>
 
       <!-- Footer -->
       <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:14px;border-top:1px solid var(--border);">
-        <button type="button" class="btn-s" onclick="closePetModal()">Cancelar</button>
-        <button type="submit" id="petSubmitBtn" class="btn-p">Añadir mascota</button>
+        <button type="button" class="btn-s" onclick="closePetModal()">{{ __('Cancelar') }}</button>
+        <button type="submit" id="petSubmitBtn" class="btn-p">{{ __('Añadir mascota') }}</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
-     MODAL DETALLE DE MASCOTA
-════════════════════════════════════════════════════════ -->
+<!-- MODAL DETALLE DE MASCOTA -->
 <div class="pet-overlay" id="petDetailOverlay" onclick="closePetDetailModal(event)">
   <div class="pet-detail-modal" onclick="event.stopPropagation()">
 
@@ -372,37 +398,45 @@
     <div style="position:relative;background:var(--soft);">
       <img id="petDetailGalImg" src="" alt=""
            style="width:100%;height:300px;object-fit:cover;display:block;">
-      <button class="gal-arr l pet-detail-gal-arr" onclick="petDetailNavDir(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-      <button class="gal-arr r pet-detail-gal-arr" onclick="petDetailNavDir(1)"><i class="fa-solid fa-chevron-right"></i></button>
+      <button class="gal-arr l pet-detail-gal-arr" onclick="petDetailNavDir(-1)">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button class="gal-arr r pet-detail-gal-arr" onclick="petDetailNavDir(1)">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
       <div class="gal-nav" id="petDetailGalDots"></div>
-      <button onclick="closePetDetailModal()" class="modal-close-btn"><i class="fa-solid fa-xmark"></i></button>
+      <button onclick="closePetDetailModal()" class="modal-close-btn">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
     </div>
 
     <!-- Cuerpo -->
     <div style="padding:24px 28px 30px;">
 
-      <!-- Nombre y meta -->
-      <h2 id="petDetailNombre" style="font-family:'Fraunces',serif;font-size:1.7rem;font-weight:700;color:var(--dark);margin-bottom:6px;"></h2>
-      <div id="petDetailMeta" style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;font-size:.83rem;color:var(--muted);"></div>
+      <h2 id="petDetailNombre"
+          style="font-family:'Fraunces',serif;font-size:1.7rem;font-weight:700;color:var(--dark);margin-bottom:6px;"></h2>
+      <div id="petDetailMeta"
+           style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;font-size:.83rem;color:var(--muted);"></div>
 
-      <!-- Acciones del dueño -->
-      <div id="petDetailOwnerActions" style="display:none;flex-wrap:wrap;gap:8px;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--border);"></div>
+      <!-- Acciones del dueño (JS las inyecta) -->
+      <div id="petDetailOwnerActions"
+           style="display:none;flex-wrap:wrap;gap:8px;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--border);"></div>
 
-      <!-- Descripción -->
-      <p id="petDetailDesc" style="font-size:.88rem;line-height:1.75;color:var(--txt);margin-bottom:20px;"></p>
+      <p id="petDetailDesc"
+         style="font-size:.88rem;line-height:1.75;color:var(--txt);margin-bottom:20px;"></p>
 
-      <!-- Vacunas (solo dueño) -->
+      <!-- Vacunas -->
       <div id="petDetailVaccineSection" style="margin-bottom:20px;">
         <div style="font-family:'Fraunces',serif;font-size:1rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
-          <i class="fa-solid fa-syringe" style="color:var(--terra)"></i> Vacunas
+          <i class="fa-solid fa-syringe" style="color:var(--terra)"></i> {{ __('Vacunas') }}
         </div>
         <div id="petDetailVaccineList" style="display:flex;flex-wrap:wrap;gap:7px;"></div>
       </div>
 
-      <!-- Recordatorios (solo dueño) -->
+      <!-- Recordatorios -->
       <div id="petDetailReminderSection">
         <div style="font-family:'Fraunces',serif;font-size:1rem;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:8px;">
-          <i class="fa-solid fa-bell" style="color:var(--terra)"></i> Recordatorios
+          <i class="fa-solid fa-bell" style="color:var(--terra)"></i> {{ __('Recordatorios') }}
         </div>
         <div id="petDetailReminderList"></div>
       </div>
@@ -415,31 +449,36 @@
 <div class="pet-overlay" id="reminderModalOverlay" onclick="closeReminderModal(event)">
   <div class="pet-modal" style="max-width:440px;" onclick="event.stopPropagation()">
     <div style="padding:24px 28px 0;display:flex;align-items:center;justify-content:space-between;">
-      <h2 style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;margin:0;">🔔 Añadir recordatorio</h2>
-      <button onclick="closeReminderModal()" style="background:var(--soft);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:13px;color:var(--muted);display:flex;align-items:center;justify-content:center;">✕</button>
+      <h2 style="font-family:'Fraunces',serif;font-size:1.2rem;font-weight:700;margin:0;">
+        🔔 {{ __('Añadir recordatorio') }}
+      </h2>
+      <button onclick="closeReminderModal()"
+              style="background:var(--soft);border:none;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:13px;color:var(--muted);display:flex;align-items:center;justify-content:center;">✕</button>
     </div>
 
     <form id="reminderForm" onsubmit="submitReminderForm(event)" style="padding:20px 28px 28px;">
       <div class="form-group" style="margin-bottom:12px;">
-        <label style="font-size:.83rem;font-weight:600;">Título *</label>
-        <input type="text" id="reminderTitulo" class="fi" placeholder="Ej: Vacuna anual de la Rabia" required maxlength="100">
+        <label style="font-size:.83rem;font-weight:600;">{{ __('Título *') }}</label>
+        <input type="text" id="reminderTitulo" class="fi"
+               placeholder="{{ __('Ej: Vacuna anual de la Rabia') }}" required maxlength="100">
       </div>
       <div class="form-group" style="margin-bottom:12px;">
-        <label style="font-size:.83rem;font-weight:600;">Descripción</label>
-        <textarea id="reminderMensaje" class="fi" rows="3" placeholder="Notas adicionales..."
+        <label style="font-size:.83rem;font-weight:600;">{{ __('Descripción') }}</label>
+        <textarea id="reminderMensaje" class="fi" rows="3"
+                  placeholder="{{ __('Notas adicionales...') }}"
                   style="resize:vertical;font-family:'DM Sans',sans-serif;"></textarea>
       </div>
       <div class="form-group" style="margin-bottom:20px;">
-        <label style="font-size:.83rem;font-weight:600;">📅 Fecha y hora *</label>
+        <label style="font-size:.83rem;font-weight:600;">📅 {{ __('Fecha y hora *') }}</label>
         <input type="datetime-local" id="reminderFecha" class="fi" required
                min="{{ now()->addHour()->format('Y-m-d\TH:i') }}">
         <small style="font-size:.72rem;color:var(--muted);margin-top:4px;display:block;">
-          Recibirás notificaciones 5 días, 2 días, 12 h y 1 h antes.
+          {{ __('Recibirás notificaciones 5 días, 2 días, 12 h y 1 h antes.') }}
         </small>
       </div>
       <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:14px;border-top:1px solid var(--border);">
-        <button type="button" class="btn-s" onclick="closeReminderModal()">Cancelar</button>
-        <button type="submit" id="reminderSubmitBtn" class="btn-p">Guardar recordatorio</button>
+        <button type="button" class="btn-s" onclick="closeReminderModal()">{{ __('Cancelar') }}</button>
+        <button type="submit" id="reminderSubmitBtn" class="btn-p">{{ __('Guardar recordatorio') }}</button>
       </div>
     </form>
   </div>
