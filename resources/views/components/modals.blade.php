@@ -307,12 +307,14 @@
                  color:#fff;font-size:1.8rem;cursor:pointer;">✕</button>
   <button class="lb-arr" onclick="lightboxNav(-1)"
           style="position:absolute;left:16px;background:rgba(255,255,255,0.15);border:none;
-                 color:#fff;font-size:2rem;padding:10px 16px;border-radius:50%;cursor:pointer;">‹</button>
+       color:#fff;font-size:2rem;width:44px;height:44px;border-radius:50%;cursor:pointer;
+       display:flex;align-items:center;justify-content:center;padding:0;">‹</button>
   <img id="lightboxImg" src=""
        style="max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px;">
   <button class="lb-arr" onclick="lightboxNav(1)"
           style="position:absolute;right:16px;background:rgba(255,255,255,0.15);border:none;
-                 color:#fff;font-size:2rem;padding:10px 16px;border-radius:50%;cursor:pointer;">›</button>
+                 color:#fff;font-size:2rem;width:44px;height:44px;border-radius:50%;cursor:pointer;
+                 display:flex;align-items:center;justify-content:center;padding:0;">›</button>
   <div id="lightboxCounter"
        style="position:absolute;bottom:20px;color:#fff;font-size:0.9rem;opacity:0.7;"></div>
 </div>

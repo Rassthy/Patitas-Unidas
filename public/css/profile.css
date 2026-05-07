@@ -31,7 +31,7 @@
 /* TARJETA DE PERFIL */
 .profile-card {
   background: #fff; border-radius: var(--r); border: 1.5px solid var(--border);
-  padding: 32px; box-shadow: var(--sh-m); margin-bottom: 32px;
+  padding: 32px; box-shadow: var(--sh-m); margin-bottom: 24px;
 }
 
 /* FILA SUPERIOR — avatar · info · acciones */
@@ -122,12 +122,113 @@
   padding: 16px 24px; background: transparent; border: none;
   color: var(--muted); font-size: .95rem; font-weight: 500;
   cursor: pointer; position: relative; transition: color .2s;
+  font-family: 'DM Sans', sans-serif;
 }
 .profile-tab:hover       { color: var(--terra); }
 .profile-tab.active      { color: var(--terra); }
 .profile-tab.active::after {
   content: ''; position: absolute;
-  bottom: -1.5px; left: 0; right: 0; height: 1.5px; background: var(--terra);
+  bottom: -1.5px; left: 0; right: 0; height: 2px; background: var(--terra);
+  border-radius: 2px 2px 0 0;
+}
+
+/* Badge numérico dentro del tab */
+.tab-count-badge {
+  background: var(--terra); color: #fff;
+  border-radius: 50px; font-size: .65rem; font-weight: 700;
+  padding: 1px 7px; margin-left: 6px;
+  vertical-align: middle; display: inline-block;
+}
+
+/* ============================================================
+   BLOQUE 1 — Tabs (Valoraciones + Animales)
+   ============================================================ */
+
+/* Tarjeta con tabs: sin padding propio, el contenido lo gestiona */
+.profile-card--tabs {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Cabecera del bloque tabs: tabs a la izq, botón añadir mascota a la der */
+.profile-card-tabs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  border-bottom: 1.5px solid var(--border);
+  gap: 12px;
+}
+
+/* Ajustar las tabs dentro de esta cabecera */
+.profile-card--tabs .profile-tabs {
+  margin-bottom: 0;
+  border-bottom: none;
+  flex: 1;
+}
+
+.profile-card--tabs .profile-tab {
+  padding: 20px 22px;
+}
+
+/* Botón Añadir mascota pegado a la derecha */
+.btn-add-pet {
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-size: .82rem;
+  padding: 8px 18px;
+}
+
+/* Área de contenido de cada tab con padding consistente */
+.profile-tab-content--padded {
+  padding: 28px;
+}
+
+/* ============================================================
+   BLOQUE 2 — Publicaciones
+   ============================================================ */
+
+.profile-card--posts {
+  padding: 0;
+  overflow: hidden;
+}
+
+/* Cabecera de publicaciones: título a la izq, badge contador a la der */
+.profile-card-posts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px;
+  border-bottom: 1.5px solid var(--border);
+  gap: 12px;
+}
+
+/* El edit-section-title dentro del header de publicaciones no necesita margen */
+.profile-card-posts-header .edit-section-title {
+  margin-bottom: 0 !important;
+}
+
+/* Badge contador de publicaciones */
+.posts-count-badge {
+  background: var(--terra); color: #fff;
+  border-radius: 50px; font-size: .78rem; font-weight: 700;
+  padding: 3px 12px; flex-shrink: 0;
+}
+
+/* Grid de publicaciones con padding */
+.profile-card--posts .publications-grid {
+  padding: 28px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 0;
+}
+
+/* Hover en cards de publicaciones del perfil */
+.post-card-link:hover .post-card {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+  border-color: var(--terra) !important;
 }
 
 /*  GRIDS DE CONTENIDO  */
@@ -135,7 +236,7 @@
 /* Mascotas */
 .pets-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 22px; margin-bottom: 44px;
+  gap: 22px; margin-bottom: 0;
 }
 .pet-card {
   background: #fff; border: 1.5px solid var(--border); border-radius: var(--r);
@@ -170,10 +271,9 @@
 .empty-state-desc  { color: var(--muted); font-size: .95rem; margin-bottom: 24px; }
 
 /*  ESTADÍSTICAS DEL PERFIL  */
-/* (distinto de .stat-card del home — aquí sin icono grande, layout diferente) */
 .profile-stats {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 18px; margin-bottom: 44px;
+  gap: 18px; margin-bottom: 24px;
 }
 .stat-item {
   background: #fff; border: 1.5px solid var(--border); border-radius: var(--r);
@@ -185,7 +285,6 @@
 .stat-item-lbl        { font-size: .85rem; color: var(--muted); }
 
 /*  COMENTARIOS EN PERFIL  */
-/* (distinto de .comment-item del modal — aquí en tarjeta propia con rating) */
 .comments-section { max-width: 800px; }
 
 .comment-card {
@@ -203,7 +302,6 @@
 }
 .comment-author { flex: 1; }
 
-/* Sobreescribe el .comment-name del modal (más pequeño) dentro de este contexto */
 .comment-card .comment-name {
   font-family: 'Fraunces', serif; font-size: .95rem; font-weight: 600; color: var(--dark);
 }
@@ -238,7 +336,6 @@
 .edit-form-group  { margin-bottom: 22px; }
 .edit-form-label  { display: block; font-weight: 600; color: var(--dark); margin-bottom: 8px; font-size: .9rem; }
 
-/* input y textarea del formulario de edición comparten base */
 .edit-form-input,
 .edit-form-textarea {
   width: 100%; padding: 12px 16px; border: 1.5px solid var(--border);
@@ -251,15 +348,12 @@
 .edit-form-actions { display: flex; gap: 12px; margin-top: 32px; justify-content: flex-end; }
 
 /*  FORMULARIO DE EDICIÓN (edit.blade)  */
-
-/* Título de sección dentro de .profile-card */
 .edit-section-title {
   font-family: 'Fraunces', serif; font-size: 1rem; font-weight: 700;
   color: var(--dark); margin-bottom: 22px;
   display: flex; align-items: center; gap: 8px;
 }
 
-/* Preview de banner (div con background-image) */
 .edit-media-preview {
   width: 100%; height: 160px; border-radius: var(--r-s);
   background: var(--cream-d) center/cover;
@@ -273,7 +367,6 @@
 }
 .edit-media-placeholder i { font-size: 1.6rem; }
 
-/* Botón para elegir archivo (label que envuelve el input hidden) */
 .edit-file-label {
   display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
   padding: 8px 18px; background: var(--soft);
@@ -284,7 +377,6 @@
 .edit-file-label:hover { border-color: var(--terra); color: var(--terra); }
 .edit-file-input        { display: none; }
 
-/* Textos de ayuda y errores de campo */
 .edit-hint        { display: block; margin-top: 7px; font-size: .75rem; color: var(--muted); }
 .edit-field-error {
     color: var(--terra);
@@ -296,7 +388,6 @@
     gap: 4px;
 }
 
-/* Banner de alerta (éxito / error) — compartido entre edit y settings */
 .alert-banner {
   display: flex; align-items: flex-start; gap: 10px; padding: 14px 18px;
   border-radius: var(--r-s); font-size: .88rem;
@@ -304,9 +395,7 @@
 }
 .alert-banner--error { background: #FFF0E4; color: var(--terra); border-color: #f5c6a8; }
 
-/*  AJUSTES / SETTINGS (settings.blade)  */
-
-/* Opciones de tema (tarjetas radio visuales) */
+/*  AJUSTES / SETTINGS  */
 .settings-option-grid { display: flex; gap: 14px; }
 .settings-option {
   flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;
@@ -319,7 +408,6 @@
 .settings-option-ico             { font-size: 1.6rem; }
 .settings-option-lbl             { font-size: .85rem; font-weight: 600; color: var(--txt); }
 
-/* Select con flecha personalizada */
 .settings-select {
   width: 100%; padding: 10px 38px 10px 16px;
   border: 1.5px solid var(--border); border-radius: var(--r-s);
@@ -330,7 +418,6 @@
 }
 .settings-select:focus { border-color: var(--terra); }
 
-/* Filas de toggle (privacidad) */
 .settings-toggle-row {
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
   padding: 14px 0; border-bottom: 1px solid var(--border);
@@ -338,7 +425,6 @@
 .settings-toggle-lbl  { font-weight: 600; font-size: .9rem; color: var(--dark); margin-bottom: 3px; }
 .settings-toggle-hint { font-size: .78rem; color: var(--muted); }
 
-/* Toggle switch */
 .toggle-switch {
   position: relative; display: inline-block;
   width: 44px; height: 24px; flex-shrink: 0; cursor: pointer;
@@ -358,10 +444,10 @@
 
 /* Botones Expandibles en el Banner */
 .banner-actions {
-  position: absolute; 
-  top: 24px; 
+  position: absolute;
+  top: 24px;
   right: 24px;
-  display: flex; 
+  display: flex;
   gap: 12px;
 }
 .banner-btn-p, .banner-btn-s {
@@ -373,15 +459,15 @@
   overflow: hidden;
   box-shadow: var(--sh-m);
   transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease !important;
-  max-width: 44px; /* Estado colapsado (solo círculo) */
+  max-width: 44px;
   padding: 0;
 }
 .banner-btn-p {
-  background: var(--terra); /* Naranja/Primario */
+  background: var(--terra);
   color: #fff;
 }
 .banner-btn-s {
-  background: #fff; /* Blanco/Secundario */
+  background: #fff;
   color: var(--dark);
   border: 1.5px solid var(--border);
 }
@@ -401,43 +487,33 @@
   opacity: 0;
   transition: opacity 0.2s ease !important;
 }
-
-/* Al pasar el ratón, se expanden mostrando el texto */
 .banner-btn-p:hover, .banner-btn-s:hover {
-  max-width: 180px; 
+  max-width: 180px;
   padding-right: 20px;
 }
 .banner-btn-p:hover .banner-btn-text, .banner-btn-s:hover .banner-btn-text {
   opacity: 1;
   transition-delay: 0.1s;
 }
-
-/* Forzar que el icono secundario mantenga el color al hacer hover */
 .banner-btn-s:hover { color: var(--terra); border-color: var(--terra); }
 
 /* Campos bloqueados (Seguridad) */
-.locked-input-group { 
-  position: relative; 
+.locked-input-group {
+  position: relative;
 }
 .locked-input-group input {
-  background-color: #f1f1f1 !important; 
-  color: #777; 
+  background-color: #f1f1f1 !important;
+  color: #777;
   pointer-events: none;
 }
 .locked-overlay {
-  position: absolute; 
-  inset: 0; 
-  z-index: 10; 
-  cursor: help;
+  position: absolute; inset: 0; z-index: 10; cursor: help;
 }
 .input-lock-icon {
-  position: absolute; 
-  right: 15px; 
-  top: 38px; 
-  color: #aaa;
+  position: absolute; right: 15px; top: 38px; color: #aaa;
 }
 
-.edit-form-input.is-invalid, 
+.edit-form-input.is-invalid,
 .edit-form-textarea.is-invalid {
     border: 2px solid var(--terra) !important;
     background-color: rgba(230, 126, 34, 0.05);
@@ -447,7 +523,6 @@
    SISTEMA DE VALORACIONES (show.blade)
    ============================================= */
 
-/* ---- Contenedor del formulario de nueva valoración ---- */
 .review-form-container {
   background: var(--cream);
   border: 1.5px solid var(--border);
@@ -466,7 +541,6 @@
   gap: 8px;
 }
 
-/* ---- Estrellas interactivas ---- */
 #starRating {
   display: inline-flex;
   gap: 4px;
@@ -480,11 +554,9 @@
   transition: color .12s, transform .12s;
   display: inline-block;
 }
-/* Estado hover/preview — la clase la pone el JS */
 #starRating i.star-lit     { color: var(--terra); }
 #starRating i.star-preview { color: var(--terra-l); transform: scale(1.15); }
 
-/* ---- Lista de valoraciones publicadas ---- */
 .review-list { display: flex; flex-direction: column; gap: 14px; }
 
 .review-item {
@@ -529,54 +601,28 @@
   color: var(--muted);
 }
 
-/* ---- Modal de confirmación de sobrescritura ---- */
-/*
- * Backdrop mediante box-shadow gigante: no requiere ningún cambio en el blade.
- * La sombra se extiende 100vmax en todas las direcciones actuando como overlay oscuro.
- * El modal sigue el mismo lenguaje visual que .login-modal del proyecto.
- *
- * SCROLLBAR FIX:
- * El selector :has() detecta cuándo el modal está visible (el JS le aplica
- * display:block) y fuerza overflow:hidden en el body. Esto elimina la barra de
- * desplazamiento mientras el aviso está abierto, cerrando el hueco de 1-2px entre
- * el box-shadow y el borde derecho de la pantalla.
- * padding-right compensa el ancho de la scrollbar para que el layout no salte.
- * Soporte: Chrome 105+, Safari 15.4+, Firefox 121+.
- */
+/* Modal de confirmación */
 body:has(#overwriteWarning[style*="display: block"]) {
   overflow: hidden;
   padding-right: var(--scrollbar-compensation, 15px);
 }
 #overwriteWarning {
-  /* Posición (override de inline styles con !important) */
   position: fixed !important;
   top: 50% !important;
   left: 50% !important;
   z-index: 9999 !important;
-
-  /* Dimensiones */
   max-width: 420px;
   width: calc(100vw - 40px) !important;
   padding: 36px 36px 30px !important;
-
-  /* Superficie — idéntica a .login-modal */
   background: var(--cream) !important;
   border-radius: 20px !important;
   border: 1.5px solid var(--border);
-
-  /* Backdrop con box-shadow extendida al viewport + sombra propia */
   box-shadow:
-    0 0 0 100vmax rgba(16, 8, 2, .72),   /* overlay oscuro */
-    0 20px 80px rgba(16, 8, 2, .38) !important;  /* elevación del card */
-
-  /* Layout */
+    0 0 0 100vmax rgba(16, 8, 2, .72),
+    0 20px 80px rgba(16, 8, 2, .38) !important;
   text-align: center;
-
-  /* Animación idéntica a .login-modal */
   animation: overwritePop .32s cubic-bezier(.34, 1.2, .64, 1) both;
 }
-
-/* Icono de advertencia — overrideamos los inline styles del blade */
 #overwriteWarning > div:first-child {
   width: 56px !important;
   height: 56px !important;
@@ -585,12 +631,10 @@ body:has(#overwriteWarning[style*="display: block"]) {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  margin: 0 auto 18px !important; /* centrado horizontal */
+  margin: 0 auto 18px !important;
   font-size: 1.4rem !important;
   color: var(--terra) !important;
 }
-
-/* Título */
 #overwriteWarning h3 {
   font-family: 'Fraunces', serif;
   font-size: 1.3rem;
@@ -599,8 +643,6 @@ body:has(#overwriteWarning[style*="display: block"]) {
   margin: 0 0 10px !important;
   line-height: 1.2;
 }
-
-/* Texto descriptivo */
 #overwriteWarning p {
   font-size: .875rem;
   color: var(--muted);
@@ -610,8 +652,6 @@ body:has(#overwriteWarning[style*="display: block"]) {
   margin-left: auto !important;
   margin-right: auto !important;
 }
-
-/* Separador antes de los botones */
 #overwriteWarning > div:last-child {
   display: flex !important;
   gap: 10px !important;
@@ -620,24 +660,9 @@ body:has(#overwriteWarning[style*="display: block"]) {
   padding-top: 20px;
   border-top: 1px solid var(--border);
 }
-
-/* Animación de entrada */
 @keyframes overwritePop {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -46%) scale(.93);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-
-/* Hover de publicaciones en perfil */
-.post-card-link:hover .post-card {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-    border-color: var(--terra) !important;
+  from { opacity: 0; transform: translate(-50%, -46%) scale(.93); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
 /*  RESPONSIVE  */
@@ -646,23 +671,27 @@ body:has(#overwriteWarning[style*="display: block"]) {
 }
 
 @media (max-width: 768px) {
-  .profile-top            { grid-template-columns: 1fr; gap: 22px; }
-  .profile-avatar         { width: 100px; height: 100px; }
-  .profile-name           { font-size: 1.5rem; }
-  .profile-banner         { height: 150px; }
-  .pets-grid,
-  .publications-grid      { grid-template-columns: 1fr; }
-  .profile-tabs           { flex-wrap: wrap; }
-  .profile-edit-fab       { bottom: 20px; right: 20px; width: 48px; height: 48px; font-size: 18px; }
-  .edit-profile-form      { padding: 28px; }
+  .profile-top              { grid-template-columns: 1fr; gap: 22px; }
+  .profile-avatar           { width: 100px; height: 100px; }
+  .profile-name             { font-size: 1.5rem; }
+  .profile-banner           { height: 150px; }
+  .pets-grid                { grid-template-columns: 1fr; }
+  .profile-card--posts .publications-grid { grid-template-columns: 1fr; }
+  .profile-card-tabs-header { flex-wrap: wrap; gap: 8px; padding: 12px 18px; }
+  .profile-card-posts-header { padding: 14px 18px; }
+  .profile-tab-content--padded { padding: 18px; }
+  .profile-card--posts .publications-grid { padding: 18px; }
+  .btn-add-pet              { width: 100%; justify-content: center; }
+  .profile-edit-fab         { bottom: 20px; right: 20px; width: 48px; height: 48px; font-size: 18px; }
+  .edit-profile-form        { padding: 28px; }
 }
 
 @media (max-width: 480px) {
-  #profile-container          { padding: 16px; }
-  .profile-card               { padding: 20px; }
-  .profile-name               { font-size: 1.2rem; }
-  .profile-meta               { flex-direction: column; gap: 12px; }
-  .profile-actions            { flex-direction: column; }
+  #profile-container            { padding: 16px; }
+  .profile-card                 { padding: 20px; }
+  .profile-name                 { font-size: 1.2rem; }
+  .profile-meta                 { flex-direction: column; gap: 12px; }
+  .profile-actions              { flex-direction: column; }
   .profile-actions .btn-p,
-  .profile-actions .btn-s     { width: 100%; }
+  .profile-actions .btn-s       { width: 100%; }
 }
