@@ -193,16 +193,35 @@ function removeCustomVaccine(idx) {
 
 // Imagenes
 function handlePetImages(input) {
+  const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+  let descartados = 0;
+
   Array.from(input.files).forEach(file => {
-    const already = Array.from(petImagesFiles.files).some(f => f.name === file.name);
-    if (!already) petImagesFiles.items.add(file);
+    const yaExiste = Array.from(petImagesFiles.files).some(f => f.name === file.name);
+    
+    if (!yaExiste) {
+      if (file.size > MAX_SIZE) {
+        descartados++;
+      } else {
+        petImagesFiles.items.add(file);
+      }
+    }
   });
 
+  if (descartados > 0) {
+    if (typeof showToast === 'function') {
+      showToast('⚠️ Imágenes de más de 2 MB descartadas', 'error');
+    } else {
+      alert('Atención: No se permiten imágenes de más de 2 MB.');
+    }
+  }
+
+  // Límite de 5 fotos
   if (petImagesFiles.files.length > 5) {
     const dt = new DataTransfer();
     Array.from(petImagesFiles.files).slice(0, 5).forEach(f => dt.items.add(f));
     petImagesFiles = dt;
-    if (typeof showToast === 'function') showToast('Solo se permiten hasta 5 fotos.', 'error');
+    if (typeof showToast === 'function') showToast('Máximo 5 fotos.', 'error');
   }
 
   input.files = petImagesFiles.files;
@@ -251,15 +270,12 @@ async function submitPetForm(e) {
   formData.append('edad', document.getElementById('petEdad').value);
   formData.append('descripcion', document.getElementById('petDescripcion').value);
 
-  // Vacunas
   const allVaccines = [...selectedVaccines, ...customVaccines];
   allVaccines.forEach(v => formData.append('vaccines[]', v));
 
-  // Imagenes
   const isEdit = !!currentPetId;
 
   if (isEdit) {
-    formData.append('_method', 'PUT');
     removeImageIds.forEach(id => formData.append('remove_images[]', id));
     Array.from(petImagesFiles.files).forEach(f => formData.append('new_images[]', f));
   } else {
@@ -285,11 +301,23 @@ async function submitPetForm(e) {
       document.getElementById('petModalOverlay').classList.remove('open');
       document.body.style.overflow = '';
       setTimeout(() => window.location.reload(), 700);
-    } else {
+    } 
+    // <--- ESTE ES EL "ELSE" QUE GESTIONA LOS ERRORES DEL SERVIDOR (Como el 422)
+    else {
       const data = await res.json();
       
-      const firstErr = data.errors ? Object.values(data.errors)[0]?.[0] : data.message;
-      if (typeof showToast === 'function') showToast('Error: ' + (firstErr || 'Inténtalo de nuevo.'), 'error');
+      // Buscamos el error específico de Laravel. Si hay errores de validación, 
+      // mostramos el primero que encontremos (ej: "La imagen es demasiado grande")
+      let errorMsg = 'Inténtalo de nuevo.';
+      if (data.errors) {
+        errorMsg = Object.values(data.errors).flat()[0];
+      } else if (data.message) {
+        errorMsg = data.message;
+      }
+      
+      if (typeof showToast === 'function') {
+        showToast('Error: ' + errorMsg, 'error');
+      }
     }
   } catch (error) {
     if (typeof showToast === 'function') showToast('Error de conexión con el servidor', 'error');
@@ -400,7 +428,7 @@ function openPetDetailModal(petId) {
 function renderPetDetailModal(pet) {
   const isOwner = window.AUTH_USER_ID && pet.user_id === window.AUTH_USER_ID;
 
-  // Galeria
+  // ── GALERÍA ─────────────────────────────────────────
   const galImg = document.getElementById('petDetailGalImg');
   const galDots = document.getElementById('petDetailGalDots');
   const galArrows = document.querySelectorAll('.pet-detail-gal-arr');
@@ -408,6 +436,18 @@ function renderPetDetailModal(pet) {
   if (petDetailImages.length) {
     galImg.src = petDetailImages[0].url;
     galImg.style.display = '';
+    
+    // INTEGRACIÓN CON LIGHTBOX (Reutilizando tu lógica de posts/chat)
+    galImg.style.cursor = 'zoom-in';
+    galImg.onclick = () => {
+      if (!petDetailImages || !petDetailImages.length) return;
+      // Las URLs de mascotas ya vienen completas desde el controlador
+      const urls = petDetailImages.map(img => img.url);
+      if (typeof openLightbox === 'function') {
+        openLightbox(urls, petDetailGalIdx);
+      }
+    };
+
     galDots.innerHTML = petDetailImages.map((_, i) =>
       `<button class="gal-dot ${i === 0 ? 'act' : ''}" onclick="petDetailNav(${i})"></button>`
     ).join('');
@@ -415,11 +455,13 @@ function renderPetDetailModal(pet) {
   } else {
     galImg.src = '/img/defaults/foto_perfil_generica.png';
     galImg.style.display = '';
+    galImg.style.cursor = 'default';
+    galImg.onclick = null;
     galDots.innerHTML = '';
     galArrows.forEach(a => a.style.display = 'none');
   }
 
-  // Info de cabecera
+  // ── INFORMACIÓN BÁSICA ──────────────────────────────
   document.getElementById('petDetailNombre').textContent = pet.nombre || '—';
   document.getElementById('petDetailMeta').innerHTML = [
     pet.especie ? `<span>🐾 ${escPet(pet.especie)}</span>` : '',
@@ -429,7 +471,7 @@ function renderPetDetailModal(pet) {
 
   document.getElementById('petDetailDesc').textContent = pet.descripcion || 'Sin descripción.';
 
-  // Acciones solo del dueño
+  // ── ACCIONES DEL DUEÑO ──────────────────────────────
   const ownerActions = document.getElementById('petDetailOwnerActions');
   if (isOwner) {
     ownerActions.style.display = 'flex';
@@ -449,7 +491,7 @@ function renderPetDetailModal(pet) {
     ownerActions.style.display = 'none';
   }
 
-  // Vacunas (solo dueño)
+  // ── VACUNAS (Solo dueño) ───────────────────────────
   const vaccineSection = document.getElementById('petDetailVaccineSection');
   if (isOwner && pet.vaccines) {
     vaccineSection.style.display = '';
@@ -469,7 +511,7 @@ function renderPetDetailModal(pet) {
     vaccineSection.style.display = 'none';
   }
 
-  // Recordatorios (solo dueño)
+  // ── RECORDATORIOS (Solo dueño) ──────────────────────
   const reminderSection = document.getElementById('petDetailReminderSection');
   if (isOwner && pet.reminders) {
     reminderSection.style.display = '';
@@ -566,21 +608,31 @@ async function submitReminderForm(e) {
   }
 }
 
+// ELIMINAR RECORDATORIO
 async function deleteReminder(petId, reminderId) {
-  if (!confirm('¿Eliminar este recordatorio?')) return;
-  try {
-    const res = await fetch(`/pets/${petId}/reminders/${reminderId}`, {
-      method: 'DELETE',
-      headers: { 'X-CSRF-TOKEN': csrf() },
-    });
-    if (res.ok) {
-      if (typeof showToast === 'function') showToast('Recordatorio eliminado 🗑️');
-      // Si estamos viendo el detalle de la mascota, recargamos los datos para actualizar la lista de recordatorios
-      if (currentPetId) openPetDetailModal(currentPetId);
+  // Usamos el modal personalizado en lugar del confirm nativo
+  mostrarAvisoPatitas(
+    '¿Eliminar recordatorio?', 
+    'Este aviso dejará de sonar y se borrará de la lista permanentemente.', 
+    async () => {
+      try {
+        const res = await fetch(`/pets/${petId}/reminders/${reminderId}`, {
+          method: 'DELETE',
+          headers: { 'X-CSRF-TOKEN': csrf() }, //
+        });
+
+        if (res.ok) {
+          if (typeof showToast === 'function') showToast('Recordatorio eliminado 🗑️'); //
+          
+          // Si estamos viendo el detalle de la mascota, refrescamos la lista sin recargar toda la página
+          if (currentPetId) openPetDetailModal(currentPetId); 
+        }
+      } catch (error) {
+        if (typeof showToast === 'function') showToast('Error al eliminar'); //
+        console.error("Error al borrar recordatorio:", error);
+      }
     }
-  } catch {
-    if (typeof showToast === 'function') showToast('Error al eliminar');
-  }
+  );
 }
 
 document.addEventListener('keydown', e => {

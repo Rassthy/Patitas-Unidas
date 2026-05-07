@@ -89,3 +89,15 @@
   pointer-events: all !important;
   display: flex !important;
 }
+
+#petDetailGalImg {
+    cursor: zoom-in;
+    transition: filter 0.3s;
+}
+#petDetailGalImg:hover {
+    filter: brightness(0.9);
+}
+
+.toast, #toast, .toast-container, #toast-container {
+  z-index: 2147483647 !important;
+}
