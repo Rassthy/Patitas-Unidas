@@ -155,7 +155,7 @@ class ChatController extends Controller
                 'mensaje',
                 __('Nuevo mensaje'),
                 __(':usuario te ha enviado un mensaje', ['usuario' => Auth::user()->username]),
-                '/chats/' . $id
+                '/?open_chat=' . $id
             );
         });
 

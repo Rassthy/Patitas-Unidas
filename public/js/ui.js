@@ -810,7 +810,7 @@ async function loadNotifications() {
       const horaStr = fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 
       return `
-        <div onclick="markNotificationRead(${n.id}, this)"
+        <div onclick="markNotificationRead(${n.id}, this); ${n.enlace_url ? `window.location.href='${n.enlace_url}'` : ''}"
              style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;cursor:pointer;
                     border-bottom:1px solid var(--border);
                     background:${n.leida ? 'transparent' : 'var(--soft)'}
@@ -834,7 +834,7 @@ async function loadNotifications() {
   }
 }
 
-async function markNotificationRead(id, el) {
+async function markNotificationRead(id, el, url = '') {
   try {
     await fetch(`/notifications/${id}`, {
       method: 'PUT',
@@ -852,6 +852,8 @@ async function markNotificationRead(id, el) {
     if (current > 0) {
       badge.textContent = current - 1;
       if (current - 1 === 0) badge.style.display = 'none';
+
+      if (url) window.location.href = url;
     }
   } catch (error) {
     console.error('Error marcando notificación:', error);
