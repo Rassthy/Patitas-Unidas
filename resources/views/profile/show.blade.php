@@ -102,7 +102,6 @@
          ============================================================ -->
     <div class="profile-card profile-card--tabs" id="profile-card-1">
 
-      <!-- Cabecera de tabs + botón añadir mascota -->
       <div class="profile-card-tabs-header">
         <div class="profile-tabs" style="border-bottom:none;margin-bottom:0;flex:1;">
           <button class="profile-tab active" onclick="switchTab(this,'tab-valoraciones')">
@@ -115,6 +114,7 @@
             @endif
           </button>
         </div>
+        
         @if($isOwner && $user->pets->isNotEmpty())
           <button class="btn-p btn-add-pet" id="addPetButton" onclick="openAddPetModal()">
             <i class="fa-solid fa-plus"></i> {{ __('Añadir mascota') }}
@@ -255,12 +255,13 @@
         @endif
       </div>
 
-    </div>
-    {{-- /profile-card-1 --}}
-
     <!-- ============================================================
          BLOQUE 2: PUBLICACIONES
          ============================================================ -->
+
+    </div>
+    {{-- /profile-card-1 --}}
+
     <div class="profile-card profile-card--posts" id="profile-card-2">
 
       <div class="profile-card-posts-header">
