@@ -68,10 +68,26 @@
   font-size: .78rem; font-weight: 600; color: var(--brown, #5C3218); margin-bottom: 12px;
 }
 .btn-primary {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--cream-d); border: 1.5px solid var(--border);
-  padding: 5px 14px; border-radius: 50px;
-  font-size: .78rem; font-weight: 600; color: var(--brown, #5C3218); margin-bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--cream-d);
+  border: 1.5px solid var(--border);
+  padding: 5px 14px;
+  border-radius: 50px;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--brown, #5C3218);
+  margin-bottom: 12px;
+}
+#btn-valoracion:hover {
+  color: var(--cream-d);
+}
+.btn-primary:hover {
+  color: var(--cream-d);
+  background: var(--terra-h);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(200, 88, 46, .35);
 }
 .profile-name {
   font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 700;

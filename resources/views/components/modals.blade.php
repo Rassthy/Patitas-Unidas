@@ -326,7 +326,7 @@
        style="background:var(--cream);border-radius:16px;width:min(90vw,720px);
               max-height:85vh;display:flex;flex-direction:column;box-shadow:var(--sh-l);">
 
-    {{-- Cabecera --}}
+    <!-- Cabecera -->
     <div style="padding:20px 28px;border-bottom:1px solid var(--border);
                 display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
       <h3 style="margin:0;font-size:1.1rem;">🐾 {{ __('Términos de uso') }}</h3>
@@ -334,7 +334,7 @@
               style="background:none;border:none;cursor:pointer;font-size:1.2rem;color:var(--muted);">✕</button>
     </div>
 
-    {{-- Contenido en dos columnas --}}
+    <!-- Contenido en dos columnas -->
     <div style="padding:28px;overflow-y:auto;font-size:0.875rem;color:var(--txt);line-height:1.7;
                 display:grid;grid-template-columns:1fr 1fr;gap:20px 32px;">
 
@@ -382,7 +382,7 @@
 
     </div>
 
-    {{-- Footer --}}
+    <!-- Footer -->
     <div style="padding:16px 28px;border-top:1px solid var(--border);flex-shrink:0;text-align:right;">
       <button onclick="closeTermsModal()" class="btn-p">
         {{ __('Entendido') }}

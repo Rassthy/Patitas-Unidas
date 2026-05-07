@@ -136,7 +136,7 @@ function renderPosts(catId, filter = '') {
     </div>`;
 }
 
-// ========== ENVIAR MENSAJE ==========
+// ENVIAR MENSAJE
 async function sendMsg() {
   const input = document.getElementById('msgInput');
   if (!input.value.trim()) { showToast(t('Escribe un comentario antes de enviar 💬')); return; }
@@ -164,7 +164,7 @@ async function sendMsg() {
   }
 }
 
-// ========== FUNCIONES COMPLETAS DEL CHAT ==========
+// FUNCIONES COMPLETAS DEL CHAT
 let activeChatUserId = null;
 
 async function openFcChat(id) {

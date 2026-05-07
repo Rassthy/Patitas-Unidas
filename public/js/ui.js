@@ -653,43 +653,42 @@ async function submitReply(parentCommentId, postId) {
   }
 }
 
-function deleteComment(commentId, postId) {
-  DOM.toastMsg.innerHTML = `
-    ${t('¿Eliminar comentario?')}
-    <span style="display:flex;gap:8px;margin-top:8px;justify-content:center;">
-      <button onclick="confirmDeleteComment(${commentId}, ${postId})"
-        style="background:var(--terra);color:#fff;border:none;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:0.8rem;">
-        ${t('Eliminar')}
-      </button>
-      <button onclick="DOM.toast.classList.remove('show')"
-        style="background:var(--bg-secondary);color:var(--text);border:none;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:0.8rem;">
-        ${t('Cancelar')}
-      </button>
-    </span>
-  `;
-  DOM.toast.classList.add('show');
-  clearTimeout(toastTimer);
-}
+// ELIMINAR COMENTARIO
+window.deleteComment = async function(commentId, postId) {
+    // Al recibir explicitamente (commentId, postId), ya no se confunde.
+    
+    try {
+        const res = await fetch(`/comments/${commentId}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            }
+        });
 
-async function confirmDeleteComment(commentId, postId) {
-  DOM.toast.classList.remove('show');
-  try {
-    const response = await fetch(`/comments/${commentId}`, {
-      method: 'DELETE',
-      headers: {
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-      }
-    });
-    if (response.ok) {
-      loadComments(postId);
-      showToast(t('Comentario eliminado 🗑️'));
-    } else {
-      showToast(t('Error al eliminar comentario'));
+        if (res.ok) {
+            if (typeof showToast === 'function') showToast(window.i18n['Comentario eliminado 🗑️'] || 'Comentario eliminado');
+            
+            // MAGIA NINJA: Buscamos el comentario en pantalla y lo borramos visualmente
+            const divComentario = document.getElementById('comment-' + commentId);
+            if (divComentario) {
+                divComentario.style.transition = 'all 0.3s ease';
+                divComentario.style.opacity = '0';
+                divComentario.style.transform = 'scale(0.95)';
+                setTimeout(() => divComentario.remove(), 300); // 300ms para que dé tiempo a la animación
+            }
+        } else if (res.status === 404) {
+            if (typeof showToast === 'function') showToast('El comentario ya no existe', 'error');
+            // Si da 404 (ya estaba borrado), lo quitamos visualmente de la pantalla también
+            const divComentario = document.getElementById('comment-' + commentId);
+            if (divComentario) divComentario.remove();
+        } else {
+            if (typeof showToast === 'function') showToast(window.i18n['Error al eliminar comentario'] || 'Error al eliminar', 'error');
+        }
+    } catch (error) {
+        if (typeof showToast === 'function') showToast(window.i18n['Error de conexión'] || 'Error de conexión', 'error');
     }
-  } catch (error) {
-    showToast(t('Error de conexión'));
-  }
-}
+};
 
 async function toggleLike(postId) {
   try {

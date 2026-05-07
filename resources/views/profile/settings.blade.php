@@ -98,6 +98,8 @@
           <div class="edit-section-title">
             <i class="fa-solid fa-eye" style="color:var(--terra)"></i> {{ __('Visibilidad de datos') }}
           </div>
+
+          <!-- Mostrar apellidos -->
           <div class="settings-toggle-row">
             <div>
               <div class="settings-toggle-lbl">{{ __('Mostrar apellidos') }}</div>
@@ -110,6 +112,8 @@
               <span class="toggle-thumb"></span>
             </label>
           </div>
+
+          <!-- Mostrar fecha de nacimiento -->
           <div class="settings-toggle-row">
             <div>
               <div class="settings-toggle-lbl">{{ __('Mostrar fecha de nacimiento') }}</div>
@@ -122,7 +126,22 @@
               <span class="toggle-thumb"></span>
             </label>
           </div>
+
+          <!-- Mostrar mascotas públicamente -->
+          <div class="settings-toggle-row" style="border-bottom:none;padding-bottom:0;">
+            <div>
+              <div class="settings-toggle-lbl">🐾 Mascotas públicas</div>
+              <div class="settings-toggle-hint">Otros usuarios podrán ver las mascotas de tu perfil.</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="hidden" name="settings[mascotas_publicas]" value="0">
+              <input type="checkbox" name="settings[mascotas_publicas]" value="1"
+                {{ ($user->user_settings['mascotas_publicas'] ?? '1') == '1' ? 'checked' : '' }}>
+              <span class="toggle-thumb"></span>
+            </label>
+          </div>
         </div>
+
         <div style="display:flex;justify-content:flex-end;margin-top:24px;">
           <button type="submit" class="btn-p">
             <i class="fa-solid fa-floppy-disk"></i> {{ __('Guardar privacidad') }}

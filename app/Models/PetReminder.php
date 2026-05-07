@@ -18,11 +18,13 @@ class PetReminder extends Model
         'mensaje',
         'fecha_alarma',
         'notificado',
+        'stages_notified',
     ];
 
     protected $casts = [
-        'fecha_alarma' => 'datetime',
-        'notificado' => 'boolean',
+        'fecha_alarma'    => 'datetime',
+        'notificado'      => 'boolean',
+        'stages_notified' => 'array',
     ];
 
     public function pet()
