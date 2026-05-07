@@ -1,6 +1,8 @@
 <!-- SIDEBAR -->
 <aside class="sidebar">
-  <div class="sb-logo" onclick="showSection('bienvenida')">🐾</div>
+  <div class="sb-logo" onclick="showSection('bienvenida')">
+    <img src="{{ asset('img/defaults/LogoPU.png') }}" alt="PatitasUnidas" class="sb-logo-img">
+  </div>
   <button class="sb-btn active" onclick="if(document.getElementById('sec-bienvenida')){ showSection('bienvenida'); return false; } window.location.href='{{ route('home', ['tab' => 'bienvenida']) }}';" title="{{ __('Inicio') }}">
     <i class="fa-solid fa-house"></i>
     <span class="sb-tip">{{ __('Inicio') }}</span>
