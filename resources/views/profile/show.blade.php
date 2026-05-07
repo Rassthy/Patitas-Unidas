@@ -97,29 +97,33 @@
       </div>
     </div>
 
-    <!-- TABS MIXTOS -->
-    <div class="profile-card" id="profile-card-1" style="margin-bottom:32px;">
-      <div class="profile-tabs" style="border-bottom:none;margin-bottom:16px;">
-        <button class="profile-tab active" onclick="switchTab(this,'tab-valoraciones')">
-          <i class="fa-solid fa-star"></i> {{ __('Valoraciones') }}
-        </button>
-        <button class="profile-tab" onclick="switchTab(this,'tab-animales')">
-          <i class="fa-solid fa-paw"></i> {{ __('Mis animales') }}
-          @if($user->pets->count() > 0)
-            <span style="background:var(--terra);color:#fff;border-radius:50px;font-size:.65rem;
-                         font-weight:700;padding:1px 7px;margin-left:4px;">{{ $user->pets->count() }}</span>
-          @endif
-        </button>
-        <!-- Botón añadir mascota (solo propietario) -->
+    <!-- ============================================================
+         BLOQUE 1: VALORACIONES + MIS ANIMALES (Tabs)
+         ============================================================ -->
+    <div class="profile-card profile-card--tabs" id="profile-card-1">
+
+      <div class="profile-card-tabs-header">
+        <div class="profile-tabs" style="border-bottom:none;margin-bottom:0;flex:1;">
+          <button class="profile-tab active" onclick="switchTab(this,'tab-valoraciones')">
+            <i class="fa-solid fa-star"></i> {{ __('Valoraciones') }}
+          </button>
+          <button class="profile-tab" onclick="switchTab(this,'tab-animales')">
+            <i class="fa-solid fa-paw"></i> {{ __('Mis animales') }}
+            @if($user->pets->count() > 0)
+              <span class="tab-count-badge">{{ $user->pets->count() }}</span>
+            @endif
+          </button>
+        </div>
+        
         @if($isOwner && $user->pets->isNotEmpty())
-          <button class="btn-p" id="addPetButton" onclick="openAddPetModal()">
+          <button class="btn-p btn-add-pet" id="addPetButton" onclick="openAddPetModal()">
             <i class="fa-solid fa-plus"></i> {{ __('Añadir mascota') }}
           </button>
         @endif
       </div>
 
       <!-- TAB VALORACIONES -->
-      <div id="tab-valoraciones" class="profile-tab-content">
+      <div id="tab-valoraciones" class="profile-tab-content profile-tab-content--padded">
         @auth @if(!$isOwner)
         <div class="review-form-container">
           <h4>{{ __('Dejar una valoración') }}</h4>
@@ -182,7 +186,7 @@
       </div>
 
       <!-- TAB ANIMALES -->
-      <div id="tab-animales" class="profile-tab-content" style="display:none;">
+      <div id="tab-animales" class="profile-tab-content profile-tab-content--padded" style="display:none;">
 
         @if(!$canSeePets)
         <div style="position:relative;overflow:hidden;border-radius:var(--r);min-height:200px;">
@@ -251,28 +255,37 @@
         @endif
       </div>
 
-    <!-- PUBLICACIONES -->
-    <div class="profile-card" id="profile-card-2">
-      <div class="edit-section-title" style="margin-bottom:24px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
-          <span><i class="fa-solid fa-paw" style="color:var(--terra)"></i> {{ __('Publicaciones') }}</span>
-          <span style="font-size:.8rem;background:var(--terra);color:white;padding:4px 12px;border-radius:20px;">{{ $user->posts->count() }}</span>
+    <!-- ============================================================
+         BLOQUE 2: PUBLICACIONES
+         ============================================================ -->
+
+    </div>
+    {{-- /profile-card-1 --}}
+
+    <div class="profile-card profile-card--posts" id="profile-card-2">
+
+      <div class="profile-card-posts-header">
+        <div class="edit-section-title" style="margin-bottom:0;">
+          <i class="fa-solid fa-paw" style="color:var(--terra)"></i>
+          <span>{{ __('Publicaciones') }}</span>
         </div>
+        <span class="posts-count-badge">{{ $user->posts->count() }}</span>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px;">
+
+      <div class="publications-grid">
         @forelse($user->posts as $post)
           <a href="{{ route('posts.show', $post->id) }}" class="post-card-link" style="text-decoration:none;color:inherit;">
-            <div class="post-card" style="border:1px solid #eee;border-radius:12px;overflow:hidden;background:white;transition:transform .2s;height:100%;">
+            <div class="post-card" style="border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:white;transition:transform .2s,box-shadow .2s,border-color .2s;height:100%;">
               @if($post->imagen_url)
-                <img src="{{ $post->imagen_url }}" alt="{{ $post->titulo }}" style="width:100%;height:160px;object-fit:cover;">
+                <img src="{{ $post->imagen_url }}" alt="{{ $post->titulo }}" style="width:100%;height:160px;object-fit:cover;display:block;">
               @endif
               <div style="padding:15px;">
-                <span style="font-size:.7rem;font-weight:700;text-transform:uppercase;color:var(--terra);">{{ $post->category->name ?? __('General') }}</span>
-                <h4 style="margin:8px 0;font-size:1.1rem;color:var(--dark);">{{ $post->titulo }}</h4>
-                <p style="font-size:.9rem;color:#666;">{{ Str::limit($post->descripcion, 80) }}</p>
-                <div style="display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid #f5f5f5;">
-                  <small style="color:#999;">{{ $post->created_at->diffForHumans() }}</small>
-                  <span style="color:var(--terra);font-weight:600;font-size:.85rem;">{{ __('Leer más →') }}</span>
+                <span style="font-size:0.6rem;font-weight:700;text-transform:uppercase;color:var(--terra);letter-spacing:0.3px;">{{ $post->category->name ?? __('General') }}</span>
+                <h4 style="margin:8px 0 5px;font-size:1.25rem;color:var(--dark);font-family:'Fraunces',serif;">{{ $post->titulo }}</h4>
+                <p style="font-size:0.75rem;color:var(--muted);line-height:1.5;margin-bottom:12px;">{{ Str::limit($post->descripcion, 80) }}</p>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--border);">
+                  <small style="color:var(--muted);font-size:.72rem;">{{ $post->created_at->diffForHumans() }}</small>
+                  <span style="color:var(--terra);font-weight:600;font-size:.82rem;">{{ __('Leer más →') }}</span>
                 </div>
               </div>
             </div>
@@ -285,7 +298,10 @@
           </div>
         @endforelse
       </div>
+
     </div>
+    {{-- /profile-card-2 --}}
+
   </div>
 </div>
 
@@ -488,7 +504,7 @@
 <script>
 /* Control de pestañas */
 function switchTab(btn, tabId) {
-  document.querySelectorAll('.profile-tabs .profile-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#profile-card-1 .profile-tabs .profile-tab').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-valoraciones').style.display = 'none';
   document.getElementById('tab-animales').style.display     = 'none';
   btn.classList.add('active');

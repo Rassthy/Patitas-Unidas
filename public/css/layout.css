@@ -369,22 +369,18 @@ header.chat-open {
 }
 
 .hdr-logo-icon {
-    width: 36px;
-    height: 36px;
-    background: var(--terra);
-    border-radius: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 17px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 40px;
+    height: 40px;
 }
 
 .hdr-logo-txt {
     font-family: 'Fraunces', serif;
     font-size: 1.3rem;
     font-weight: 700;
-    color: var(--terra);
+    color: #f87300;
     letter-spacing: -.5px;
 }
 

@@ -1,7 +1,9 @@
 <!-- HEADER -->
 <header id="mainHeader">
   <a class="hdr-logo" href="#" onclick="showSection('bienvenida');return false;">
-    <div class="hdr-logo-icon">🐾</div>
+    <div class="hdr-logo-icon">
+        <img src="{{ asset('img/defaults/h-logo.png') }}" alt="Logo Patitas Unidas" style="width: 100%; height: 100%; object-fit: contain;">
+    </div>
     <span class="hdr-logo-txt">PatitasUnidas</span>
   </a>
   <nav>
