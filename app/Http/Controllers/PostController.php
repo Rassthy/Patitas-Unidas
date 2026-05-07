@@ -43,7 +43,13 @@ class PostController extends Controller
             });
         }
 
-        $posts = $query->orderBy('created_at', 'desc')->paginate(12);
+        match($request->sort ?? 'recientes') {
+            'antiguas'  => $query->orderBy('created_at', 'asc'),
+            'populares' => $query->withCount('likes')->orderBy('likes_count', 'desc'),
+            default     => $query->orderBy('created_at', 'desc'),
+        };
+
+        $posts = $query->paginate(12);
 
         return response()->json(['posts' => $posts], 200);
     }
@@ -210,6 +216,11 @@ class PostController extends Controller
         $comments->each(function($comment) use ($userId) {
             $comment->likes_count = $comment->likes()->count();
             $comment->liked_by_user = $userId ? $comment->isLikedBy($userId) : false;
+
+            $comment->replies->each(function($reply) use ($userId) {
+                $reply->likes_count   = $reply->likes()->count();
+                $reply->liked_by_user = $userId ? $reply->isLikedBy($userId) : false;
+            });
         });
 
         return response()->json(['comments' => $comments], 200);

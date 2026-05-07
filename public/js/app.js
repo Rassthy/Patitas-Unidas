@@ -50,12 +50,19 @@ const catTitles = {
 // ========== CARGA DE PUBLICACIONES ==========
 let allPosts = [];
 let currentFilter = '';
+let currentSort = 'recientes';
+
+function sortPosts(sort) {
+  currentSort = sort;
+  loadPosts();
+}
 
 async function loadPosts() {
   try {
     const params = new URLSearchParams();
     params.append('category_id', currentCat);
     if (currentFilter) params.append('provincia', currentFilter);
+    if (currentSort) params.append('sort', currentSort);
 
     const response = await fetch(`/posts?${params}`);
     const data = await response.json();
@@ -546,11 +553,19 @@ document.addEventListener('keydown', e => {
 })();
 
 document.addEventListener('DOMContentLoaded', () => {
+
   const urlParams = new URLSearchParams(window.location.search);
   const postIdToOpen = urlParams.get('open_post');
+  const openChatId = urlParams.get('open_chat');
+
   if (postIdToOpen) {
     if (typeof openPostModal === 'function') {
       openPostModal(postIdToOpen);
     }
+  }
+  
+  if (openChatId) {
+    openFullChat();
+    setTimeout(() => openFcChat(parseInt(openChatId)), 300);
   }
 });

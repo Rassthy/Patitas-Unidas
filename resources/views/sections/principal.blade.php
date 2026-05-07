@@ -35,10 +35,10 @@
           <option>Zaragoza</option>
           <option>Bilbao</option>
         </select>
-        <select class="pa-select">
-          <option>{{ __('Más recientes') }}</option>
-          <option>{{ __('Más populares') }}</option>
-          <option>{{ __('Más antiguas') }}</option>
+        <select class="pa-select" onchange="sortPosts(this.value)">
+          <option value="recientes">{{ __('Más recientes') }}</option>
+          <option value="populares">{{ __('Más populares') }}</option>
+          <option value="antiguas">{{ __('Más antiguas') }}</option>
         </select>
         <button class="new-post-btn" onclick="openNewPostModal()">
           <i class="fa-solid fa-plus"></i> {{ __('Publicar') }}
