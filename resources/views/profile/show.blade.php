@@ -98,7 +98,7 @@
     </div>
 
     <!-- TABS MIXTOS -->
-    <div class="profile-card" style="margin-bottom:32px;">
+    <div class="profile-card" id="profile-card-1" style="margin-bottom:32px;">
       <div class="profile-tabs" style="border-bottom:none;margin-bottom:16px;">
         <button class="profile-tab active" onclick="switchTab(this,'tab-valoraciones')">
           <i class="fa-solid fa-star"></i> {{ __('Valoraciones') }}
@@ -252,7 +252,7 @@
       </div>
 
     <!-- PUBLICACIONES -->
-    <div class="profile-card">
+    <div class="profile-card" id="profile-card-2">
       <div class="edit-section-title" style="margin-bottom:24px;">
         <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
           <span><i class="fa-solid fa-paw" style="color:var(--terra)"></i> {{ __('Publicaciones') }}</span>
