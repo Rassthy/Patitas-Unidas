@@ -18,17 +18,6 @@ class SendPetReminderNotifications extends Command
         '12h' => [12 * 60,     'faltan **12 horas**',   3 * 60],
         '2h'  => [2 * 60,      'faltan **2 horas**',    60],
 
-        '10m' => [10, 'faltan **10 minutos**', 5],
-        '9m'  => [9,  'faltan **9 minutos**',  5],
-        '8m'  => [8,  'faltan **8 minutos**',  5],
-        '7m'  => [7,  'faltan **7 minutos**',  5],
-        '6m'  => [6,  'faltan **6 minutos**',  5],
-        '5m'  => [5,  'faltan **5 minutos**',  5],
-        '4m'  => [4,  'faltan **4 minutos**',  5],
-        '3m'  => [3,  'faltan **3 minutos**',  5],
-        '2m'  => [2,  'faltan **2 minutos**',  5],
-        '1m'  => [1,  'falta **1 minuto**',    5],
-
         '0m'  => [0,  '¡**el momento ha llegado**!', 10],
     ];
 
