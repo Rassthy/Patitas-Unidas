@@ -12,9 +12,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DonationController;
 
-/*
-*    RUTAS PROTEGIDAS (Requieren inicio de sesión)
-*/
+// RUTAS PROTEGIDAS (Requieren inicio de sesión)
 
 // Home | Landing
 Route::get('/', function () {
@@ -43,9 +41,7 @@ Route::get('posts/{id}/comments', [PostController::class, 'getComments'])->name(
 // Pets públicos (info básica, respeta privacidad del dueño)
 Route::get('pets/{id}/public', [PetController::class, 'show'])->name('pets.public.show');
 
-/* 
-*    RUTAS PROTEGIDAS (Requieren inicio de sesión)
-*/
+// RUTAS PROTEGIDAS (Requieren inicio de sesión)
 Route::middleware('auth')->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -93,15 +89,22 @@ Route::middleware('auth')->group(function () {
     Route::get('chats/{id}', [ChatController::class, 'show'])->name('chats.show');
     Route::post('chats/{id}/messages', [ChatController::class, 'sendMessage'])->name('chats.messages.store');
 
-    // Comprobador silencioso de nuevas notificaciones (¡Debe ir ANTES del resource!)
+    // Comprobador silencioso de nuevas notificaciones (ANTES DE RESOURCE SIEMPRE PARA EVITAR COLISIONES CON /notifications/{id})
     Route::get('/notifications/check', function () {
-        $latest = \App\Models\Notification::where('user_id', \Illuminate\Support\Facades\Auth::id())
+        $userId = \Illuminate\Support\Facades\Auth::id();
+
+        $latest = \App\Models\Notification::where('user_id', $userId)
             ->where('leida', false)
             ->latest()
             ->first();
-            
+
+        $unreadCount = \App\Models\Notification::where('user_id', $userId)
+            ->where('leida', false)
+            ->count();
+
         return response()->json([
-            'latest' => $latest ? $latest->only(['id', 'titulo', 'mensaje']) : null
+            'latest'       => $latest ? $latest->only(['id', 'titulo', 'mensaje']) : null,
+            'unread_count' => $unreadCount,
         ]);
     })->name('notifications.check');
 
@@ -115,7 +118,5 @@ Route::middleware('auth')->group(function () {
     Route::post('/donations/capture-order', [DonationController::class, 'captureOrder']);
 });
 
-/* 
-*    RUTAS DINÁMICAS (Al final para evitar colisiones)
-*/
+// RUTAS DINÁMICAS (Al final para evitar colisiones)
 Route::get('/profile/{identifier?}', [ProfileController::class, 'show'])->name('profile.show');

@@ -14,7 +14,9 @@ return new class extends Migration
             $table->string('titulo', 100);
             $table->text('mensaje')->nullable();
             $table->dateTime('fecha_alarma');
+            $table->string('timezone')->default('Europe/Madrid');
             $table->boolean('notificado')->default(false);
+            $table->json('stages_notified')->nullable();
             $table->timestamps();
         });
     }

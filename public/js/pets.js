@@ -573,6 +573,7 @@ function closeReminderModal(e) {
   document.body.style.overflow = '';
 }
 
+// ENVIO DE RECORDATORIO + INTEGRACION CON TIMEZONE DEL USUARIO
 async function submitReminderForm(e) {
   e.preventDefault();
   if (!petReminderPetId) return;
@@ -583,6 +584,8 @@ async function submitReminderForm(e) {
   const titulo       = document.getElementById('reminderTitulo').value;
   const mensaje      = document.getElementById('reminderMensaje').value;
   const fecha_alarma = document.getElementById('reminderFecha').value;
+  
+  const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   try {
     const res = await fetch(`/pets/${petReminderPetId}/reminders`, {
@@ -591,7 +594,7 @@ async function submitReminderForm(e) {
         'X-CSRF-TOKEN': csrf(),
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ titulo, mensaje, fecha_alarma }),
+      body: JSON.stringify({ titulo, mensaje, fecha_alarma, timezone: userTz }),
     });
 
     const data = await res.json();

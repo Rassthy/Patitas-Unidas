@@ -655,8 +655,6 @@ async function submitReply(parentCommentId, postId) {
 
 // ELIMINAR COMENTARIO
 window.deleteComment = async function(commentId, postId) {
-    // Al recibir explicitamente (commentId, postId), ya no se confunde.
-    
     try {
         const res = await fetch(`/comments/${commentId}`, {
             method: 'DELETE',
@@ -668,18 +666,16 @@ window.deleteComment = async function(commentId, postId) {
 
         if (res.ok) {
             if (typeof showToast === 'function') showToast(window.i18n['Comentario eliminado 🗑️'] || 'Comentario eliminado');
-            
-            // MAGIA NINJA: Buscamos el comentario en pantalla y lo borramos visualmente
             const divComentario = document.getElementById('comment-' + commentId);
             if (divComentario) {
                 divComentario.style.transition = 'all 0.3s ease';
                 divComentario.style.opacity = '0';
                 divComentario.style.transform = 'scale(0.95)';
-                setTimeout(() => divComentario.remove(), 300); // 300ms para que dé tiempo a la animación
+                setTimeout(() => divComentario.remove(), 300);
             }
         } else if (res.status === 404) {
             if (typeof showToast === 'function') showToast('El comentario ya no existe', 'error');
-            // Si da 404 (ya estaba borrado), lo quitamos visualmente de la pantalla también
+            // Si da 404 (ya estaba borrado) pues lo quitamos visualmente de la pantalla de todas formas
             const divComentario = document.getElementById('comment-' + commentId);
             if (divComentario) divComentario.remove();
         } else {
@@ -753,7 +749,7 @@ function closeNewPostModal(e) {
   document.getElementById('imagePreviewList').innerHTML = '';
 }
 
-// ========== NOTIFICACIONES ==========
+// PANEL DE NOTIFICACIONES
 let notifOpen = false;
 
 function openNotificationsPanel() {
@@ -776,58 +772,62 @@ document.addEventListener('click', e => {
   }
 });
 
+function parseBold(str) {
+  if (!str) return '';
+    const safe = str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  // Transformacion de **...** en <strong>...</strong>
+  return safe.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+}
+
 async function loadNotifications() {
   try {
     const response = await fetch('/notifications');
-    const data = await response.json();
-    const list = document.getElementById('notifList');
-    const badge = document.getElementById('notifBadge');
-
+    const data     = await response.json();
+    const list     = document.getElementById('notifList');
+ 
     if (!data.notifications || !data.notifications.length) {
       list.innerHTML = `<div style="text-align:center;padding:40px 20px;color:var(--muted);font-size:0.85rem;">${t('Sin notificaciones por ahora 🐾')}</div>`;
-      badge.style.display = 'none';
+      _updateNotifBadge(0);
       return;
     }
-
+ 
     const unread = data.notifications.filter(n => !n.leida).length;
-    badge.textContent = unread;
-    badge.style.display = unread ? '' : 'none';
-
+    _updateNotifBadge(unread);
+ 
     list.innerHTML = data.notifications.map(n => {
       const icons = {
-        like: '❤️',
-        mensaje: '✉️',
-        comentario_post: '💬',
+        like:                 '❤️',
+        mensaje:              '✉️',
+        comentario_post:      '💬',
         recordatorio_mascota: '🐾',
-        reporte: '🚨',
-        rating: '⭐',
-        sistema: '🔔'
+        reporte:              '🚨',
+        rating:               '⭐',
+        sistema:              '🔔'
       };
-      const icon = icons[n.tipo] ?? '🔔';
-      const fecha = new Date(n.created_at);
+      const icon    = icons[n.tipo] ?? '🔔';
+      const fecha   = new Date(n.created_at);
       const fechaStr = fecha.toLocaleDateString('es-ES');
-      const horaStr = fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-
+      const horaStr  = fecha.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+ 
       return `
         <div onclick="markNotificationRead(${n.id}, this); ${n.enlace_url ? `window.location.href='${n.enlace_url}'` : ''}"
              style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;cursor:pointer;
                     border-bottom:1px solid var(--border);
-                    background:${n.leida ? 'transparent' : 'var(--soft)'}
+                    background:${n.leida ? 'transparent' : 'var(--soft)'};
                     transition:background 0.2s;">
           <span style="font-size:1.4rem;line-height:1;">${icon}</span>
           <div style="flex:1;min-width:0;">
-            <div style="font-size:0.85rem;color:var(--text);line-height:1.4;">${n.mensaje ?? n.tipo}</div>
+            <div style="font-size:0.85rem;color:var(--text);line-height:1.4;">${parseBold(n.mensaje ?? n.tipo)}</div>
             <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">${fechaStr} ${horaStr}</div>
           </div>
           ${!n.leida ? `<span style="width:8px;height:8px;border-radius:50%;background:var(--terra);flex-shrink:0;margin-top:4px;"></span>` : ''}
         </div>
       `;
     }).join('');
-
-    const notifDot = document.getElementById('notifDot');
-    if (notifDot) {
-      notifDot.style.display = unread > 0 ? '' : 'none';
-    }
+ 
   } catch (error) {
     console.error('Error cargando notificaciones:', error);
   }
@@ -846,24 +846,52 @@ async function markNotificationRead(id, el, url = '') {
     el.style.background = 'transparent';
     const dot = el.querySelector('span[style*="border-radius:50%"]');
     if (dot) dot.remove();
-    const badge = document.getElementById('notifBadge');
-    const current = parseInt(badge.textContent) || 0;
-    if (current > 0) {
-      badge.textContent = current - 1;
-      if (current - 1 === 0) badge.style.display = 'none';
-
-      if (url) window.location.href = url;
-    }
+ 
+    // Recalcular badge restando 1 al valor actual
+    const badge  = document.getElementById('notifBadge');
+    const current = parseInt(badge?.textContent) || 0;
+    _updateNotifBadge(Math.max(0, current - 1));
+ 
+    if (url) window.location.href = url;
   } catch (error) {
     console.error('Error marcando notificación:', error);
+  }
+}
+
+async function initNotifBadge() {
+  if (!window.AUTH_USER_ID) return;
+  try {
+    const res  = await fetch('/notifications');
+    const data = await res.json();
+    const unread = (data.notifications || []).filter(n => !n.leida).length;
+    _updateNotifBadge(unread);
+  } catch (_) { /* silencioso — no crítico */ }
+}
+
+function _updateNotifBadge(unread) {
+  const badge   = document.getElementById('notifBadge');
+  const notifDot = document.getElementById('notifDot');
+ 
+  if (badge) {
+    if (unread > 0) {
+      badge.textContent    = unread > 99 ? '99+' : unread;
+      badge.style.display  = '';
+    } else {
+      badge.style.display  = 'none';
+      badge.textContent    = '';
+    }
+  }
+ 
+  if (notifDot) {
+    notifDot.style.display = unread > 0 ? '' : 'none';
   }
 }
 
 async function markAllNotificationsRead() {
   try {
     const response = await fetch('/notifications');
-    const data = await response.json();
-    const unread = data.notifications.filter(n => !n.leida);
+    const data     = await response.json();
+    const unread   = data.notifications.filter(n => !n.leida);
     await Promise.all(unread.map(n =>
       fetch(`/notifications/${n.id}`, {
         method: 'PUT',
@@ -875,6 +903,7 @@ async function markAllNotificationsRead() {
       })
     ));
     loadNotifications();
+    _updateNotifBadge(0);
     showToast(t('Todas las notificaciones leídas ✅'));
   } catch (error) {
     showToast(t('Error de conexión'));
