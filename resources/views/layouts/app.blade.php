@@ -57,13 +57,10 @@
   </div>
 </div>
 
-<!-- Auth user para JS -->
 <script>
   window.AUTH_USER_ID = {{ Auth::check() ? Auth::id() : 'null' }};
 
-<!-- Traducciones para JS -->
-
-  @php
+@php
     $i18n = [
       'Error al cargar publicaciones'                => __('Error al cargar publicaciones'),
       'publicacion'                                  => __('publicacion'),
@@ -137,71 +134,75 @@
       'faq_q5' => __('faq_q5'), 'faq_a5' => __('faq_a5'),
       'faq_q6' => __('faq_q6'), 'faq_a6' => __('faq_a6'),
       'Debes marcar al menos media estrella para valorar.' => __('Debes marcar al menos media estrella para valorar.'),
-      '🐾 Añadir mascota'                                              => __('🐾 Añadir mascota'),
-      '✏️ Editar mascota'                                              => __('✏️ Editar mascota'),
-      'Guardando...'                                                   => __('Guardando...'),
-      'Error al cargar la mascota'                                     => __('Error al cargar la mascota'),
-      'Solo se permiten hasta 5 fotos.'                                => __('Solo se permiten hasta 5 fotos.'),
-      '✅ Mascota actualizada'                                         => __('✅ Mascota actualizada'),
-      '🐾 ¡Mascota añadida correctamente!'                            => __('🐾 ¡Mascota añadida correctamente!'),
-      'Error de conexión con el servidor'                              => __('Error de conexión con el servidor'),
-      '¿Eliminar mascota?'                                             => __('¿Eliminar mascota?'),
+      '🐾 Añadir mascota'                               => __('🐾 Añadir mascota'),
+      '✏️ Editar mascota'                               => __('✏️ Editar mascota'),
+      'Guardando...'                                   => __('Guardando...'),
+      'Error al cargar la mascota'                     => __('Error al cargar la mascota'),
+      'Solo se permiten hasta 5 fotos.'                => __('Solo se permiten hasta 5 fotos.'),
+      '✅ Mascota actualizada'                         => __('✅ Mascota actualizada'),
+      '🐾 ¡Mascota añadida correctamente!'             => __('🐾 ¡Mascota añadida correctamente!'),
+      'Error de conexión con el servidor'              => __('Error de conexión con el servidor'),
+      '¿Eliminar mascota?'                             => __('¿Eliminar mascota?'),
       'Esta acción borrará todos los datos de tu mascota de forma permanente.' => __('Esta acción borrará todos los datos de tu mascota de forma permanente.'),
-      'Cancelar'                                                       => __('Cancelar'),
-      'Eliminar'                                                       => __('Eliminar'),
-      'Mascota eliminada correctamente'                                => __('Mascota eliminada correctamente'),
-      'Error al conectar con el servidor'                              => __('Error al conectar con el servidor'),
-      'Sin descripción.'                                               => __('Sin descripción.'),
-      'Editar'                                                         => __('Editar'),
-      'Añadir recordatorio'                                            => __('Añadir recordatorio'),
-      'Sin vacunas registradas.'                                       => __('Sin vacunas registradas.'),
-      'Sin recordatorios.'                                             => __('Sin recordatorios.'),
-      '🔔 Recordatorio añadido correctamente'                          => __('🔔 Recordatorio añadido correctamente'),
-      'Error de conexión'                                              => __('Error de conexión'),
-      'Recordatorio eliminado 🗑️'                                     => __('Recordatorio eliminado 🗑️'),
-      'Error al eliminar'                                              => __('Error al eliminar'),
-      'Guardar cambios'                                                => __('Guardar cambios'),
-      'Guardar recordatorio'                                           => __('Guardar recordatorio'),
-      'año'                                                            => __('año'),
-      'años'                                                           => __('años'),
-      '+ Otro'                                                         => __('+ Otro'),
+      'Cancelar'                                       => __('Cancelar'),
+      'Eliminar'                                       => __('Eliminar'),
+      'Mascota eliminada correctamente'                => __('Mascota eliminada correctamente'),
+      'Error al conectar con el servidor'              => __('Error al conectar con el servidor'),
+      'Sin descripción.'                               => __('Sin descripción.'),
+      'Editar'                                         => __('Editar'),
+      'Añadir recordatorio'                            => __('Añadir recordatorio'),
+      'Sin vacunas registradas.'                       => __('Sin vacunas registradas.'),
+      'Sin recordatorios.'                             => __('Sin recordatorios.'),
+      '🔔 Recordatorio añadido correctamente'          => __('🔔 Recordatorio añadido correctamente'),
+      'Error de conexión'                              => __('Error de conexión'),
+      'Recordatorio eliminado 🗑️'                     => __('Recordatorio eliminado 🗑️'),
+      'Error al eliminar'                              => __('Error al eliminar'),
+      'Guardar cambios'                                => __('Guardar cambios'),
+      'Guardar recordatorio'                           => __('Guardar recordatorio'),
+      'año'                                            => __('año'),
+      'años'                                           => __('años'),
+      '+ Otro'                                         => __('+ Otro'),
     ];
   @endphp
   window.i18n = {!! json_encode($i18n, JSON_UNESCAPED_UNICODE) !!};
 
-  if (window.AUTH_USER_ID) {
+  @auth
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof initNotifBadge === 'function') {
+      initNotifBadge();
+    }
+  });
+
+  (function startNotifPolling() {
+    if (!window.AUTH_USER_ID) return;
+
     let lastNotificationId = null;
 
-    // Preguntamos al servidor cada 15 segundos
     setInterval(async () => {
       try {
-        const res = await fetch('/notifications/check');
+        const res  = await fetch('/notifications/check');
         if (!res.ok) return;
-        
+
         const data = await res.json();
-        
-        // Si hay una notificación nueva que no hemos mostrado todavía...
+
+        // Toast solo si llega una notificacion nueva
         if (data.latest && data.latest.id !== lastNotificationId) {
-            lastNotificationId = data.latest.id;
-            
-            // Lanzamos el Toast emergente en la pantalla
-            if (typeof showToast === 'function') {
-                showToast('🔔 ' + data.latest.titulo);
-            }
-            
-            // OPCIONAL: Si tienes una bolita roja en tu menú, puedes iluminarla aquí
-            const bellBadge = document.getElementById('notification-badge'); // Cambia el ID por el tuyo
-            if (bellBadge) {
-                bellBadge.style.display = 'inline-block';
-            }
+          lastNotificationId = data.latest.id;
+          if (typeof showToast === 'function') {
+            showToast('🔔 ' + data.latest.titulo);
+          }
         }
-      } catch (error) {
-      }
+
+        // Actualizar badge con el conteo real de no leidas
+        if (data.unread_count !== undefined && typeof _updateNotifBadge === 'function') {
+          _updateNotifBadge(data.unread_count);
+        }
+      } catch (_) { /* silencioso */ }
     }, 15000);
-  }
+  })();
+  @endauth
 </script>
 
-<!-- JS -->
 <script src="{{ asset('js/ui.js') }}"></script>
 <script src="{{ asset('js/app.js') }}"></script>
 <script src="{{ asset('js/pets.js') }}?v=3"></script>

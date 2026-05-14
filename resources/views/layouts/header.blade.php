@@ -21,7 +21,7 @@
     @auth
       <button class="hdr-icon-btn" onclick="openNotificationsPanel()">
         <i class="fa-solid fa-bell"></i>
-        <span class="hdr-badge" id="notifBadge">0</span>
+        <span class="hdr-badge" id="notifBadge" style="display:none;"></span>
       </button>
       <div class="user-chip" onclick="window.location.href='{{ route('profile.show') }}'">
         <img src="{{ Auth::user()->foto_perfil_url }}" alt="Foto de perfil">

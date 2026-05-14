@@ -114,6 +114,7 @@
     border-radius: 50px;
     font-size: .67rem;
     font-weight: 700;
+    background-color: var(--white);
 }
 
 .pc-badge-adopt {
