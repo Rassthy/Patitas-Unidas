@@ -25,6 +25,12 @@ Route::get('/login', function () {
 })->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register'])->name('register');
+
+// Verificación de email
+Route::get('/verificar-email', [AuthController::class, 'mostrarVerificacionForm'])->name('verificar.email.form');
+Route::post('/verificar-email', [AuthController::class, 'verificarEmail'])->name('verificar.email');
+Route::post('/verificar-email/reenviar', [AuthController::class, 'reenviarCodigo'])->name('verificar.email.reenviar');
+
 Route::get('/check-auth', [AuthController::class, 'checkAuth'])->name('check-auth');
 
 // Restablecimiento de Contraseña
