@@ -2,24 +2,63 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <style>
-        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
-        .container { max-width: 480px; margin: 40px auto; background: #fff; border-radius: 12px; padding: 40px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        .logo { text-align: center; font-size: 28px; margin-bottom: 8px; }
-        h2 { color: #2d6a4f; text-align: center; margin-top: 0; }
-        p { color: #555; line-height: 1.6; }
-        .codigo { display: block; text-align: center; font-size: 42px; font-weight: bold; letter-spacing: 10px; color: #2d6a4f; background: #e8f5e9; border-radius: 8px; padding: 20px; margin: 28px 0; }
-        .footer { text-align: center; color: #aaa; font-size: 12px; margin-top: 32px; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verifica tu correo</title>
 </head>
-<body>
-    <div class="container">
-        <div class="logo">🐾</div>
-        <h2>¡Hola, {{ $nombre }}!</h2>
-        <p>Gracias por registrarte en <strong>PatitasUnidas</strong>. Para completar tu registro, introduce el siguiente código en la pantalla de verificación:</p>
-        <span class="codigo">{{ $codigo }}</span>
-        <p>Este código expira en <strong>10 minutos</strong>. Si no solicitaste este registro, puedes ignorar este correo.</p>
-        <div class="footer">PatitasUnidas &mdash; Conectando patitas con hogares 🏠</div>
-    </div>
+<body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #FDFBF7; color: #333333;">
+
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #FDFBF7; padding: 40px 0;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: hidden;">
+                    
+                    <tr>
+                        <td align="center" style="padding: 40px 0 20px 0; background-color: #F9F6F0; border-bottom: 2px solid #E8D5C4;">
+                            <img src="{{ $message->embed(public_path('img/defaults/LogoPU.png')) }}" alt="Patitas Unidas Logo" style="width: 120px; height: auto;">
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 40px;">
+                            <h2 style="margin-top: 0; color: #1a1a1a; font-size: 24px;">¡Hola, {{ $nombre }}!</h2>
+                            <p style="font-size: 16px; line-height: 1.6; color: #555555;">
+                                Gracias por unirte a <strong>Patitas Unidas</strong>. Estamos muy felices de tenerte en nuestra comunidad.<br><br>
+                                Para garantizar la seguridad de todos nuestros peludos, necesitamos verificar tu dirección de correo electrónico.
+                            </p>
+
+                            <div style="text-align: center; margin: 40px 0;">
+                                <a href="{{ route('verificar.email.auto', ['id' => $userId, 'codigo' => $codigo]) }}" style="background-color: #D96C4A; color: #ffffff; padding: 15px 30px; text-decoration: none; font-size: 18px; font-weight: bold; border-radius: 50px; display: inline-block;">
+                                    Verificar mi correo
+                                </a>
+                            </div>
+
+                            <p style="font-size: 16px; line-height: 1.6; color: #555555; text-align: center;">
+                                O si lo prefieres, puedes introducir manualmente este código de 6 dígitos en la página web:
+                            </p>
+
+                            <div style="text-align: center; margin: 20px 0;">
+                                <span style="display: inline-block; background-color: #E8D5C4; color: #333333; font-size: 32px; font-weight: bold; padding: 15px 40px; border-radius: 10px; letter-spacing: 5px;">
+                                    {{ $codigo }}
+                                </span>
+                            </div>
+
+                            <p style="font-size: 14px; color: #888888; margin-top: 30px; text-align: center;">
+                                Este enlace y código expirarán en 10 minutos.<br>
+                                Si no has creado una cuenta en Patitas Unidas, ignora este mensaje.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="background-color: #F9F6F0; padding: 20px; text-align: center; font-size: 12px; color: #999999;">
+                            &copy; {{ date('Y') }} Patitas Unidas. Todos los derechos reservados.<br>
+                            Conectando patas con corazones.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
 </body>
 </html>

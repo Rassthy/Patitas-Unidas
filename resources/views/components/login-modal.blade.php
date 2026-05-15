@@ -19,9 +19,11 @@
     </div>
 
     @php
+      $isVerifyPage = request()->routeIs('verificar.email.form') || request()->is('verificar-email*');
       $isLoginAttempt = old('login') !== null;
       $isRegisterAttempt = (old('username') !== null || old('nombre') !== null) && !request()->routeIs('profile.*');
-      $openModal = ($errors->any() && !request()->routeIs('profile.*')) || $isLoginAttempt || $isRegisterAttempt;
+      
+      $openModal = ($errors->any() && !request()->routeIs('profile.*') && !$isVerifyPage) || $isLoginAttempt || $isRegisterAttempt;
     @endphp
 
     <!-- LOGIN FORM -->

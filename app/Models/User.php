@@ -34,6 +34,8 @@ class User extends Authenticatable
         'activo',
         'motivo_baja',
         'user_settings',
+        'role',
+        'is_approved',
     ];
 
     protected $hidden = [
@@ -48,6 +50,11 @@ class User extends Authenticatable
         'user_settings' => 'array',
     ];
 
+    public function getAuthPasswordName()
+    {
+        return 'password_hash';
+    }
+    
     public function getAuthPassword()
     {
         return $this->password_hash;
