@@ -203,6 +203,7 @@ class AuthController extends Controller
         $remember = $request->filled('remember');
 
         if (\Illuminate\Support\Facades\Auth::validate($credentials)) {
+            
             $user = \App\Models\User::where($fieldType, $request->login)->first(); 
             
             if (!$user->is_approved && in_array($user->tipo, ['protectora', 'organizacion', 'empresa'])) {
@@ -212,6 +213,7 @@ class AuthController extends Controller
             if (!$user->email_verificado) {
                 session(['verificacion_user_id' => $user->id]);
                 session(['verificacion_email'   => $user->email]);
+                session()->save(); 
                 
                 return redirect()->route('verificar.email.form')
                     ->with('info', 'Por favor, verifica tu correo para poder entrar.');
