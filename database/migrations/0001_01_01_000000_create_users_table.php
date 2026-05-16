@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('cif', 15)->nullable()->unique();
             $table->string('direccion', 200)->nullable();
             $table->string('web', 200)->nullable();
-            $table->enum('tipo', ['usuario', 'protectora', 'organizacion', 'admin'])->default('usuario');
+            $table->enum('tipo', ['usuario', 'protectora', 'organizacion', 'empresa'])->default('usuario');
             $table->text('descripcion')->nullable();
             $table->date('fecha_nacimiento')->nullable();
             $table->string('foto_perfil')->nullable();

@@ -983,3 +983,34 @@ document.addEventListener('DOMContentLoaded', () => {
     window.history.replaceState({}, document.title, "/");
   }
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    const selectTipoOrg = document.getElementById('selectTipoOrg');
+    const labelCifDni = document.getElementById('label-cif-dni');
+    const inputCifDni = document.getElementById('input-cif-dni');
+    const helpDocumento = document.getElementById('help-documento');
+
+    if (selectTipoOrg) {
+        selectTipoOrg.addEventListener('change', function() {
+            const opcion = this.value;
+
+            if (opcion === 'veterinaria') {
+                labelCifDni.innerText = "CIF de la Empresa / DNI del Titular *";
+                inputCifDni.placeholder = "Ej: B12345678 o 12345678Z";
+                helpDocumento.innerText = "Sube el certificado de colegiación o la licencia de apertura.";
+            } else if (opcion === 'refugio') {
+                labelCifDni.innerText = "CIF del Refugio *";
+                inputCifDni.placeholder = "Ej: G12345678";
+                helpDocumento.innerText = "Es obligatorio adjuntar el Certificado oficial de Núcleo Zoológico.";
+            } else if (opcion === 'protectora') {
+                labelCifDni.innerText = "CIF de la Protectora *";
+                inputCifDni.placeholder = "Ej: G12345678";
+                helpDocumento.innerText = "Sube el documento de inscripción en asociaciones o estatutos.";
+            } else { 
+                labelCifDni.innerText = "CIF de la Asociación *";
+                inputCifDni.placeholder = "Ej: G12345678";
+                helpDocumento.innerText = "Sube la resolución definitiva de inscripción de asociaciones.";
+            }
+        });
+    }
+});

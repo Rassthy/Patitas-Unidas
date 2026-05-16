@@ -171,7 +171,7 @@
       </form>
 
       <!-- FORM ORGANIZACIÓN -->
-      <form method="POST" action="{{ route('register') }}" id="registerFormOrg" style="display:none;">
+      <form method="POST" action="{{ route('register') }}" id="registerFormOrg" enctype="multipart/form-data" style="display:none;">
         @csrf
         <input type="hidden" name="tipo" value="organizacion">
 
@@ -183,7 +183,7 @@
 
         <div class="fg">
           <label class="fl">{{ __('Tipo de organización *') }}</label>
-          <select class="fi" name="tipo_organizacion" required>
+          <select class="fi" name="tipo_organizacion" id="selectTipoOrg" required>
             <option value="">{{ __('Selecciona un tipo') }}</option>
             <option value="protectora">🏠 {{ __('Protectora de animales') }}</option>
             <option value="veterinaria">🏥 {{ __('Clínica veterinaria') }}</option>
@@ -203,10 +203,23 @@
         </div>
 
         <div class="fg">
-          <label class="fl">{{ __('CIF *') }}</label>
-          <input class="fi" type="text" name="cif" placeholder="A12345678" required>
+          <label class="fl" id="label-cif-dni">{{ __('CIF de la Organización *') }}</label>
+          <input class="fi @error('cif') input-error @enderror" type="text" name="cif" id="input-cif-dni" value="{{ old('cif') }}" placeholder="Ej: G12345678" required>
+          @error('cif') 
+            <span style="color: #e74c3c; font-size: 0.85rem; margin-top: 5px; display: block; font-weight: 600;">{{ $message }}</span> 
+          @enderror
         </div>
 
+        <div class="fg">
+          <label class="fl">{{ __('Documento Acreditativo Oficial *') }}</label>
+          <input class="fi @error('documento_oficial') input-error @enderror" type="file" name="documento_oficial" accept=".pdf,.jpg,.jpeg,.png" style="padding: 10px;" required>
+          <small id="help-documento" style="color: var(--muted); display: block; margin-top: 5px; font-size: 0.85rem;">
+            {{ __('Sube la resolución de inscripción en el registro de asociaciones.') }}
+          </small>
+          @error('documento_oficial') 
+            <span style="color: #e74c3c; font-size: 0.85rem; margin-top: 5px; display: block; font-weight: 600;">{{ $message }}</span> 
+          @enderror
+        </div>
         <div class="fg">
           <label class="fl">{{ __('Teléfono') }}</label>
           <input class="fi" type="tel" name="telefono" placeholder="+34 600 000 000" required>

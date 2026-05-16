@@ -60,13 +60,67 @@
   color: #fff; font-size: 16px; border: 3px solid #fff; box-shadow: var(--sh-s);
 }
 
-/* INFO PRINCIPAL */
+/* Estilos base para para etiqueta del perfil */
 .profile-type {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: var(--cream-d); border: 1.5px solid var(--border);
-  padding: 5px 14px; border-radius: 50px;
-  font-size: .78rem; font-weight: 600; color: var(--brown, #5C3218); margin-bottom: 12px;
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background-color: var(--soft);
+    color: #c2712f;
+    border: 1px solid var(--border);
 }
+
+/* Ayudante */
+.profile-type.staff-ayudante {
+    background-color: #e0f2fe;
+    color: #0284c7;
+    border: 1px solid #bae6fd;
+}
+
+/* Moderador */
+.profile-type.staff-moderador {
+    background-color: #f3e8ff;
+    color: #9333ea;
+    border: 1px solid #e9d5ff;
+}
+
+/* Administrador */
+.profile-type.staff-administrador {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+/* Dueño */
+.profile-type.staff-dueno {
+    background-color: #dcfce7;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+/* Protectora */
+.profile-type.protectora {
+  background-color: #ffedd5;
+  border: 1px solid;
+  color: #c2410c;
+}
+
+/* Organizacion */
+.profile-type.organizacion {
+  background-color: #fef08a;
+  border: 1px solid;
+  color: #a16207;
+}
+
+/* Empresa */
+.profile-type.empresa {
+  background-color: #e2e8f0;
+  border: 1px solid;
+  color: #334155;
+}
+
 .btn-primary {
   display: inline-flex;
   align-items: center;

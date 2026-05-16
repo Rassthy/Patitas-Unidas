@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
-    // REGISTRO
     public function register(RegisterRequest $request)
     {
         $data    = $request->validated();
@@ -26,13 +25,27 @@ class AuthController extends Controller
                 'email'         => $data['email'],
                 'telefono'      => $data['telefono'],
                 'password_hash' => Hash::make($data['password']),
-                'activo'        => false,          // inactivo hasta verificar
+                'activo'        => false,
                 'email_verificado' => false,
                 'foto_perfil'   => null,
             ];
 
             if ($isOrg) {
-                $userData['tipo']                = 'organizacion';
+                if (in_array($data['tipo_organizacion'], ['protectora', 'refugio'])) {
+                    $userData['tipo'] = 'protectora';
+                } elseif ($data['tipo_organizacion'] === 'asociacion') {
+                    $userData['tipo'] = 'organizacion';
+                } elseif ($data['tipo_organizacion'] === 'veterinaria') {
+                    $userData['tipo'] = 'empresa';
+                } else {
+                    $userData['tipo'] = 'organizacion';
+                }
+
+                if ($request->hasFile('documento_oficial')) {
+                    $rutaArchivo = $request->file('documento_oficial')->store('documentos_verificacion', 'public');
+                    $userData['documento_oficial'] = $rutaArchivo;
+                }
+
                 $userData['nombre']              = $data['nombre_organizacion'];
                 $userData['apellidos']           = '';
                 $userData['nombre_organizacion'] = $data['nombre_organizacion'];
@@ -49,7 +62,6 @@ class AuthController extends Controller
                 $userData['dni_nie']   = $data['dni_nie'];
             }
 
-            // ¡CORRECCIÓN VITAL! Le decimos a la BD que los usuarios normales sí están aprobados
             $userData['is_approved'] = ($userData['tipo'] === 'usuario');
 
             $user = User::create($userData);
@@ -158,7 +170,11 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $user = Auth::user(); 
             
-            // 1. USUARIO NO HA VERIFICADO EMAIL
+            if (!$user->is_approved) {
+                Auth::logout();
+                return back()->withErrors(['error' => 'Tu cuenta está pendiente de validación por el Staff.']);
+            }
+
             if (!$user->email_verificado) {
                 session(['verificacion_user_id' => $user->id]);
                 session(['verificacion_email'   => $user->email]);
@@ -168,14 +184,6 @@ class AuthController extends Controller
                     ->with('info', 'Redirigiendo a verificación de correo...');
             }
 
-            // 2. PROTECTORA/EMPRESA NO APROBADA POR STAFF
-            if (!$user->is_approved) {
-                Auth::logout();
-                // ¡CORRECCIÓN! Usamos withErrors para forzar al Modal a quedarse abierto y mostrar el aviso.
-                return back()->withErrors(['error' => 'Tu cuenta está pendiente de validación por el Staff.']);
-            }
-
-            // 3. PASÓ TODOS LOS FILTROS
             $request->session()->regenerate();
             return redirect()->intended(route('home'));
         }
