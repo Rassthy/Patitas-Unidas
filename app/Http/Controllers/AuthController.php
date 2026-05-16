@@ -211,10 +211,10 @@ class AuthController extends Controller
             }
 
             if (!$user->email_verificado) {
+                Auth::logout(); 
+                
                 session(['verificacion_user_id' => $user->id]);
                 session(['verificacion_email'   => $user->email]);
-                
-                Auth::logout(); 
 
                 return redirect()->route('verificar.email.form')
                     ->with('info', 'Por favor, verifica tu correo para poder entrar.');

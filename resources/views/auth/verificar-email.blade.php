@@ -21,7 +21,6 @@
       {{ __('Verifica tu correo') }}
     </h2>
 
-    {{-- ALERTAS GENERALES --}}
     @if(session('success'))
     <div class="flash flash-success" style="margin-bottom:16px;">
       {{ session('success') }}
@@ -34,12 +33,11 @@
       </div>
     @endif
 
-    {{-- CONTROL DE SESIÓN ACTIVA (Desde Hotfix) --}}
-    @if(session('verificacion_email'))
+    @if(session('verificacion_user_id'))
         
         <p style="color:var(--muted);font-size:0.92em;margin-bottom:28px;line-height:1.6;">
           Te hemos enviado un código de 6 dígitos a<br>
-          <strong style="color:var(--dark);">{{ session('verificacion_email') }}</strong>.<br>
+          <strong style="color:var(--dark);">{{ session('verificacion_email', 'tu correo electrónico registrado') }}</strong>.<br>
           Introdúcelo aquí para activar tu cuenta.
         </p>
 
