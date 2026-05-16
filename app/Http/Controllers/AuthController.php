@@ -202,25 +202,24 @@ class AuthController extends Controller
 
         $remember = $request->filled('remember');
 
-        if (Auth::attempt($credentials, $remember)) {
-            $user = Auth::user(); 
+        if (\Illuminate\Support\Facades\Auth::validate($credentials)) {
+            $user = \App\Models\User::where($fieldType, $request->login)->first(); 
             
             if (!$user->is_approved && in_array($user->tipo, ['protectora', 'organizacion', 'empresa'])) {
-                Auth::logout();
                 return back()->withErrors(['login' => 'Tu cuenta está pendiente de validación por el Staff.']);
             }
 
             if (!$user->email_verificado) {
-                Auth::logout(); 
-                
                 session(['verificacion_user_id' => $user->id]);
                 session(['verificacion_email'   => $user->email]);
-
+                
                 return redirect()->route('verificar.email.form')
                     ->with('info', 'Por favor, verifica tu correo para poder entrar.');
             }
 
+            \Illuminate\Support\Facades\Auth::login($user, $remember);
             $request->session()->regenerate();
+            
             return redirect()->intended(route('home'));
         }
 
@@ -229,7 +228,6 @@ class AuthController extends Controller
         ])->withInput($request->only('login', 'remember'));
     }
 
-    // Verificar CÓDIGO automáticamente (1 Clic)
     public function verificarEmailAuto($id, $codigo)
     {
         $codigoGuardado = Cache::get("email_verify_{$id}");
