@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -25,13 +26,27 @@ class AuthController extends Controller
                 'email'         => $data['email'],
                 'telefono'      => $data['telefono'],
                 'password_hash' => Hash::make($data['password']),
-                'activo'        => false,          // inactivo hasta verificar
+                'activo'        => false,
                 'email_verificado' => false,
                 'foto_perfil'   => null,
             ];
 
             if ($isOrg) {
-                $userData['tipo']                = 'organizacion';
+                if (in_array($data['tipo_organizacion'], ['protectora', 'refugio'])) {
+                    $userData['tipo'] = 'protectora';
+                } elseif ($data['tipo_organizacion'] === 'asociacion') {
+                    $userData['tipo'] = 'organizacion';
+                } elseif ($data['tipo_organizacion'] === 'veterinaria') {
+                    $userData['tipo'] = 'empresa';
+                } else {
+                    $userData['tipo'] = 'organizacion';
+                }
+
+                if ($request->hasFile('documento_oficial')) {
+                    $rutaArchivo = $request->file('documento_oficial')->store('documentos_verificacion', 'public');
+                    $userData['documento_oficial'] = $rutaArchivo;
+                }
+
                 $userData['nombre']              = $data['nombre_organizacion'];
                 $userData['apellidos']           = '';
                 $userData['nombre_organizacion'] = $data['nombre_organizacion'];
@@ -48,23 +63,21 @@ class AuthController extends Controller
                 $userData['dni_nie']   = $data['dni_nie'];
             }
 
+            $userData['is_approved'] = ($userData['tipo'] === 'usuario');
+
             $user = User::create($userData);
 
             // Generar y cachear el código 10 minutos
             $codigo = strval(random_int(100000, 999999));
             Cache::put("email_verify_{$user->id}", $codigo, now()->addMinutes(10));
 
-            // Guardar el user_id en sesión para el paso de verificación
-            session(['verificacion_user_id' => $user->id]);
-            session(['verificacion_email'   => $user->email]);
-
             // Enviar el email
-            Mail::to($user->email)->send(new VerificacionEmailMail($codigo, $user->nombre));
+            Mail::to($user->email)->send(new VerificacionEmailMail($codigo, $user->nombre, $user->id));
 
-            return redirect()->route('verificar.email.form');
+            return redirect()->route('home')->with('register_success', '¡Registro exitoso! Por favor, verifica tu correo antes de iniciar sesión.');
 
         } catch (\Exception $e) {
-            \Log::error('Error en registro: ' . $e->getMessage());
+            Log::error('Error en registro: ' . $e->getMessage());
             return back()
                 ->withInput($request->except('password', 'password_confirmation'))
                 ->withErrors(['error' => 'Error al crear la cuenta. Por favor, intenta de nuevo.']);
@@ -74,22 +87,20 @@ class AuthController extends Controller
     // MOSTRAR FORMULARIO DE VERIFICACIÓN
     public function mostrarVerificacionForm()
     {
-        // Si no hay sesión de verificación pendiente, redirigir al home
         if (!session('verificacion_user_id')) {
             return redirect()->route('home');
         }
-
         return view('auth.verificar-email');
     }
 
-    // VERIFICAR CODIGO
+    // VERIFICAR CÓDIGO (MANUAL)
     public function verificarEmail(Request $request)
     {
         $request->validate([
             'codigo' => 'required|string|size:6',
         ], [
-            'codigo.required' => 'El código es obligatorio.',
-            'codigo.size'     => 'El código debe tener 6 dígitos.',
+            'codigo.required' => 'Debe introducir el código que le enviamos a su correo.',
+            'codigo.size'     => 'El código debe tener exactamente 6 dígitos.',
         ]);
 
         $userId = session('verificacion_user_id');
@@ -99,24 +110,13 @@ class AuthController extends Controller
                 ->withErrors(['error' => 'Sesión de verificación expirada. Regístrate de nuevo.']);
         }
 
-        $user          = User::findOrFail($userId);
+        $user = User::findOrFail($userId);
         $codigoGuardado = Cache::get("email_verify_{$userId}");
 
-        // Código expirado
-        if (!$codigoGuardado) {
-            return back()->withErrors([
-                'codigo' => 'El código ha expirado. Solicita uno nuevo.',
-            ]);
+        if (!$codigoGuardado || $request->codigo !== $codigoGuardado) {
+            return back()->withErrors(['codigo' => 'Código incorrecto o expirado.']);
         }
 
-        // Código incorrecto
-        if ($request->codigo !== $codigoGuardado) {
-            return back()->withErrors([
-                'codigo' => 'Código incorrecto. Comprueba tu correo e inténtalo de nuevo.',
-            ]);
-        }
-
-        // Verificación correcta
         $user->update([
             'email_verificado' => true,
             'activo'           => true,
@@ -125,11 +125,15 @@ class AuthController extends Controller
         Cache::forget("email_verify_{$userId}");
         session()->forget('verificacion_user_id');
 
+        if (!$user->is_approved) {
+            return redirect()->route('home')
+                ->with('success', '¡Correo verificado! Ahora el Staff revisará tu documentación para activarte. 🐾');
+        }
+
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('home')
-            ->with('success', '¡Bienvenido a PatitasUnidas! 🐾 Tu correo ha sido verificado.');
+        return redirect()->route('home')->with('success', '¡Bienvenido a PatitasUnidas! 🐾 Tu correo ha sido verificado.');
     }
 
     public function cambiarEmailVerificacion(Request $request)
@@ -170,16 +174,13 @@ class AuthController extends Controller
     public function reenviarCodigo(Request $request)
     {
         $userId = session('verificacion_user_id');
-
-        if (!$userId) {
-            return redirect()->route('home');
-        }
+        if (!$userId) return redirect()->route('home');
 
         $user   = User::findOrFail($userId);
         $codigo = strval(random_int(100000, 999999));
 
         Cache::put("email_verify_{$userId}", $codigo, now()->addMinutes(10));
-        Mail::to($user->email)->send(new \App\Mail\VerificacionEmailMail($codigo, $user->nombre, $user->id));
+        Mail::to($user->email)->send(new VerificacionEmailMail($codigo, $user->nombre, $user->id));
 
         return back()->with('success', 'Te hemos reenviado el código a ' . $user->email);
     }
@@ -228,6 +229,36 @@ class AuthController extends Controller
         ])->withInput($request->only('login', 'remember'));
     }
 
+    // Verificar CÓDIGO automáticamente (1 Clic)
+    public function verificarEmailAuto($id, $codigo)
+    {
+        $codigoGuardado = Cache::get("email_verify_{$id}");
+
+        if (!$codigoGuardado || $codigo !== $codigoGuardado) {
+            return redirect()->route('home')->withErrors(['error' => 'El enlace de verificación es inválido o ha expirado.']);
+        }
+
+        $user = User::findOrFail($id);
+
+        $user->update([
+            'email_verificado' => true,
+            'activo'           => true,
+        ]);
+
+        Cache::forget("email_verify_{$id}");
+        session()->forget(['verificacion_user_id', 'verificacion_email']);
+
+        if (!$user->is_approved) {
+            return redirect()->route('home')
+                ->with('success', '¡Correo verificado! Ahora el Staff revisará tu documentación para activarte. 🐾');
+        }
+
+        Auth::login($user);
+        request()->session()->regenerate();
+
+        return redirect()->route('home')->with('success', '¡Bienvenido a PatitasUnidas! Correo verificado y sesión iniciada. 🐾');
+    }
+
     // LOGOUT
     public function logout(Request $request)
     {
@@ -241,9 +272,7 @@ class AuthController extends Controller
     {
         return response()->json([
             'authenticated' => Auth::check(),
-            'user'          => Auth::user()
-                ? Auth::user()->only(['id', 'username', 'email', 'nombre', 'apellidos'])
-                : null,
+            'user'          => Auth::user() ? Auth::user()->only(['id', 'username', 'email', 'nombre', 'apellidos']) : null,
         ]);
     }
 }

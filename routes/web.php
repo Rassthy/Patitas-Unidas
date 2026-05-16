@@ -33,6 +33,9 @@ Route::post('/verificar-email/reenviar', [AuthController::class, 'reenviarCodigo
 Route::post('/verificar-email/cambiar', [AuthController::class, 'cambiarEmailVerificacion'])->name('verificar.cambiar.email');
 Route::get('/verificar-email/auto/{id}/{codigo}', [AuthController::class, 'verificarEmailAuto'])->name('verificar.email.auto');
 
+// Verificacion de email automatica (desde el enlace del correo mandado al usuario)
+Route::get('/verificar-email/auto/{id}/{codigo}', [AuthController::class, 'verificarEmailAuto'])->name('verificar.email.auto');
+
 Route::get('/check-auth', [AuthController::class, 'checkAuth'])->name('check-auth');
 
 // Restablecimiento de Contraseña
