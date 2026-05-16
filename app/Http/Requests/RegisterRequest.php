@@ -13,26 +13,34 @@ class RegisterRequest extends FormRequest
 
     public function rules(): array
     {
-        $emailValidation = app()->environment('testing')
-            ? 'required|email|max:150|unique:users,email'
-            : 'required|email:rfc,dns|max:150|unique:users,email';
+        $emailValidation = 'required|email|max:150|unique:users,email';
 
         $isOrg = $this->input('tipo') === 'organizacion';
 
         if ($isOrg) {
+            // 1. REGEX DINÁMICO: Si es veterinaria acepta CIF o DNI/NIE. Si no, solo CIF.
+            if ($this->input('tipo_organizacion') === 'veterinaria') {
+                // Acepta CIF (Letra + 7 núm + Letra/num) O DNI (8 núm + Letra) O NIE (Letra + 7 núm + Letra)
+                $cifRegex = '/^[A-Z][0-9]{7}[A-Z0-9]$|^[0-9]{8}[A-Z]$|^[XYZ][0-9]{7}[A-Z]$/';
+            } else {
+                // Solo CIF oficial de organización/asociación
+                $cifRegex = '/^[A-Z][0-9]{7}[A-Z0-9]$/';
+            }
+
             return [
                 'tipo'               => 'required|in:organizacion',
                 'nombre_organizacion'=> 'required|string|max:150',
                 'tipo_organizacion'  => 'required|in:protectora,veterinaria,refugio,asociacion',
                 'username'           => ['required','string','min:3','max:50','unique:users,username','regex:/^[a-zA-Z0-9_\-\.]+$/'],
                 'email'              => $emailValidation,
-                'cif'                => ['required','string','max:15','unique:users,cif','regex:/^[A-Z][0-9]{7}[A-Z0-9]$/'],
+                'cif'                => ['required','string','max:15','unique:users,cif','regex:' . $cifRegex],
                 'telefono'           => ['required','string','max:20','unique:users,telefono'],
                 'provincia'          => 'nullable|string|max:50',
                 'ciudad'             => 'nullable|string|max:100',
                 'direccion'          => 'nullable|string|max:200',
                 'web'                => 'nullable|url|max:200',
                 'password'           => ['required','string','min:8','max:255','confirmed','regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/'],
+                'documento_oficial'  => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             ];
         }
 
@@ -75,6 +83,9 @@ class RegisterRequest extends FormRequest
             'password.regex'             => 'La contraseña debe contener mayúscula, minúscula y número.',
             'password.confirmed'         => 'Las contraseñas no coinciden.',
             'web.url'                    => 'La URL de la web no es válida.',
+            'documento_oficial.required' => 'Es obligatorio adjuntar el documento acreditativo para verificar la legitimidad.',
+            'documento_oficial.mimes'    => 'El documento debe ser un archivo PDF, JPG o PNG.',
+            'documento_oficial.max'      => 'El archivo no puede pesar más de 5MB.',
         ];
     }
 

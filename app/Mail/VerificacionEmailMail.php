@@ -12,15 +12,21 @@ class VerificacionEmailMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(
-        public string $codigo,
-        public string $nombre,
-    ) {}
+    public $codigo;
+    public $nombre;
+    public $userId;
+
+    public function __construct($codigo, $nombre, $userId)
+    {
+        $this->codigo = $codigo;
+        $this->nombre = $nombre;
+        $this->userId = $userId;
+    }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '🐾 Verifica tu correo — PatitasUnidas',
+            subject: 'Verificación de Correo - PatitasUnidas',
         );
     }
 

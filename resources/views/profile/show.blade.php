@@ -68,13 +68,18 @@
           </div>
         </div>
         <div class="profile-right-area" style="text-align:right;">
-          <div class="profile-type"><i class="fa-solid fa-user"></i> {{ __('Usuario') }}</div>
-          @auth @if(!$isOwner)
-            <br>
-            <button class="btn-primary" onclick="startChatWith({{ $user->id }})" style="margin-top:5px;">
-              <i class="fa-solid fa-comment"></i> {{ __('Enviar Mensaje') }}
-            </button>
-          @endif @endauth
+            <div class="profile-type {{ $user->profile_class }}">
+                <i class="fa-solid fa-user"></i> {{ $user->profile_label }}
+            </div>
+
+            @auth 
+                @if(!$isOwner)
+                    <br>
+                    <button class="btn-primary" onclick="startChatWith({{ $user->id }})" style="margin-top:5px;">
+                        <i class="fa-solid fa-comment"></i> {{ __('Enviar Mensaje') }}
+                    </button>
+                @endif 
+            @endauth
         </div>
       </div>
     </div>

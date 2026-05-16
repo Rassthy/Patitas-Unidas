@@ -37,6 +37,57 @@
   </div>
 @endif
 
+@if (session('register_success'))
+  <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          if (typeof showToast === 'function') {
+              showToast("{{ session('register_success') }}", 'success');
+          }
+          // Abrimos el modal de login automáticamente 500ms después
+          setTimeout(() => {
+              if (typeof openLoginModal === 'function') openLoginModal();
+          }, 500);
+      });
+  </script>
+@endif
+
+@if (session('info'))
+  <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          if (typeof showToast === 'function') {
+              showToast("{{ session('info') }}", 'info');
+          }
+      });
+  </script>
+@endif
+
+@if ($errors->any())
+  <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          // SOLO abrimos el modal si NO estamos en la página de verificación
+          const isVerifyPage = window.location.pathname.includes('/verificar-email');
+          
+          if (!isVerifyPage) {
+              if (typeof openLoginModal === 'function') openLoginModal();
+          }
+
+          // Si el error es específicamente del código, lanzamos el Toast
+          @if($errors->has('codigo'))
+              if (typeof showToast === 'function') {
+                  showToast("{{ $errors->first('codigo') }}", 'error');
+              }
+          @endif
+
+          // Si es un error de login normal (y no estamos en verificar), también toast
+          @if($errors->has('login') || $errors->has('error'))
+              if (!isVerifyPage && typeof showToast === 'function') {
+                  showToast("{{ $errors->first('login') ?: $errors->first('error') }}", 'error');
+              }
+          @endif
+      });
+</script>
+@endif
+
 <main id="mainContent">
     @yield('content')
 </main>

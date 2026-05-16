@@ -34,6 +34,9 @@ class User extends Authenticatable
         'activo',
         'motivo_baja',
         'user_settings',
+        'role',
+        'is_approved',
+        'documento_oficial'
     ];
 
     protected $hidden = [
@@ -48,6 +51,11 @@ class User extends Authenticatable
         'user_settings' => 'array',
     ];
 
+    public function getAuthPasswordName()
+    {
+        return 'password_hash';
+    }
+    
     public function getAuthPassword()
     {
         return $this->password_hash;
@@ -104,7 +112,42 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserRating::class, 'voter_id');
     }
+
+    // Devuelve el texto del tipo de perfil que es
+    public function getProfileLabelAttribute()
+    {
+        // Si tiene un rol asignado del Staff, tiene prioridad absoluta
+        if (in_array($this->role, ['ayudante', 'moderador', 'administrador', 'dueño'])) {
+            return ucfirst($this->role);
+        }
+
+        // Si no es staff, mapeamos según su columna 'tipo'
+        return match ($this->tipo) {
+            'usuario'      => 'Usuario',
+            'protectora'   => 'Protectora',
+            'organizacion' => 'Organización',
+            'empresa'      => 'Empresa',
+            default        => 'Usuario',
+        };
+    }
     
+    // Devuelve la clase CSS limpia para pintar la etiqueta de X color
+    public function getProfileClassAttribute()
+    {
+        if (in_array($this->role, ['ayudante', 'moderador', 'administrador', 'dueño'])) {
+            $rolLimpio = $this->role === 'dueño' ? 'dueno' : $this->role;
+            return 'staff-' . $rolLimpio;
+        }
+
+        return match ($this->tipo) {
+            'usuario'      => 'usuario',
+            'protectora'   => 'protectora',
+            'organizacion' => 'organizacion',
+            'empresa'      => 'empresa',
+            default        => 'usuario',
+        };
+    }
+
     // RELACIONES
     public function pets() { return $this->hasMany(Pet::class); }
     public function posts() { return $this->hasMany(Post::class, 'author_id'); }
