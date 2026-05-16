@@ -30,6 +30,8 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::get('/verificar-email', [AuthController::class, 'mostrarVerificacionForm'])->name('verificar.email.form');
 Route::post('/verificar-email', [AuthController::class, 'verificarEmail'])->name('verificar.email');
 Route::post('/verificar-email/reenviar', [AuthController::class, 'reenviarCodigo'])->name('verificar.email.reenviar');
+Route::post('/verificar-email/cambiar', [AuthController::class, 'cambiarEmailVerificacion'])->name('verificar.cambiar.email');
+Route::get('/verificar-email/auto/{id}/{codigo}', [AuthController::class, 'verificarEmailAuto'])->name('verificar.email.auto');
 
 // Verificacion de email automatica (desde el enlace del correo mandado al usuario)
 Route::get('/verificar-email/auto/{id}/{codigo}', [AuthController::class, 'verificarEmailAuto'])->name('verificar.email.auto');

@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
+    // REGISTRO
     public function register(RegisterRequest $request)
     {
         $data    = $request->validated();
@@ -135,6 +136,40 @@ class AuthController extends Controller
         return redirect()->route('home')->with('success', '¡Bienvenido a PatitasUnidas! 🐾 Tu correo ha sido verificado.');
     }
 
+    public function cambiarEmailVerificacion(Request $request)
+    {
+        $request->validate([
+            'nuevo_email' => 'required|email|max:150|unique:users,email',
+        ], [
+            'nuevo_email.unique' => 'Este correo ya está registrado por otro usuario.',
+        ]);
+
+        $userId = session('verificacion_user_id');
+        
+        if (!$userId) {
+            return redirect()->route('home')->withErrors(['error' => 'Sesión de verificación expirada. Por favor, inicia sesión de nuevo.']);
+        }
+
+        $user = User::find($userId);
+        if (!$user) {
+            return redirect()->route('home');
+        }
+
+        // Actualizamos el correo en la base de datos
+        $user->email = $request->nuevo_email;
+        $user->save();
+
+        // Actualizamos el correo en la sesión actual
+        session(['verificacion_email' => $user->email]);
+
+        // Generamos un nuevo código y lo enviamos
+        $codigo = strval(random_int(100000, 999999));
+        Cache::put("email_verify_{$user->id}", $codigo, now()->addMinutes(10));
+        Mail::to($user->email)->send(new VerificacionEmailMail($codigo, $user->nombre, $user->id));
+
+        return back()->with('success', 'Correo actualizado correctamente. Te hemos enviado un nuevo código.');
+    }
+
     // REENVIAR CÓDIGO
     public function reenviarCodigo(Request $request)
     {
@@ -170,18 +205,19 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $remember)) {
             $user = Auth::user(); 
             
-            if (!$user->is_approved) {
+            if (!$user->is_approved && in_array($user->tipo, ['protectora', 'organizacion', 'empresa'])) {
                 Auth::logout();
-                return back()->withErrors(['error' => 'Tu cuenta está pendiente de validación por el Staff.']);
+                return back()->withErrors(['login' => 'Tu cuenta está pendiente de validación por el Staff.']);
             }
 
             if (!$user->email_verificado) {
                 session(['verificacion_user_id' => $user->id]);
                 session(['verificacion_email'   => $user->email]);
+                
                 Auth::logout(); 
 
                 return redirect()->route('verificar.email.form')
-                    ->with('info', 'Redirigiendo a verificación de correo...');
+                    ->with('info', 'Por favor, verifica tu correo para poder entrar.');
             }
 
             $request->session()->regenerate();
