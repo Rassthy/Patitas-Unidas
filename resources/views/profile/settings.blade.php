@@ -162,7 +162,7 @@
 
         <div style="display:flex;flex-direction:column;gap:24px;">
 
-          {{-- CAMBIAR CONTRASEÑA --}}
+          <!-- CAMBIAR CONTRASEÑA -->
           <form method="POST" action="{{ route('profile.password') }}">
             @csrf @method('PUT')
             <div style="display:flex;flex-direction:column;gap:12px;max-width:400px;">
@@ -214,7 +214,7 @@
 
           <hr style="border:none;border-top:1px solid var(--border);">
 
-          {{-- ELIMINAR CUENTA --}}
+          <!-- ELIMINAR CUENTA -->
           <div>
             <p style="font-size:0.85rem;color:#c0392b;margin-bottom:12px;">
               ⚠️ {{ __('Esta acción es irreversible. Se eliminarán todos tus datos permanentemente.') }}

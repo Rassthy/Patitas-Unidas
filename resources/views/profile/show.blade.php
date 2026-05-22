@@ -260,8 +260,6 @@
 
     <!-- PUBLICACIONES -->
     </div>
-    {{-- /profile-card-1 --}}
-
     <div class="profile-card profile-card--posts" id="profile-card-2">
 
       <div class="profile-card-posts-header">
@@ -300,7 +298,6 @@
       </div>
 
     </div>
-    {{-- /profile-card-2 --}}
 
   </div>
 </div>

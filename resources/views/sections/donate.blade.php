@@ -5,7 +5,7 @@
 
 <div id="donations-container">
 
-  {{-- HERO --}}
+  <!-- HERO -->
   <div class="don-hero">
     <div class="don-hero-inner">
       <div class="don-hero-badge">{!! __('don_hero_badge') !!}</div>
@@ -36,20 +36,20 @@
     </div>
   </div>
 
-  {{-- GRID PRINCIPAL --}}
+  <!-- GRID PRINCIPAL -->
   <div class="don-grid">
 
-    {{-- COLUMNA IZQUIERDA: FORMULARIO --}}
+    <!-- COLUMNA IZQUIERDA: FORMULARIO -->
     <div class="don-form-col">
 
-      {{-- SELECTOR DE CANTIDAD --}}
+      <!-- SELECTOR DE CANTIDAD -->
       <div class="don-card" id="don-form-card">
         <div class="don-card-head">
           <i class="fa-solid fa-hand-holding-heart" style="color:var(--terra)"></i>
           <h2>{{ __('Elige tu aportación') }}</h2>
         </div>
 
-        {{-- Chips de cantidad predefinida --}}
+        <!-- Chips de cantidad predefinida -->
         <div class="don-amount-chips">
           <button class="don-chip" data-val="3">3 €</button>
           <button class="don-chip active" data-val="5">5 €</button>
@@ -58,7 +58,7 @@
           <button class="don-chip" data-val="50">50 €</button>
         </div>
 
-        {{-- Input personalizado --}}
+        <!-- Input personalizado -->
         <div class="don-custom-wrap">
           <label class="don-custom-label" for="amount">{{ __('O introduce una cantidad personalizada') }}</label>
           <div class="don-custom-input-wrap">
@@ -67,13 +67,13 @@
           </div>
         </div>
 
-        {{-- Resumen --}}
+        <!-- Resumen -->
         <div class="don-summary">
           <span>{{ __('Vas a donar') }}</span>
           <span class="don-summary-val" id="don-summary-val">5,00 €</span>
         </div>
 
-        {{-- Botón PayPal --}}
+        <!-- Botón PayPal -->
         <div class="don-paypal-wrap">
           <div class="don-paypal-label">
             <i class="fa-solid fa-lock"></i> {{ __('Pago seguro gestionado por PayPal') }}
@@ -81,7 +81,7 @@
           <div id="paypal-button"></div>
         </div>
 
-        {{-- Flash de éxito --}}
+        <!-- Flash de éxito -->
         @if(session('donation_success'))
         <div class="don-success-banner" id="don-success">
           <i class="fa-solid fa-circle-check"></i>
@@ -93,7 +93,7 @@
         @endif
       </div>
 
-      {{-- USOS DEL DINERO --}}
+      <!-- USOS DEL DINERO -->
       <div class="don-card don-card--soft">
         <div class="don-card-head">
           <i class="fa-solid fa-circle-info" style="color:var(--terra)"></i>
@@ -125,10 +125,10 @@
       </div>
     </div>
 
-    {{-- COLUMNA DERECHA: HISTORIAL --}}
+    <!-- COLUMNA DERECHA: HISTORIAL -->
     <div class="don-history-col">
 
-      {{-- ÚLTIMAS DONACIONES (globales, anonimizadas) --}}
+      <!-- ÚLTIMAS DONACIONES (globales, anonimizadas) -->
       <div class="don-card">
         <div class="don-card-head">
           <i class="fa-solid fa-clock-rotate-left" style="color:var(--terra)"></i>
@@ -170,7 +170,7 @@
         @endif
       </div>
 
-      {{-- MIS DONACIONES (si está autenticado) --}}
+      <!-- MIS DONACIONES (si está autenticado) -->
       @auth
       <div class="don-card">
         <div class="don-card-head">
@@ -222,16 +222,16 @@
       @endauth
 
     </div>
-    {{-- /COLUMNA DERECHA --}}
+    <!-- /COLUMNA DERECHA -->
 
   </div>
-  {{-- /GRID --}}
+  <!-- /GRID -->
 
 </div>
 
-{{-- SDK de PayPal (sandbox) --}}
+<!-- SDK de PayPal (sandbox) -->
 <script src="https://www.paypal.com/sdk/js?client-id={{ config('services.paypal.client_id') }}&currency=EUR"></script>
 
-{{-- Donaciones logic --}}
+<!-- Donaciones logic -->
 <script src="{{ asset('js/donations.js') }}"></script>
 @endsection
