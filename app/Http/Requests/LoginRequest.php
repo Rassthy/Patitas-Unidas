@@ -6,17 +6,13 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class LoginRequest extends FormRequest
 {
-    /**
-     * Determina si el usuario está autorizado para hacer esta solicitud.
-     */
+    // Determinamos si el usuario está autorizado
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Obtiene las reglas de validación que se aplican a la solicitud.
-     */
+    // Obtenemos las reglas de validación para el inicio de sesión
     public function rules(): array
     {
         $emailValidation = app()->environment('testing') 
@@ -33,9 +29,7 @@ class LoginRequest extends FormRequest
         ];
     }
 
-    /**
-     * Obtiene los mensajes personalizados para los errores de validación.
-     */
+    // Obtenemos los mensajes personalizados para los errores
     public function messages(): array
     {
         return [

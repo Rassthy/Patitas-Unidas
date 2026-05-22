@@ -61,7 +61,7 @@ class User extends Authenticatable
         return $this->password_hash;
     }
 
-    /* Foto de perfil: Maneja tres casos principales para devolver la URL correcta. */
+    // Foto de perfil: Maneja tres casos principales para devolver la URL correcta
     public function getFotoPerfilUrlAttribute()
     {
         // Si no hay foto, devolvemos la genérica de la carpeta public

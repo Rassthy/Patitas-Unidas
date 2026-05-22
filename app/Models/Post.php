@@ -83,7 +83,7 @@ class Post extends Model
     {
         // Verificar si el post tiene almenos 1 imagencita
         if ($this->images->count() > 0) {
-            // Pillamos la primera imagens y devolvemos su URL
+            // Pillamos la primera imagen y devolvemos su URL
             $primeraImagen = $this->images->first()->url; 
             return asset('storage/' . $primeraImagen);
         }

@@ -53,7 +53,7 @@ class ChatController extends Controller
         if (!$isGroup) {
             $targetId = $data['user_id'];
 
-            // Buscar chat privado existente entre los dos usuarios
+            // Buscar chat privado entre los dos usuarios
             $existing = Chat::where('is_group', false)
                 ->whereHas('participants', fn($q) => $q->where('user_id', Auth::id()))
                 ->whereHas('participants', fn($q) => $q->where('user_id', $targetId))

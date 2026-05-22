@@ -102,9 +102,7 @@
       </div>
     </div>
 
-    <!-- ============================================================
-         BLOQUE 1: VALORACIONES + MIS ANIMALES (Tabs)
-         ============================================================ -->
+    <!-- VALORACIONES + MIS ANIMALES (Tabs) -->
     <div class="profile-card profile-card--tabs" id="profile-card-1">
 
       <div class="profile-card-tabs-header">
@@ -260,10 +258,7 @@
         @endif
       </div>
 
-    <!-- ============================================================
-         BLOQUE 2: PUBLICACIONES
-         ============================================================ -->
-
+    <!-- PUBLICACIONES -->
     </div>
     {{-- /profile-card-1 --}}
 
@@ -505,7 +500,6 @@
   </div>
 </div>
 
-<!-- SCRIPTS -->
 <script>
 /* Control de pestañas */
 function switchTab(btn, tabId) {

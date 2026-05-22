@@ -25,9 +25,7 @@ class Donation extends Model
         'amount' => 'decimal:2',
     ];
 
-    /**
-     * Relación con User
-     */
+    // Relación con User
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

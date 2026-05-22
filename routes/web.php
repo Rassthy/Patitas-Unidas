@@ -100,7 +100,6 @@ Route::middleware('auth')->group(function () {
     Route::get('chats/{id}', [ChatController::class, 'show'])->name('chats.show');
     Route::post('chats/{id}/messages', [ChatController::class, 'sendMessage'])->name('chats.messages.store');
 
-    // Comprobador silencioso de nuevas notificaciones (ANTES DE RESOURCE SIEMPRE PARA EVITAR COLISIONES CON /notifications/{id})
     Route::get('/notifications/check', function () {
         $userId = \Illuminate\Support\Facades\Auth::id();
 

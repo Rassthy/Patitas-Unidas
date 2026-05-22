@@ -93,7 +93,7 @@ class AuthController extends Controller
         return view('auth.verificar-email');
     }
 
-    // VERIFICAR CÓDIGO (MANUAL)
+    // VERIFICAR CÓDIGO
     public function verificarEmail(Request $request)
     {
         $request->validate([

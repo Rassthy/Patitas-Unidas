@@ -8,9 +8,7 @@ use Illuminate\Http\Request;
 
 class DonationController extends Controller
 {
-    /**
-     * Mostrar página de donaciones
-     */
+    // Mostrar página de donaciones
     public function index()
     {
         // Totales globales
@@ -21,14 +19,14 @@ class DonationController extends Controller
             ->count('user_id');
         $animalsHelped = ceil($totalDonated / 30); // Aproximado: 30€ por animal
 
-        // Últimas donaciones (público)
+        // Últimas donaciones
         $recentDonations = Donation::where('status', 'completed')
             ->with('user:id,nombre,foto_perfil')
             ->orderByDesc('created_at')
             ->limit(5)
             ->get();
 
-        // Mis donaciones (si está autenticado)
+        // Mis donaciones
         $myDonations = null;
         if (auth()->check()) {
             $myDonations = Donation::where('user_id', auth()->id())
@@ -46,9 +44,7 @@ class DonationController extends Controller
         ]);
     }
 
-    /**
-     * Crear orden de PayPal
-     */
+    // Crear orden de PayPal
     public function createOrder(Request $request, PayPalService $paypal)
     {
         $request->validate([
@@ -62,9 +58,7 @@ class DonationController extends Controller
         ]);
     }
 
-    /**
-     * Capturar orden de PayPal y guardar donación
-     */
+    // Capturar orden de PayPal y guardar donación
     public function captureOrder(Request $request, PayPalService $paypal)
     {
         $orderId = $request->input('orderID');
@@ -76,7 +70,6 @@ class DonationController extends Controller
         }
 
         try {
-            // 👇 toda la lógica de PayPal está en el service
             $data = $paypal->captureOrder($orderId);
 
             $capture = $data['purchase_units'][0]['payments']['captures'][0] ?? null;

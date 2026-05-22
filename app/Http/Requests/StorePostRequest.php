@@ -7,17 +7,13 @@ use Illuminate\Validation\Rule;
 
 class StorePostRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+    // Determinamos si el usuario está autorizado
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     */
+    // Obtenemos las reglas de validación para el almacenamiento de publicaciones
     public function rules(): array
     {
         return [
@@ -37,9 +33,7 @@ class StorePostRequest extends FormRequest
         ];
     }
 
-    /**
-     * Get custom messages for validator errors.
-     */
+    // Obtenemos los mensajes personalizados para los errores
     public function messages(): array
     {
         return [

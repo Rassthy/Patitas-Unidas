@@ -9,7 +9,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Mantenemos solo tu cambio de user_settings
             $table->json('user_settings')->nullable()->after('ciudad');
         });
     }

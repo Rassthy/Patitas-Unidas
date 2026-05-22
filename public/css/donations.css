@@ -1,9 +1,4 @@
-/* =============================================
-   donations.css — Página de donaciones PayPal
-   Requiere: variables.css, layout.css, components.css
-   ============================================= */
-
-/* ======= CONTENEDOR PRINCIPAL ======= */
+/*  CONTENEDOR PRINCIPAL  */
 #donations-container {
   margin-left: var(--sidebar);
   margin-top: var(--header);
@@ -12,7 +7,7 @@
   padding: 48px 44px 80px;
 }
 
-/* ======= HERO ======= */
+/*  HERO  */
 .don-hero {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -77,7 +72,7 @@
   display: block;
 }
 
-/* ======= GRID PRINCIPAL ======= */
+/*  GRID PRINCIPAL  */
 .don-grid {
   display: grid;
   grid-template-columns: 1fr 380px;
@@ -87,7 +82,7 @@
   align-items: flex-start;
 }
 
-/* ======= COLUMNAS ======= */
+/*  COLUMNAS  */
 .don-form-col,
 .don-history-col {
   display: flex;
@@ -95,7 +90,7 @@
   gap: 24px;
 }
 
-/* ======= TARJETA BASE ======= */
+/*  TARJETA BASE  */
 .don-card {
   background: #fff;
   border: 1.5px solid var(--border);
@@ -124,7 +119,7 @@
   margin: 0;
 }
 
-/* ======= FORMULARIO DE DONACIÓN ======= */
+/*  FORMULARIO DE DONACIÓN  */
 
 /* Chips de cantidad */
 .don-amount-chips {
@@ -192,7 +187,7 @@
   height: 46px;
   background: #fff;
 }
-/* Ocultar flechas nativas del input number */
+
 .don-amount-input::-webkit-inner-spin-button,
 .don-amount-input::-webkit-outer-spin-button { -webkit-appearance: none; }
 .don-amount-input[type=number]               { -moz-appearance: textfield; }
@@ -245,14 +240,14 @@
 .don-success-banner strong { font-size: .9rem; color: var(--dark); display: block; margin-bottom: 3px; }
 .don-success-banner p      { font-size: .82rem; color: var(--muted); margin: 0; }
 
-/* ======= USOS DEL DINERO ======= */
+/*  USOS DEL DINERO  */
 .don-uses        { display: flex; flex-direction: column; gap: 16px; }
 .don-use-item    { display: flex; align-items: flex-start; gap: 14px; }
 .don-use-ico     { font-size: 1.6rem; flex-shrink: 0; line-height: 1; }
 .don-use-title   { font-size: .88rem; font-weight: 700; color: var(--dark); margin-bottom: 3px; }
 .don-use-desc    { font-size: .8rem; color: var(--muted); line-height: 1.55; }
 
-/* ======= FEED DE DONACIONES RECIENTES ======= */
+/*  FEED DE DONACIONES RECIENTES  */
 .don-feed { display: flex; flex-direction: column; }
 
 .don-feed-item {
@@ -265,7 +260,6 @@
 }
 .don-feed-item:last-child { border-bottom: none; }
 
-/* Avatar circular con inicial — mismo patrón que .cp-av-circle */
 .don-feed-av {
   width: 36px;
   height: 36px;
@@ -292,7 +286,7 @@
   flex-shrink: 0;
 }
 
-/* ======= TABLA DE MIS DONACIONES ======= */
+/*  TABLA DE MIS DONACIONES  */
 .don-my-table-wrap { overflow-x: auto; }
 
 .don-my-table {
@@ -340,7 +334,7 @@
 .don-status--pending   { background: #FFF8E0; color: #A07000; }
 .don-status--failed    { background: #FFF0E4; color: var(--terra); }
 
-/* ======= ESTADO VACÍO ======= */
+/*  ESTADO VACÍO  */
 .don-empty {
   text-align: center;
   padding: 32px 20px;
@@ -349,13 +343,13 @@
 .don-empty-ico { font-size: 2.4rem; margin-bottom: 10px; opacity: .5; }
 .don-empty p   { font-size: .88rem; margin: 0; line-height: 1.6; }
 
-/* ======= ANIMACIONES ======= */
+/*  ANIMACIONES  */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ======= RESPONSIVE ======= */
+/*  RESPONSIVE  */
 @media (max-width: 1024px) {
   .don-grid {
     grid-template-columns: 1fr;

@@ -18,12 +18,12 @@ class RegisterRequest extends FormRequest
         $isOrg = $this->input('tipo') === 'organizacion';
 
         if ($isOrg) {
-            // 1. REGEX DINÁMICO: Si es veterinaria acepta CIF o DNI/NIE. Si no, solo CIF.
+            // 1. REGEX DINÁMICO: Si es veterinaria acepta CIF o DNI/NIE, sino solo CIF
             if ($this->input('tipo_organizacion') === 'veterinaria') {
                 // Acepta CIF (Letra + 7 núm + Letra/num) O DNI (8 núm + Letra) O NIE (Letra + 7 núm + Letra)
                 $cifRegex = '/^[A-Z][0-9]{7}[A-Z0-9]$|^[0-9]{8}[A-Z]$|^[XYZ][0-9]{7}[A-Z]$/';
             } else {
-                // Solo CIF oficial de organización/asociación
+                // Solo CIF oficial
                 $cifRegex = '/^[A-Z][0-9]{7}[A-Z0-9]$/';
             }
 

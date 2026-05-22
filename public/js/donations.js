@@ -1,15 +1,9 @@
-// ============================================================================
-// DONATIONS PAGE - JavaScript Logic
-// ============================================================================
-
 document.addEventListener('DOMContentLoaded', function() {
   initDonationForm();
   initPayPalButtons();
 });
 
-/**
- * Inicializar sincronización de chips y input de cantidad
- */
+//  Inicializar sincronización de chips y input de cantidad
 function initDonationForm() {
   const chips       = document.querySelectorAll('.don-chip');
   const amountInput = document.getElementById('amount');
@@ -44,9 +38,7 @@ function initDonationForm() {
   syncSummary();
 }
 
-/**
- * Inicializar botones de PayPal
- */
+// Inicializar botones de PayPal
 function initPayPalButtons() {
   if (typeof paypal === 'undefined') {
     console.error('PayPal SDK no cargado');

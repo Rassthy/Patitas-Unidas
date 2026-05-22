@@ -1,4 +1,4 @@
-/* === BOTONES GENERALES === */
+/* BOTONES GENERALES */
 .btn-p {
     padding: 11px 26px;
     background: var(--terra);
@@ -75,7 +75,7 @@
     color: var(--terra);
 }
 
-/* === POST CARDS === */
+/* POST CARDS */
 .post-card {
     background: #fff;
     border-radius: var(--r);
@@ -195,7 +195,7 @@
     flex-shrink: 0;
 }
 
-/* === POST/PUBLICACIONES MODAL === */
+/* POST/PUBLICACIONES MODAL */
 .overlay {
     position: fixed;
     inset: 0;
@@ -513,7 +513,7 @@
     color: #e91e63;
 }
 
-/* === FORMULARIOS === */
+/* FORMULARIOS */
 .form-group {
     display: flex;
     flex-direction: column;
@@ -677,7 +677,7 @@
     background: var(--terra-h);
 }
 
-/* Tag colors */
+/* Tag colores */
 .t1 {
     background: #FFF0E4;
     color: var(--terra);
@@ -693,7 +693,7 @@
     color: var(--green);
 }
 
-/* === LOGIN === */
+/* LOGIN */
 .login-overlay {
     position: fixed;
     inset: 0;
@@ -896,7 +896,7 @@
     font-weight: 500;
 }
 
-/* === TOAST === */
+/* TOAST */
 .toast {
     position: fixed;
     bottom: 22px;
@@ -928,7 +928,7 @@
     font-size: 1rem;
 }
 
-/* === MENSAJES EMERGENTES === */
+/* MENSAJES EMERGENTES */
 .bubble-wrap {
     display: flex;
     flex-direction: column;
@@ -1008,7 +1008,7 @@
     background: var(--terra-h);
 }
 
-/* === UTILIDADES === */
+/* UTILIDADES */
 .hidden {
     display: none !important;
 }

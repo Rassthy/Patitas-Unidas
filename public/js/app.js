@@ -1,6 +1,6 @@
 // LOGICA PRINCIPAL DE LA APP E INICIALIZACION
 
-// ========== STATE ==========
+//  STATE 
 let currentCat = 0;
 let selectedFiles = new DataTransfer();
 let currentPost = null;
@@ -15,7 +15,7 @@ let chatPollingInterval = null;
 // Helper de traducción
 const t = (key) => window.i18n?.[key] ?? key;
 
-// ========== CARGA DE CHATS ==========
+//  CARGA DE CHATS 
 async function loadChats() {
   if (!window.AUTH_USER_ID) return;
   try {
@@ -34,7 +34,7 @@ async function loadChats() {
   }
 }
 
-// ========== CONSTANTES ==========
+//  CONSTANTES 
 const catInfo = {
   1: { label: "🏠 Adoptar mascota", cls: "t1" },
   2: { label: "🔍 Perdida / Robada", cls: "t2" },
@@ -47,7 +47,7 @@ const catTitles = {
   3: "❤️ Apoyar animales"
 };
 
-// ========== CARGA DE PUBLICACIONES ==========
+//  CARGA DE PUBLICACIONES 
 let allPosts = [];
 let currentFilter = '';
 let currentSort = 'recientes';
@@ -345,7 +345,7 @@ async function startChatWith(userId) {
   }
 }
 
-// ========== FUNCIONES DE LOGIN ==========
+//  FUNCIONES DE LOGIN 
 function doLogin() {
   closeLoginModal();
   document.body.style.overflow = '';
@@ -370,7 +370,7 @@ function closeTermsModal() {
     document.getElementById('termsModal').classList.remove('open');
 }
 
-// ========== DATOS FAQ / INFO ==========
+//  DATOS FAQ / INFO 
 const faqData = [
   { q: t('faq_q1'), a: t('faq_a1') },
   { q: t('faq_q2'), a: t('faq_a2') },
@@ -395,7 +395,7 @@ function renderFaq() {
   `).join('');
 }
 
-// ========== INICIALIZACION ==========
+//  INICIALIZACION 
 DOM.init();
 loadPosts();
 renderFaq();

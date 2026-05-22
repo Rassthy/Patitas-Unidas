@@ -2,7 +2,7 @@
   z-index: 9999 !important;
 }
 
-/* Vaccine tags */
+/* Tags de vacunas */
 .pet-vaccine-tag {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 5px 14px; border-radius: 50px; cursor: pointer;
@@ -16,7 +16,7 @@
   box-shadow: 0 2px 8px rgba(200,88,46,.3);
 }
 
-/* Pet cards */
+/* Tarjetas de mascotas */
 .pet-card {
   background: #fff; border: 1.5px solid var(--border); border-radius: var(--r);
   overflow: hidden; cursor: pointer;
@@ -36,7 +36,7 @@
   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
 }
 
-/* Privacy blur */
+/* Blur (Privacidad) */
 .pets-private-blur {
   filter: blur(6px); pointer-events: none; user-select: none;
   opacity: .5; min-height: 160px;
@@ -48,7 +48,7 @@
   border-radius: var(--r); z-index: 2;
 }
 
-/* Pet modal overlay */
+/* Overlay modal */
 .pet-overlay {
   position: fixed; inset: 0; background: rgba(16,8,2,.82);
   z-index: 500; display: flex; align-items: center; justify-content: center;
@@ -72,7 +72,7 @@
 }
 .pet-overlay.open .pet-detail-modal { transform: scale(1) translateY(0); }
 
-/* Image input */
+/* Input de imagen */
 .pet-img-input-wrap {
   border: 2px dashed var(--border); border-radius: var(--r-s);
   background: var(--soft); display: flex; align-items: center;

@@ -64,7 +64,7 @@
 @if ($errors->any())
   <script>
       document.addEventListener('DOMContentLoaded', function() {
-          // SOLO abrimos el modal si NO estamos en la página de verificación
+          // SOLO abrimos el modal si no estamos en la página de verificación
           const isVerifyPage = window.location.pathname.includes('/verificar-email');
           
           if (!isVerifyPage) {

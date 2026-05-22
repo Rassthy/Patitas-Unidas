@@ -675,7 +675,6 @@ window.deleteComment = async function(commentId, postId) {
             }
         } else if (res.status === 404) {
             if (typeof showToast === 'function') showToast('El comentario ya no existe', 'error');
-            // Si da 404 (ya estaba borrado) pues lo quitamos visualmente de la pantalla de todas formas
             const divComentario = document.getElementById('comment-' + commentId);
             if (divComentario) divComentario.remove();
         } else {
@@ -847,7 +846,6 @@ async function markNotificationRead(id, el, url = '') {
     const dot = el.querySelector('span[style*="border-radius:50%"]');
     if (dot) dot.remove();
  
-    // Recalcular badge restando 1 al valor actual
     const badge  = document.getElementById('notifBadge');
     const current = parseInt(badge?.textContent) || 0;
     _updateNotifBadge(Math.max(0, current - 1));
@@ -865,7 +863,7 @@ async function initNotifBadge() {
     const data = await res.json();
     const unread = (data.notifications || []).filter(n => !n.leida).length;
     _updateNotifBadge(unread);
-  } catch (_) { /* silencioso — no crítico */ }
+  } catch (_) { /* no crítico */ }
 }
 
 function _updateNotifBadge(unread) {
@@ -910,7 +908,7 @@ async function markAllNotificationsRead() {
   }
 }
 
-// ========== REPORTES ==========
+// REPORTES
 let reportData = { tipo: null, entidadId: null, reportedUserId: null };
 
 function openReportModal(tipo, entidadId, reportedUserId = null) {

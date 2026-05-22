@@ -60,7 +60,7 @@ class PostController extends Controller
         $data['author_id'] = Auth::id();
         $post = Post::create($data);
 
-        // Manejar imágenes
+        // Manejar imagenes
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $index => $image) {
                 $path = $image->store('posts', 'public');
@@ -97,7 +97,7 @@ class PostController extends Controller
     {
         $post = Post::where('author_id', Auth::id())->findOrFail($id);
 
-        // Eliminar imágenes
+        // Eliminar imagenes
         foreach ($post->images as $image) {
             Storage::disk('public')->delete($image->url);
             $image->delete();
@@ -148,7 +148,7 @@ class PostController extends Controller
         $post = Post::findOrFail($id);
 
         if ($data['parent_comment_id'] ?? null) {
-            // Es una respuesta — notificar al autor del comentario padre
+            // Notificar al auto del comentario original (RESPUESTA)
             $parentComment = PostComment::findOrFail($data['parent_comment_id']);
             $this->createNotification(
                 $parentComment->author_id,
@@ -158,7 +158,7 @@ class PostController extends Controller
                 '/posts/' . $id
             );
         } else {
-            // Es un comentario — notificar al autor del post
+            // Notificar al autor del post
             $this->createNotification(
                 $post->author_id,
                 'comentario_post',
@@ -228,7 +228,7 @@ class PostController extends Controller
 
     private function createNotification($userId, $tipo, $titulo, $mensaje, $enlaceUrl = null)
     {
-        // No notificar a uno mismo
+        // No notificarse a uno mismo
         if ($userId === Auth::id()) return;
 
         \App\Models\Notification::create([
